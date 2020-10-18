@@ -114,6 +114,30 @@ public class AppConfigTest {
     }
 
     @Test
+    public void testProcessBottomOrder1() {
+        WorkOrder order = workOrderService.getWorkOrderById(3101334);
+        machineActionService.clearAllAction();
+        mainService.processBottomOrder(order);
+        assertEquals(machineActionService.getActionCount(), 13);
+    }
+
+    @Test
+    public void testProcessBottomOrder2() {
+        WorkOrder order = workOrderService.getWorkOrderById(3098967);
+        machineActionService.clearAllAction();
+        mainService.processBottomOrder(order);
+        assertEquals(machineActionService.getActionCount(), 5);
+    }
+
+    @Test
+    public void testProcessBottomOrder3() {
+        WorkOrder order = workOrderService.getWorkOrderById(3101166);
+        machineActionService.clearAllAction();
+        mainService.processBottomOrder(order);
+        assertEquals(machineActionService.getActionCount(), 3);
+    }
+
+    @Test
     public void testGetAllWidthBetterBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         List<WorkOrder> orders = workOrderService.getBottomOrders(op.getWorkOrderDate());
@@ -135,15 +159,6 @@ public class AppConfigTest {
         System.out.println(order);
         CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
         System.out.println(cutBoard);
-    }
-
-    @Test
-    public void testProcessingBoard() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098528);
-        CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
-        Board productBoard = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
-
-        boardService.processingBoard(cutBoard, productBoard, 3, 0, order.getId(), order.getSiteModule());
     }
 
     @Test

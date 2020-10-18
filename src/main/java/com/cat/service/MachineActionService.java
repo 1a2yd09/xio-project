@@ -22,6 +22,10 @@ public class MachineActionService {
         this.jdbcTemplate.update("TRUNCATE TABLE machine_action");
     }
 
+    public Integer getActionCount() {
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM machine_action", Integer.class);
+    }
+
     public void addPickAction(Board board, Integer orderId, String orderModule) {
         // 注意位置参数的类型是否与数据库类型可以相互转换:
         this.jdbcTemplate.update("INSERT INTO machine_action (action_category, board_category, board_specification, board_material, work_order_id, work_order_module) " +

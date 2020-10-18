@@ -27,23 +27,24 @@ public class BoardService {
         return cutBoard;
     }
 
-    public void processingBoard(CutBoard cutBoard, Board targetBoard, int rotateTimes, int cutTimes, Integer orderId, String orderModule) {
-        if (cutTimes > 0) {
-            for (int i = 0; i < rotateTimes; i++) {
-                this.actionService.addRotateAction(cutBoard, orderId, orderModule);
-                if (cutBoard.getForwardEdge() == 1) {
-                    cutBoard.setForwardEdge(0);
-                } else {
-                    cutBoard.setForwardEdge(1);
-                }
+    public void rotatingBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
+        for (int i = 0; i < rotateTimes; i++) {
+            this.actionService.addRotateAction(cutBoard, orderId, orderModule);
+            if (cutBoard.getForwardEdge() == 1) {
+                cutBoard.setForwardEdge(0);
+            } else {
+                cutBoard.setForwardEdge(1);
             }
-            for (int i = 0; i < cutTimes; i++) {
-                this.actionService.addCuttingAction(targetBoard, orderId, orderModule);
-                if (cutBoard.getForwardEdge() == 1) {
-                    cutBoard.setWidth(cutBoard.getWidth().subtract(targetBoard.getWidth()));
-                } else {
-                    cutBoard.setLength(cutBoard.getLength().subtract(targetBoard.getWidth()));
-                }
+        }
+    }
+
+    public void cuttingBoard(CutBoard cutBoard, Board targetBoard, int cutTimes, Integer orderId, String orderModule) {
+        for (int i = 0; i < cutTimes; i++) {
+            this.actionService.addCuttingAction(targetBoard, orderId, orderModule);
+            if (cutBoard.getForwardEdge() == 1) {
+                cutBoard.setWidth(cutBoard.getWidth().subtract(targetBoard.getWidth()));
+            } else {
+                cutBoard.setLength(cutBoard.getLength().subtract(targetBoard.getWidth()));
             }
         }
     }
@@ -68,8 +69,8 @@ public class BoardService {
                 }
                 wastedBoard.setCategory(BoardUtil.calBoardCategory(wastedBoard.getWidth(), wastedBoard.getLength(), wasteThreshold));
 
-                int rotateTimes = i - currentForwardEdge;
-                this.processingBoard(cutBoard, wastedBoard, rotateTimes, 1, orderId, orderModule);
+                this.rotatingBoard(cutBoard, i - currentForwardEdge, orderId, orderModule);
+                this.cuttingBoard(cutBoard, wastedBoard, 1, orderId, orderModule);
 
                 currentForwardEdge = i;
             }
@@ -88,7 +89,8 @@ public class BoardService {
             extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
 
             int rotateTimes = cutBoard.getForwardEdge() == 1 ? 1 : 0;
-            this.processingBoard(cutBoard, extraBoard, rotateTimes, 1, orderId, orderModule);
+            this.rotatingBoard(cutBoard, rotateTimes, orderId, orderModule);
+            this.cuttingBoard(cutBoard, extraBoard, 1, orderId, orderModule);
         }
     }
 
@@ -104,13 +106,17 @@ public class BoardService {
             extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
 
             int rotateTimes = cutBoard.getForwardEdge() == 1 ? 0 : 1;
-            this.processingBoard(cutBoard, extraBoard, rotateTimes, 1, orderId, orderModule);
+            this.rotatingBoard(cutBoard, rotateTimes, orderId, orderModule);
+            this.cuttingBoard(cutBoard, extraBoard, 1, orderId, orderModule);
         }
     }
 
     public void cuttingTargetBoard(CutBoard cutBoard, Board targetBoard, int cutTimes, Integer orderId, String orderModule) {
-        int rotateTimes = cutBoard.getForwardEdge() == 1 ? 0 : 1;
-        this.processingBoard(cutBoard, targetBoard, rotateTimes, cutTimes, orderId, orderModule);
+        if (cutTimes > 0) {
+            int rotateTimes = cutBoard.getForwardEdge() == 1 ? 0 : 1;
+            this.rotatingBoard(cutBoard, rotateTimes, orderId, orderModule);
+            this.cuttingBoard(cutBoard, targetBoard, cutTimes, orderId, orderModule);
+        }
     }
 
     public void sendingBoard(Board targetBoard, Integer orderId, String orderModule) {
@@ -123,14 +129,14 @@ public class BoardService {
         return productBoard;
     }
 
-    public Board getSemiProductBoard(CutBoard cutBoard) {
-        BigDecimal fixedWidth = parameterService.getLatestOperatingParameter().getFixedWidth();
-        return new Board(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), cutBoard.getMaterial(), BoardCategory.SEMI_PRODUCT);
-    }
-
     public int calProductBoardCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {
         int maxProductBoardCutTimes = cutBoardWidth.divideToIntegralValue(productBoardWidth).intValue();
         return Math.min(maxProductBoardCutTimes, orderUnfinishedTimes);
+    }
+
+    public Board getSemiProductBoard(CutBoard cutBoard) {
+        BigDecimal fixedWidth = parameterService.getLatestOperatingParameter().getFixedWidth();
+        return new Board(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), cutBoard.getMaterial(), BoardCategory.SEMI_PRODUCT);
     }
 
     public int calSemiProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, int productCutTimes) {

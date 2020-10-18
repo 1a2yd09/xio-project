@@ -29,8 +29,8 @@ public class WorkOrder {
     private String siteModule;
     private LocalDateTime completionDate;
 
-    public Integer getUnfinishedAmount() {
-        return OrderUtil.calUnfinishedAmount(this.amount, this.completedAmount);
+    public int getUnfinishedAmount() {
+        return OrderUtil.amountPropertyStrToInt(this.amount) - OrderUtil.amountPropertyStrToInt(this.completedAmount);
     }
 
     public String getBatchNumber() {

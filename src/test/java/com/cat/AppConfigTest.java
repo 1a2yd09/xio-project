@@ -2,7 +2,6 @@ package com.cat;
 
 import com.cat.entity.*;
 import com.cat.entity.enums.BoardCategory;
-import com.cat.entity.enums.SignalCategory;
 import com.cat.service.*;
 import com.cat.util.BoardUtil;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AppConfigTest {
 
@@ -24,6 +23,7 @@ public class AppConfigTest {
     static MachineActionService machineActionService;
     static BoardService boardService;
     static MainService mainService;
+    static InventoryService inventoryService;
 
     @BeforeAll
     public static void init() {
@@ -34,83 +34,17 @@ public class AppConfigTest {
         machineActionService = context.getBean(MachineActionService.class);
         boardService = context.getBean(BoardService.class);
         mainService = context.getBean(MainService.class);
+        inventoryService = context.getBean(InventoryService.class);
     }
 
     @Test
-    public void testGetSignal() {
-        Signal signal = signalService.getLatestSignal(SignalCategory.START_WORK);
-        assertNotNull(signal);
-        System.out.println(signal);
-    }
-
-    @Test
-    public void testGetLatestSignal() {
-        boolean flag = signalService.isReceivedNewSignal(SignalCategory.START_WORK);
-        assertTrue(flag);
-    }
-
-    @Test
-    public void getBottomOrders() {
-        OperatingParameter op = parameterService.getLatestOperatingParameter();
-        List<WorkOrder> workOrders = workOrderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
-//        List<WorkOrder> workOrders = workOrderService.getBottomOrders(op.getWorkOrderDate());
-        assertEquals(workOrders.size(), 914);
-        workOrders.forEach(System.out::println);
-    }
-
-    @Test
-    public void testGetParameter() {
-//        OperatingParameter p = parameterService.getLatestOperatingParameter();
-        TrimmingParameter p = parameterService.getLatestTrimmingParameter();
-        assertNotNull(p);
-        System.out.println(p);
-    }
-
-    @Test
-    public void testGetCutBoard() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098925);
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING, 0);
-        assertNotNull(cutBoard);
-        System.out.println(cutBoard);
-    }
-
-    @Test
-    public void testAddPickAction() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098925);
-        System.out.println(order);
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING, 0);
-        System.out.println(cutBoard);
-        machineActionService.clearAllAction();
-        machineActionService.addPickAction(cutBoard, order.getId(), order.getSiteModule());
-    }
-
-    @Test
-    public void testAddRotateAction() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098925);
-        System.out.println(order);
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING, 0);
-        System.out.println(cutBoard);
-        machineActionService.clearAllAction();
-        machineActionService.addRotateAction(cutBoard, order.getId(), order.getSiteModule());
-    }
-
-    @Test
-    public void testAddCutAction() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098925);
-        System.out.println(order);
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING, 0);
-        System.out.println(cutBoard);
-        machineActionService.clearAllAction();
-        machineActionService.addCuttingAction(cutBoard, order.getId(), order.getSiteModule());
-    }
-
-    @Test
-    public void testProcessBottomOrder() {
-//        WorkOrder order = workOrderService.getWorkOrderById(3101334);
-//        WorkOrder order = workOrderService.getWorkOrderById(3098967);
-        WorkOrder order = workOrderService.getWorkOrderById(3101166);
-        machineActionService.clearAllAction();
-        mainService.processBottomOrder(order);
+    public void testSomething() {
+        WorkOrder order = workOrderService.getWorkOrderById(3098528);
+        CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
+        BigDecimal width = cutBoard.getWidth();
+        System.out.println(width);
+        System.out.println(width.subtract(BigDecimal.TEN));
+        System.out.println(width);
     }
 
     @Test
@@ -153,21 +87,24 @@ public class AppConfigTest {
         }
     }
 
+    /**
+     * 如何测试处理一组完成的机器动作：
+     * 因为成品语句会写入数据表，因此需要判断这组机器动作中生成了多少个成品板，还要计算原来要求的数量是多少，
+     * 两者相减得到最后未完成的数量。
+     * 因为修改到数据表，需要复原。
+     * 因为半成品语句会写入数据表，因此需要计算生成了多少个这样的半成品，都是一致的，然后计算数据表中原来有多少，
+     * 两者相加得到最后的个数。
+     * 因为修改到数据表，需要复原。
+     */
     @Test
-    public void testPickingBoard() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098528);
-        System.out.println(order);
-        CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
-        System.out.println(cutBoard);
-    }
-
-    @Test
-    public void testSomething() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098528);
-        CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
-        BigDecimal width = cutBoard.getWidth();
-        System.out.println(width);
-        System.out.println(width.subtract(BigDecimal.TEN));
-        System.out.println(width);
+    public void testProcessFinishedAction() {
+        WorkOrder order = workOrderService.getWorkOrderById(3101334);
+        machineActionService.clearAllAction();
+        mainService.processBottomOrder(order);
+        List<MachineAction> actions = machineActionService.getAllActions();
+        mainService.processFinishedAction(actions);
+        order = workOrderService.getWorkOrderById(3101334);
+        assertEquals(order.getUnfinishedAmount(), 0);
+        assertEquals(inventoryService.getInventoryCount(), 1);
     }
 }

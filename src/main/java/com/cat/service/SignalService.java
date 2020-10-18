@@ -20,7 +20,8 @@ public class SignalService {
     public boolean isReceivedNewSignal(SignalCategory category) {
         Signal signal = this.getLatestSignal(category);
         if (signal != null && !signal.getProcessed()) {
-            this.processedSignal(signal.getId());
+            signal.setProcessed(true);
+            this.processedSignal(signal);
             return true;
         }
         return false;
@@ -31,7 +32,7 @@ public class SignalService {
         return signals.isEmpty() ? null : signals.get(0);
     }
 
-    public void processedSignal(Integer id) {
-        this.jdbcTemplate.update("UPDATE signal SET processed = 1 WHERE id = ?", id);
+    public void processedSignal(Signal signal) {
+        this.jdbcTemplate.update("UPDATE signal SET processed = ? WHERE id = ?", signal.getProcessed(), signal.getId());
     }
 }

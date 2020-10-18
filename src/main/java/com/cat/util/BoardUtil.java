@@ -4,6 +4,7 @@ import com.cat.entity.Board;
 import com.cat.entity.enums.BoardCategory;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 public class BoardUtil {
@@ -29,7 +30,11 @@ public class BoardUtil {
     }
 
     public static String getSpecStr(BigDecimal height, BigDecimal width, BigDecimal length) {
-        return String.join(SPEC_SEP, height.toString(), width.toString(), length.toString());
+        // 同步数据表设计时设定的小数位数，规范化输出格式:
+        String heightStr = height.setScale(2, RoundingMode.DOWN).toString();
+        String widthStr = width.setScale(2, RoundingMode.DOWN).toString();
+        String lengthStr = length.setScale(2, RoundingMode.DOWN).toString();
+        return String.join(SPEC_SEP, heightStr, widthStr, lengthStr);
     }
 
     public static BoardCategory calBoardCategory(BigDecimal boardWidth, BigDecimal boardLength, BigDecimal wasteThreshold) {

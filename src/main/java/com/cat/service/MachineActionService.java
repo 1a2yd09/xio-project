@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Component
 public class MachineActionService {
@@ -24,6 +25,14 @@ public class MachineActionService {
 
     public Integer getActionCount() {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM machine_action", Integer.class);
+    }
+
+    public void doneAllAction() {
+        this.jdbcTemplate.update("UPDATE machine_action SET completed = 1 WHERE completed = 0");
+    }
+
+    public List<MachineAction> getAllActions() {
+        return this.jdbcTemplate.query("SELECT * FROM machine_action ORDER BY created_at", this.actionM);
     }
 
     public void addPickAction(Board board, Integer orderId, String orderModule) {

@@ -4,11 +4,11 @@ public enum BoardCategory {
     /**
      * 下料板。
      */
-    CUTTING("下料"),
+    CUTTING("下料板"),
     /**
      * 成品板。
      */
-    PRODUCT("成品"),
+    PRODUCT("成品板"),
     /**
      * 半成品。
      */
@@ -20,11 +20,11 @@ public enum BoardCategory {
     /**
      * 余料。
      */
-    REMAINING("余料"),
+    REMAINING("余料板"),
     /**
      * 废料。
      */
-    WASTED("废料");
+    WASTED("废料板");
 
     public final String value;
 

@@ -7,8 +7,6 @@ import com.cat.service.*;
 import com.cat.util.BoardUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -107,20 +105,10 @@ public class AppConfigTest {
     }
 
     @Test
-    public void testTrimming() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098528);
-        System.out.println(order);
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING, 0);
-        System.out.println(cutBoard);
-        machineActionService.clearAllAction();
-        List<BigDecimal> trimValues = List.of(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ONE);
-        boardService.trimming(cutBoard, trimValues, order.getId(), order.getSiteModule());
-        System.out.println(cutBoard);
-    }
-
-    @Test
     public void testProcessBottomOrder() {
-        WorkOrder order = workOrderService.getWorkOrderById(3111220);
+//        WorkOrder order = workOrderService.getWorkOrderById(3101334);
+//        WorkOrder order = workOrderService.getWorkOrderById(3098967);
+        WorkOrder order = workOrderService.getWorkOrderById(3101166);
         machineActionService.clearAllAction();
         mainService.processBottomOrder(order);
     }
@@ -139,5 +127,32 @@ public class AppConfigTest {
                 System.out.println(board);
             }
         }
+    }
+
+    @Test
+    public void testPickingBoard() {
+        WorkOrder order = workOrderService.getWorkOrderById(3098528);
+        System.out.println(order);
+        CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
+        System.out.println(cutBoard);
+    }
+
+    @Test
+    public void testProcessingBoard() {
+        WorkOrder order = workOrderService.getWorkOrderById(3098528);
+        CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
+        Board productBoard = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+
+        boardService.processingBoard(cutBoard, productBoard, 3, 0, order.getId(), order.getSiteModule());
+    }
+
+    @Test
+    public void testSomething() {
+        WorkOrder order = workOrderService.getWorkOrderById(3098528);
+        CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
+        BigDecimal width = cutBoard.getWidth();
+        System.out.println(width);
+        System.out.println(width.subtract(BigDecimal.TEN));
+        System.out.println(width);
     }
 }

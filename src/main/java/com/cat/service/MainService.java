@@ -31,13 +31,14 @@ public class MainService {
         String orderModule = order.getSiteModule();
         logger.info("Order: {}", order);
 
-        CutBoard cutBoard = this.boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), orderId, orderModule);
+        CutBoard cutBoard = this.boardService.getDefaultCutBoard(order.getCuttingSize(), order.getMaterial());
+        this.boardService.pickingCutBoard(cutBoard, orderId, orderModule);
         logger.info("Picking CutBoard: {}", cutBoard);
 
         this.boardService.trimmingBoard(cutBoard, orderId, orderModule);
         logger.info("CutBoard after trimming: {}", cutBoard);
 
-        Board productBoard = this.boardService.getStandardProductBoard(order.getSpecification(), order.getMaterial());
+        Board productBoard = this.boardService.getStandardBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         logger.info("ProductBoard: {}", productBoard);
 
         int productCutTimes = this.boardService.calProductBoardCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
@@ -75,5 +76,16 @@ public class MainService {
                 this.inventoryService.addInventory(action.getBoardSpecification(), action.getBoardMaterial(), 1, BoardCategory.SEMI_PRODUCT.value);
             }
         }
+    }
+
+    public CutBoard processNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard) {
+        int orderId = order.getId();
+        String orderModule = order.getSiteModule();
+        String material = order.getMaterial();
+
+        CutBoard cutBoard = this.boardService.getDefaultCutBoard(order.getCuttingSize(), material);
+        Board productBoard = this.boardService.getStandardBoard(order.getSpecification(), material, BoardCategory.PRODUCT);
+
+        return null;
     }
 }

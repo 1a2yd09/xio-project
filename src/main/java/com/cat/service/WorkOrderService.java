@@ -34,7 +34,7 @@ public class WorkOrderService {
         if (sortPattern.equals(BottomSortPattern.SPEC.value)) {
             // 如果要求按照成品规格排序，则按照成品规格厚度、宽度、长度从大到小排序工单，规格相同则按ID升序排序:
             orders.sort((o1, o2) -> {
-                int retVal = BoardUtil.compareTwoSpecification(o1.getSpecification(), o2.getSpecification());
+                int retVal = BoardUtil.compareTwoSpecificationStr(o1.getSpecification(), o2.getSpecification());
                 return retVal != 0 ? retVal : o1.getId() - o2.getId();
             });
         }

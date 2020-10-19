@@ -27,6 +27,28 @@ public class BoardService {
         return cutBoard;
     }
 
+    public void pickingCutBoard(CutBoard cutBoard, Integer orderId, String orderModule) {
+        this.actionService.addPickAction(cutBoard, orderId, orderModule);
+    }
+
+    public CutBoard getCutBoard(CutBoard legacyCutBoard, Board productBoard, CutBoard cutBoard, Integer orderId, String orderModule) {
+        if (legacyCutBoard == null) {
+            // 没有遗留板材，直接获取工单所需的下料板:
+            this.pickingCutBoard(cutBoard, orderId, orderModule);
+            return cutBoard;
+        } else {
+            if (legacyCutBoard.compareTo(productBoard) > 0) {
+                // 有遗留板材，并且可用于当前工单，将遗留板材作为下料板:
+                return legacyCutBoard;
+            } else {
+                // 有遗留板材，但不可用于当前工单，将遗留板材送走，获取工单所需的下料板:
+                this.sendingBoard(legacyCutBoard, orderId, orderModule);
+                this.pickingCutBoard(cutBoard, orderId, orderModule);
+                return cutBoard;
+            }
+        }
+    }
+
     public void rotatingBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < rotateTimes; i++) {
             this.actionService.addRotateAction(cutBoard, orderId, orderModule);
@@ -123,10 +145,14 @@ public class BoardService {
         this.actionService.addSendingAction(targetBoard, orderId, orderModule);
     }
 
-    public Board getStandardProductBoard(String specification, String material) {
-        Board productBoard = new Board(specification, material, BoardCategory.PRODUCT);
-        BoardUtil.standardizingBoard(productBoard);
-        return productBoard;
+    public CutBoard getDefaultCutBoard(String cuttingSize, String material) {
+        return new CutBoard(cuttingSize, material, BoardCategory.CUTTING, 0);
+    }
+
+    public Board getStandardBoard(String specification, String material, BoardCategory category) {
+        Board board = new Board(specification, material, category);
+        BoardUtil.standardizingBoard(board);
+        return board;
     }
 
     public int calProductBoardCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {

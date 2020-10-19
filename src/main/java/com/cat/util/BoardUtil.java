@@ -17,7 +17,7 @@ public class BoardUtil {
                 new BigDecimal(specifications[2]));
     }
 
-    public static int compareTwoSpecification(String sp1, String sp2) {
+    public static int compareTwoSpecificationStr(String sp1, String sp2) {
         List<BigDecimal> o1List = BoardUtil.specStrToList(sp1);
         List<BigDecimal> o2List = BoardUtil.specStrToList(sp2);
         if (o1List.get(0).compareTo(o2List.get(0)) != 0) {

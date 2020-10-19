@@ -4,8 +4,11 @@ import com.cat.entity.*;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.service.*;
 import com.cat.util.BoardUtil;
+import com.cat.util.OrderUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -15,6 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AppConfigTest {
+    final Logger logger = LoggerFactory.getLogger(getClass());
 
     static ApplicationContext context;
     static SignalService signalService;
@@ -98,13 +102,59 @@ public class AppConfigTest {
      */
     @Test
     public void testProcessFinishedAction() {
-        WorkOrder order = workOrderService.getWorkOrderById(3101334);
+        int orderId = 3105787;
+        WorkOrder order = workOrderService.getWorkOrderById(orderId);
+        // 获取工单要求的成品数量:
+        int amount = OrderUtil.amountPropertyStrToInt(order.getAmount());
+        // 清空动作表:
         machineActionService.clearAllAction();
+        // 处理工单并生成机器语句:
         mainService.processBottomOrder(order);
         List<MachineAction> actions = machineActionService.getAllActions();
+        int productBoardAmount = 0;
+        int semiProductBoardAmount = 0;
+        Board semiProductBoard = null;
+        // 分别计算这组机器语句生成了多少个成品板和半成品板:
+        for (MachineAction action : actions) {
+            if (action.getBoardCategory().equals(BoardCategory.PRODUCT.value)) {
+                productBoardAmount++;
+            } else if (action.getBoardCategory().equals(BoardCategory.SEMI_PRODUCT.value)) {
+                semiProductBoard = new Board(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.SEMI_PRODUCT);
+                semiProductBoardAmount++;
+            }
+        }
+        int oldSemiProductBoardAmount = 0;
+        if (semiProductBoard != null) {
+            // 如果生成了半成品，则到存货表中查看是否已有对应的数据并获取已有的数量:
+            Inventory inventory = inventoryService.getInventory(semiProductBoard.getSpecification(), semiProductBoard.getMaterial(), semiProductBoard.getCategory().value);
+            if (inventory != null) {
+                oldSemiProductBoardAmount = inventory.getAmount();
+            }
+        }
+        // 处理这批机器动作:
         mainService.processFinishedAction(actions);
-        order = workOrderService.getWorkOrderById(3101334);
-        assertEquals(order.getUnfinishedAmount(), 0);
-        assertEquals(inventoryService.getInventoryCount(), 1);
+        // 重新获取该工单:
+        order = workOrderService.getWorkOrderById(orderId);
+        // 此时工单的未完成数目应该等于原来要求的数目减去上面机器动作完成的数目:
+        assertEquals(order.getUnfinishedAmount(), amount - productBoardAmount);
+        if (semiProductBoard != null) {
+            // 重新获取该半成品的存货数目:
+            Inventory inventory = inventoryService.getInventory(semiProductBoard.getSpecification(), semiProductBoard.getMaterial(), semiProductBoard.getCategory().value);
+            // 这个数目应该等于原有的数目加上机器动作中生成的数目:
+            assertEquals(inventory.getAmount(), oldSemiProductBoardAmount + semiProductBoardAmount);
+        }
+    }
+
+    @Test
+    public void testCompareBoard() {
+        int orderId = 3105787;
+        WorkOrder order = workOrderService.getWorkOrderById(orderId);
+        logger.info("order: {}", order);
+        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING, 0);
+        Board productBoard = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        assertEquals(cutBoard.compareTo(productBoard), 1);
+        assertEquals(productBoard.compareTo(cutBoard), -1);
+        productBoard.setMaterial("热板");
+        assertEquals(cutBoard.compareTo(productBoard), -1);
     }
 }

@@ -6,7 +6,7 @@ import com.cat.util.BoardUtil;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class Board {
+public class Board implements Comparable<Board> {
     private BigDecimal height;
     private BigDecimal width;
     private BigDecimal length;
@@ -86,5 +86,19 @@ public class Board {
                 ", material='" + material + '\'' +
                 ", category=" + category +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Board other) {
+        if (this.material.equals(other.material)) {
+            if (this.height.compareTo(other.height) == 0 && this.width.compareTo(other.width) >= 0 && this.length.compareTo(other.length) >= 0) {
+                // 厚度相等，宽度和长度大于等于:
+                return 1;
+            } else {
+                return -1;
+            }
+        } else {
+            return -1;
+        }
     }
 }

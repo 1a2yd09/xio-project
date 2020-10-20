@@ -27,6 +27,9 @@ public class MainService {
     @Autowired
     ParameterService parameterService;
 
+    @Autowired
+    StockSpecificationService stockSpecificationService;
+
     public int calProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {
         // TODO: 如果能把板材裁剪次数也作为板材的属性之一，就可以在获得板材对象的同时计算板材的裁剪次数。可以从板材基类延申出一个非下料板类型的板材类。
         int maxProductBoardCutTimes = cutBoardWidth.divideToIntegralValue(productBoardWidth).intValue();
@@ -122,6 +125,15 @@ public class MainService {
         }
     }
 
+    public Board getStockBoard(BigDecimal height, String material) {
+        StockSpecification ss = this.stockSpecificationService.getMatchSpecification(height);
+        if (ss != null) {
+            return new Board(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
+        } else {
+            return new Board(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, material, BoardCategory.STOCK);
+        }
+    }
+
     public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {
         String material = order.getMaterial();
         int orderId = order.getId();
@@ -159,6 +171,9 @@ public class MainService {
                 logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
             } else {
                 logger.info("remainingCutBoard can't reuse");
+
+                Board stockBoard = this.getStockBoard(cutBoard.getHeight(), material);
+                logger.info("stockBoard: {}", stockBoard);
 
 
             }

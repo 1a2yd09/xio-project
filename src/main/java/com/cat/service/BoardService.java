@@ -2,7 +2,6 @@ package com.cat.service;
 
 import com.cat.entity.Board;
 import com.cat.entity.CutBoard;
-import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +46,8 @@ public class BoardService {
         this.actionService.addPickAction(cutBoard, orderId, orderModule);
     }
 
-    public void trimmingBoard(CutBoard cutBoard, Integer orderId, String orderModule) {
-        List<BigDecimal> trimValues = parameterService.getTrimValues();
+    public void trimmingCutBoard(CutBoard cutBoard, List<BigDecimal> trimValues, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         logger.info("trimValues: {}", trimValues);
-        BigDecimal wasteThreshold = parameterService.getLatestOperatingParameter().getWasteThreshold();
         logger.info("wasteThreshold: {}", wasteThreshold);
         int currentForwardEdge = 0;
         for (int i = 0; i < trimValues.size(); i++) {
@@ -75,20 +72,14 @@ public class BoardService {
         }
     }
 
-    public void pickingAndTrimmingCutBoard(CutBoard cutBoard, Integer orderId, String orderModule) {
-        this.pickingCutBoard(cutBoard, orderId, orderModule);
-        this.trimmingBoard(cutBoard, orderId, orderModule);
-    }
-
-    public void cuttingBoardExtraLength(CutBoard cutBoard, BigDecimal targetBoardLength, Integer orderId, String orderModule) {
-        BigDecimal extraLength = cutBoard.getLength().subtract(targetBoardLength);
+    public void cuttingExtraLength(CutBoard cutBoard, BigDecimal targetLength, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+        BigDecimal extraLength = cutBoard.getLength().subtract(targetLength);
         if (extraLength.compareTo(BigDecimal.ZERO) > 0) {
             Board extraBoard = new Board();
             extraBoard.setHeight(cutBoard.getHeight());
             extraBoard.setWidth(extraLength);
             extraBoard.setLength(cutBoard.getWidth());
             extraBoard.setMaterial(cutBoard.getMaterial());
-            BigDecimal wasteThreshold = parameterService.getLatestOperatingParameter().getWasteThreshold();
             extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
 
             int rotateTimes = cutBoard.getForwardEdge() == 1 ? 1 : 0;
@@ -97,15 +88,14 @@ public class BoardService {
         }
     }
 
-    public void cuttingBoardExtraWidth(CutBoard cutBoard, BigDecimal targetBoardWidth, int targetBoardCutTimes, Integer orderId, String orderModule) {
-        BigDecimal extraWidth = cutBoard.getWidth().subtract(targetBoardWidth.multiply(new BigDecimal(targetBoardCutTimes)));
+    public void cuttingExtraWidth(CutBoard cutBoard, BigDecimal targetWidth, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+        BigDecimal extraWidth = cutBoard.getWidth().subtract(targetWidth);
         if (extraWidth.compareTo(BigDecimal.ZERO) > 0) {
             Board extraBoard = new Board();
             extraBoard.setHeight(cutBoard.getHeight());
             extraBoard.setWidth(extraWidth);
             extraBoard.setLength(cutBoard.getLength());
             extraBoard.setMaterial(cutBoard.getMaterial());
-            BigDecimal wasteThreshold = parameterService.getLatestOperatingParameter().getWasteThreshold();
             extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
 
             int rotateTimes = cutBoard.getForwardEdge() == 1 ? 0 : 1;
@@ -122,7 +112,7 @@ public class BoardService {
         }
     }
 
-    public void sendingBoard(Board targetBoard, Integer orderId, String orderModule) {
+    public void sendingTargetBoard(Board targetBoard, Integer orderId, String orderModule) {
         this.actionService.addSendingAction(targetBoard, orderId, orderModule);
     }
 }

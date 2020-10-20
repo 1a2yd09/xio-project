@@ -185,4 +185,13 @@ public class AppConfigTest {
         mainService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
         assertEquals(machineActionService.getActionCount(), 2);
     }
+
+    @Test
+    public void testProcessingNotBottomOrder() {
+//        int orderId = 3098562;
+        int orderId = 3118048;
+        WorkOrder order = workOrderService.getWorkOrderById(orderId);
+        machineActionService.clearAllAction();
+        CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null);
+    }
 }

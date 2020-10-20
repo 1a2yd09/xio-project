@@ -90,6 +90,9 @@ public class Board implements Comparable<Board> {
 
     @Override
     public int compareTo(Board other) {
+        if (other == null) {
+            return -1;
+        }
         if (this.material.equals(other.material)) {
             if (this.height.compareTo(other.height) == 0 && this.width.compareTo(other.width) >= 0 && this.length.compareTo(other.length) >= 0) {
                 // 厚度相等，宽度和长度大于等于:

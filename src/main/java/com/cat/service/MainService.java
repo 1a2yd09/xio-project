@@ -122,15 +122,60 @@ public class MainService {
         }
     }
 
-    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard) {
+    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
+        OperatingParameter op = this.parameterService.getLatestOperatingParameter();
+
+        logger.info("Order: {}", order);
 
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
+        logger.info("OrderCutBoard: {}", orderCutBoard);
+
         Board productBoard = BoardUtil.getStandardBoard(order.getSpecification(), material, BoardCategory.PRODUCT);
+        logger.info("ProductBoard: {}", productBoard);
 
         CutBoard cutBoard = this.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, orderId, orderModule);
+        logger.info("processingCutBoard: {}", cutBoard);
+
+        int productCutTimes = this.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
+        logger.info("ProductCutTimes: {}", productCutTimes);
+
+        if (productCutTimes == order.getUnfinishedAmount()) {
+            logger.info("order last time processing");
+
+            BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
+            CutBoard remainingCutBoard = new CutBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.CUTTING);
+            logger.info("remainingCutBoard: {}", remainingCutBoard);
+
+            if (remainingCutBoard.compareTo(nextOrderProductBoard) > 0) {
+                logger.info("remainingCutBoard can reuse");
+
+                this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+
+                this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes, orderId, orderModule);
+                logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
+            } else {
+                logger.info("remainingCutBoard can't reuse");
+
+
+            }
+        } else {
+            logger.info("order not last time processing");
+
+            this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+            logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+
+            this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+            logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
+
+            this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
+            logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
+
+            this.boardService.sendingTargetBoard(productBoard, orderId, orderModule);
+        }
 
         return null;
     }

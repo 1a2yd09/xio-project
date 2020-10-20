@@ -1,5 +1,6 @@
 package com.cat.service;
 
+import com.cat.entity.Board;
 import com.cat.entity.StockSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -32,5 +33,9 @@ public class StockSpecificationService {
                 "FROM (SELECT id, height, width, length, created_at, ROW_NUMBER() OVER (PARTITION BY height ORDER BY created_at DESC) AS row_number " +
                 "FROM tb_stock_specification) AS S " +
                 "WHERE row_number = 1", this.specM);
+    }
+
+    public void addSpecification(Board board) {
+        this.jdbcTemplate.update("INSERT INTO tb_stock_specification(height, width, length) VALUES (?, ?, ?)", board.getHeight(), board.getWidth(), board.getLength());
     }
 }

@@ -117,7 +117,9 @@ public class BoardService {
         }
     }
 
-    public void sendingTargetBoard(Board targetBoard, Integer orderId, String orderModule) {
+    public void sendingTargetBoard(CutBoard cutBoard, Board targetBoard, Integer orderId, String orderModule) {
+        // TODO: 这里应该改成依旧送走的是下料板，但是此时类型不再是下料板，而是传入的类型。
         this.actionService.addSendingAction(targetBoard, orderId, orderModule);
+        cutBoard.setWidth(BigDecimal.ZERO);
     }
 }

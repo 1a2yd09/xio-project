@@ -84,7 +84,8 @@ public class MainService {
         this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
         logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
 
-        this.boardService.sendingTargetBoard(productBoard, orderId, orderModule);
+        this.boardService.sendingTargetBoard(cutBoard, productBoard, orderId, orderModule);
+        logger.info("CutBoard after sendingTargetBoard: {}", cutBoard);
     }
 
     public void processingFinishedAction(List<MachineAction> actions) {
@@ -116,7 +117,7 @@ public class MainService {
                 return legacyCutBoard;
             } else {
                 // 有遗留板材，不可用于工单成品裁剪，推送遗留板材，取工单下料板并修边:
-                this.boardService.sendingTargetBoard(legacyCutBoard, orderId, orderModule);
+                this.boardService.sendingTargetBoard(legacyCutBoard, legacyCutBoard, orderId, orderModule);
                 logger.info("Sending legacyCutBoard");
                 this.boardService.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
                 logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
@@ -148,6 +149,8 @@ public class MainService {
         Board productBoard = BoardUtil.getStandardBoard(order.getSpecification(), material, BoardCategory.PRODUCT);
         logger.info("ProductBoard: {}", productBoard);
 
+        logger.info("legacyCutBoard: {}", legacyCutBoard);
+
         CutBoard cutBoard = this.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, orderId, orderModule);
         logger.info("processingCutBoard: {}", cutBoard);
 
@@ -156,10 +159,11 @@ public class MainService {
 
         if (productCutTimes == order.getUnfinishedAmount()) {
             logger.info("order last time processing");
-
+            // TODO: 这个剩余宽度可以在计算库存件次数时被使用。
             BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
             CutBoard remainingCutBoard = new CutBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.CUTTING);
             logger.info("remainingCutBoard: {}", remainingCutBoard);
+            logger.info("nextOrderProductBoard: {}", nextOrderProductBoard);
 
             if (remainingCutBoard.compareTo(nextOrderProductBoard) > 0) {
                 logger.info("remainingCutBoard can reuse");
@@ -175,7 +179,65 @@ public class MainService {
                 Board stockBoard = this.getStockBoard(cutBoard.getHeight(), material);
                 logger.info("stockBoard: {}", stockBoard);
 
+                int stockBoardCutTimes = this.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, stockBoard.getWidth());
+                logger.info("stockBoardCutTimes: {}", stockBoardCutTimes);
 
+                if (stockBoardCutTimes > 0) {
+                    logger.info("can cutting stockBoard");
+
+                    if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
+                        logger.info("first cutting productBoard");
+
+                        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+
+                        this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes, orderId, orderModule);
+                        logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
+
+                        this.boardService.cuttingExtraLength(cutBoard, stockBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+
+                        this.boardService.cuttingExtraWidth(cutBoard, stockBoard.getWidth().multiply(new BigDecimal(stockBoardCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+                        logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
+
+                        this.boardService.cuttingTargetBoard(cutBoard, stockBoard, stockBoardCutTimes - 1, orderId, orderModule);
+                        logger.info("CutBoard after cuttingStockBoard: {}", cutBoard);
+
+                        this.boardService.sendingTargetBoard(cutBoard, stockBoard, orderId, orderModule);
+                    } else {
+                        logger.info("first cutting stockBoard");
+
+                        this.boardService.cuttingExtraLength(cutBoard, stockBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+
+                        this.boardService.cuttingTargetBoard(cutBoard, stockBoard, stockBoardCutTimes, orderId, orderModule);
+                        logger.info("CutBoard after cuttingStockBoard: {}", cutBoard);
+
+                        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+
+                        this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+                        logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
+
+                        this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
+                        logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
+
+                        this.boardService.sendingTargetBoard(cutBoard, productBoard, orderId, orderModule);
+                    }
+                } else {
+                    logger.info("can't cutting stockBoard");
+
+                    this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                    logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+
+                    this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+                    logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
+
+                    this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
+                    logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
+
+                    this.boardService.sendingTargetBoard(cutBoard, productBoard, orderId, orderModule);
+                }
             }
         } else {
             logger.info("order not last time processing");
@@ -189,9 +251,11 @@ public class MainService {
             this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
             logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
 
-            this.boardService.sendingTargetBoard(productBoard, orderId, orderModule);
+            this.boardService.sendingTargetBoard(cutBoard, productBoard, orderId, orderModule);
         }
 
-        return null;
+        logger.info("CutBoard in the end: {}", cutBoard);
+        // TODO: 既然送板会将下料板的宽度置零，那实际就不需要对遗留板材进行空判断，直接进行板材比较即可。
+        return cutBoard;
     }
 }

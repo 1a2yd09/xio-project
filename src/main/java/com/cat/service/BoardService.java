@@ -21,10 +21,6 @@ public class BoardService {
     @Autowired
     ParameterService parameterService;
 
-    public void pickingCutBoard(CutBoard cutBoard, Integer orderId, String orderModule) {
-        this.actionService.addPickAction(cutBoard, orderId, orderModule);
-    }
-
     public void rotatingBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < rotateTimes; i++) {
             this.actionService.addRotateAction(cutBoard, orderId, orderModule);
@@ -45,6 +41,10 @@ public class BoardService {
                 cutBoard.setLength(cutBoard.getLength().subtract(targetBoard.getWidth()));
             }
         }
+    }
+
+    public void pickingCutBoard(CutBoard cutBoard, Integer orderId, String orderModule) {
+        this.actionService.addPickAction(cutBoard, orderId, orderModule);
     }
 
     public void trimmingBoard(CutBoard cutBoard, Integer orderId, String orderModule) {
@@ -124,33 +124,5 @@ public class BoardService {
 
     public void sendingBoard(Board targetBoard, Integer orderId, String orderModule) {
         this.actionService.addSendingAction(targetBoard, orderId, orderModule);
-    }
-
-    public Board getStandardBoard(String specification, String material, BoardCategory category) {
-        Board board = new Board(specification, material, category);
-        BoardUtil.standardizingBoard(board);
-        return board;
-    }
-
-    public int calProductBoardCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {
-        // TODO: 如果能把板材裁剪次数也作为板材的属性之一，就可以在获得板材对象的同时计算板材的裁剪次数。可以从板材基类延申出一个非下料板类型的板材类。
-        int maxProductBoardCutTimes = cutBoardWidth.divideToIntegralValue(productBoardWidth).intValue();
-        return Math.min(maxProductBoardCutTimes, orderUnfinishedTimes);
-    }
-
-    public Board getSemiProductBoard(CutBoard cutBoard) {
-        BigDecimal fixedWidth = parameterService.getLatestOperatingParameter().getFixedWidth();
-        return new Board(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), cutBoard.getMaterial(), BoardCategory.SEMI_PRODUCT);
-    }
-
-    public int calSemiProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, int productCutTimes) {
-        BigDecimal fixedWidth = parameterService.getLatestOperatingParameter().getFixedWidth();
-        logger.info("FixedWidth: {}", fixedWidth);
-        if (fixedWidth.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal remainingWidth = cutBoardWidth.subtract(productBoardWidth.multiply(new BigDecimal(productCutTimes)));
-            return remainingWidth.divideToIntegralValue(fixedWidth).intValue();
-        } else {
-            return 0;
-        }
     }
 }

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,12 +42,7 @@ public class AppConfigTest {
 
     @Test
     public void testSomething() {
-        WorkOrder order = workOrderService.getWorkOrderById(3098528);
-        CutBoard cutBoard = boardService.pickingBoard(order.getCuttingSize(), order.getMaterial(), order.getId(), order.getSiteModule());
-        BigDecimal width = cutBoard.getWidth();
-        System.out.println(width);
-        System.out.println(width.subtract(BigDecimal.TEN));
-        System.out.println(width);
+
     }
 
     @Test
@@ -150,7 +144,7 @@ public class AppConfigTest {
         int orderId = 3105787;
         WorkOrder order = workOrderService.getWorkOrderById(orderId);
         logger.info("order: {}", order);
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING, 0);
+        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
         Board productBoard = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         assertEquals(cutBoard.compareTo(productBoard), 1);
         assertEquals(productBoard.compareTo(cutBoard), -1);

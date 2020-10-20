@@ -52,4 +52,10 @@ public class BoardUtil {
             board.setLength(tmp);
         }
     }
+
+    public static Board getStandardBoard(String specification, String material, BoardCategory category) {
+        Board board = new Board(specification, material, category);
+        BoardUtil.standardizingBoard(board);
+        return board;
+    }
 }

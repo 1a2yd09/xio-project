@@ -42,7 +42,7 @@ public class MainService {
         }
     }
 
-    public void processBottomOrder(WorkOrder order) {
+    public void processingBottomOrder(WorkOrder order) {
         // 如果是和处理工单对象有关的流程，要保证是从数据库中最新获取的，防止前面的流程有对相应的数据表写的操作:
         String material = order.getMaterial();
         int orderId = order.getId();
@@ -51,15 +51,14 @@ public class MainService {
 
         logger.info("Order: {}", order);
 
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
-        this.boardService.pickingCutBoard(cutBoard, orderId, orderModule);
-        logger.info("CutBoard: {}", cutBoard);
-
-        this.boardService.trimmingCutBoard(cutBoard, this.parameterService.getTrimValues(), op.getWasteThreshold(), orderId, orderModule);
-        logger.info("CutBoard after trimming: {}", cutBoard);
+        CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
+        logger.info("OrderCutBoard: {}", orderCutBoard);
 
         Board productBoard = BoardUtil.getStandardBoard(order.getSpecification(), material, BoardCategory.PRODUCT);
         logger.info("ProductBoard: {}", productBoard);
+
+        CutBoard cutBoard = this.processingCutBoard(null, orderCutBoard, productBoard, orderId, orderModule);
+        logger.info("processingCutBoard: {}", cutBoard);
 
         int productCutTimes = this.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
         logger.info("ProductCutTimes: {}", productCutTimes);
@@ -85,7 +84,7 @@ public class MainService {
         this.boardService.sendingTargetBoard(productBoard, orderId, orderModule);
     }
 
-    public void processFinishedAction(List<MachineAction> actions) {
+    public void processingFinishedAction(List<MachineAction> actions) {
         for (MachineAction action : actions) {
             // TODO: 可能需要判断动作是否已完成。
             String boardCategory = action.getBoardCategory();
@@ -98,28 +97,40 @@ public class MainService {
         }
     }
 
-    public CutBoard processNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard) {
+    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, Integer orderId, String orderModule) {
+        BigDecimal wasteThreshold = this.parameterService.getLatestOperatingParameter().getWasteThreshold();
+        List<BigDecimal> trimValues = this.parameterService.getTrimValues();
+
+        if (legacyCutBoard == null) {
+            // 无遗留板材，取工单下料板并修边:
+            this.boardService.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
+            logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
+            return orderCutBoard;
+        } else {
+            if (legacyCutBoard.compareTo(productBoard) > 0) {
+                // 有遗留板材，可用于工单成品裁剪，将遗留板材作为此次过程的下料板，遗留板材不需要修边操作:
+                logger.info("Using legacyCutBoard: {}", legacyCutBoard);
+                return legacyCutBoard;
+            } else {
+                // 有遗留板材，不可用于工单成品裁剪，推送遗留板材，取工单下料板并修边:
+                this.boardService.sendingTargetBoard(legacyCutBoard, orderId, orderModule);
+                logger.info("Sending legacyCutBoard");
+                this.boardService.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
+                logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
+                return orderCutBoard;
+            }
+        }
+    }
+
+    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard) {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
 
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
         Board productBoard = BoardUtil.getStandardBoard(order.getSpecification(), material, BoardCategory.PRODUCT);
-        // TODO: 其实逻辑应该是这样，根据一个函数确定此次下料板是使用遗留板材还是工单下料板，然后进行后续流程。
-        CutBoard cutBoard;
-        if (legacyCutBoard == null) {
-            // 无遗留板材，取工单下料板并修边:
-            cutBoard = orderCutBoard;
-        } else {
-            if (legacyCutBoard.compareTo(productBoard) > 0) {
-                // 有遗留板材，可用于工单成品裁剪，将遗留板材作为此次过程的下料板:
-                cutBoard = legacyCutBoard;
-            } else {
-                // 有遗留板材，不可用于工单成品裁剪，推送遗留板材，取工单下料板并修边:
-                this.boardService.sendingTargetBoard(legacyCutBoard, orderId, orderModule);
-                cutBoard = orderCutBoard;
-            }
-        }
+
+        CutBoard cutBoard = this.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, orderId, orderModule);
 
         return null;
     }

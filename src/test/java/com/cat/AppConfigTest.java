@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +50,7 @@ public class AppConfigTest {
     public void testProcessBottomOrder1() {
         WorkOrder order = workOrderService.getWorkOrderById(3101334);
         machineActionService.clearAllAction();
-        mainService.processBottomOrder(order);
+        mainService.processingBottomOrder(order);
         assertEquals(machineActionService.getActionCount(), 13);
     }
 
@@ -57,7 +58,7 @@ public class AppConfigTest {
     public void testProcessBottomOrder2() {
         WorkOrder order = workOrderService.getWorkOrderById(3098967);
         machineActionService.clearAllAction();
-        mainService.processBottomOrder(order);
+        mainService.processingBottomOrder(order);
         assertEquals(machineActionService.getActionCount(), 5);
     }
 
@@ -65,7 +66,7 @@ public class AppConfigTest {
     public void testProcessBottomOrder3() {
         WorkOrder order = workOrderService.getWorkOrderById(3101166);
         machineActionService.clearAllAction();
-        mainService.processBottomOrder(order);
+        mainService.processingBottomOrder(order);
         assertEquals(machineActionService.getActionCount(), 3);
     }
 
@@ -96,14 +97,14 @@ public class AppConfigTest {
      */
     @Test
     public void testProcessFinishedAction() {
-        int orderId = 3105787;
+        int orderId = 3101334;
         WorkOrder order = workOrderService.getWorkOrderById(orderId);
         // 获取工单要求的成品数量:
         int amount = OrderUtil.amountPropertyStrToInt(order.getAmount());
         // 清空动作表:
         machineActionService.clearAllAction();
         // 处理工单并生成机器语句:
-        mainService.processBottomOrder(order);
+        mainService.processingBottomOrder(order);
         List<MachineAction> actions = machineActionService.getAllActions();
         int productBoardAmount = 0;
         int semiProductBoardAmount = 0;
@@ -126,7 +127,7 @@ public class AppConfigTest {
             }
         }
         // 处理这批机器动作:
-        mainService.processFinishedAction(actions);
+        mainService.processingFinishedAction(actions);
         // 重新获取该工单:
         order = workOrderService.getWorkOrderById(orderId);
         // 此时工单的未完成数目应该等于原来要求的数目减去上面机器动作完成的数目:
@@ -150,5 +151,38 @@ public class AppConfigTest {
         assertEquals(productBoard.compareTo(cutBoard), -1);
         productBoard.setMaterial("热板");
         assertEquals(cutBoard.compareTo(productBoard), -1);
+    }
+
+    @Test
+    public void testProcessingCutBoard() {
+        int orderId = 3101334;
+        WorkOrder order = workOrderService.getWorkOrderById(orderId);
+        CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+        Board productBoard = BoardUtil.getStandardBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        // 暂时用工单下料板作为遗留板材:
+        CutBoard legacyCutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+
+        machineActionService.clearAllAction();
+        // 遗留板材可用时，不会生成任何语句:
+        mainService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
+        assertEquals(machineActionService.getActionCount(), 0);
+
+        machineActionService.clearAllAction();
+        // 不存在遗留板材时，会有下料板取板和修边等语句，由于修边值都为零，因此只有取板语句:
+        mainService.processingCutBoard(null, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
+        assertEquals(machineActionService.getActionCount(), 1);
+
+        machineActionService.clearAllAction();
+        legacyCutBoard.setMaterial("不存在的材质");
+        // 遗留板材不可用时，会多出一句送板语句:
+        mainService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
+        assertEquals(machineActionService.getActionCount(), 2);
+        legacyCutBoard.setMaterial(order.getMaterial());
+
+        machineActionService.clearAllAction();
+        legacyCutBoard.setHeight(new BigDecimal(-1));
+        // 遗留板材不可用时，会多出一句送板语句:
+        mainService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
+        assertEquals(machineActionService.getActionCount(), 2);
     }
 }

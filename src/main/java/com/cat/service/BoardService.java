@@ -72,6 +72,11 @@ public class BoardService {
         }
     }
 
+    public void pickingAndTrimmingCutBoard(CutBoard cutBoard, List<BigDecimal> trimValues, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+        this.pickingCutBoard(cutBoard, orderId, orderModule);
+        this.trimmingCutBoard(cutBoard, trimValues, wasteThreshold, orderId, orderModule);
+    }
+
     public void cuttingExtraLength(CutBoard cutBoard, BigDecimal targetLength, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         BigDecimal extraLength = cutBoard.getLength().subtract(targetLength);
         if (extraLength.compareTo(BigDecimal.ZERO) > 0) {

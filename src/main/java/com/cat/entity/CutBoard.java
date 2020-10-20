@@ -8,9 +8,9 @@ public class CutBoard extends Board {
      */
     private Integer forwardEdge;
 
-    public CutBoard(String specification, String material, BoardCategory category, Integer forwardEdge) {
+    public CutBoard(String specification, String material, BoardCategory category) {
         super(specification, material, category);
-        this.forwardEdge = forwardEdge;
+        this.forwardEdge = 0;
     }
 
     public Integer getForwardEdge() {

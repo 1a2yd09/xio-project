@@ -38,13 +38,14 @@ public class InventoryService {
     }
 
     public Inventory getInventory(String specification, String material, String category) {
-        // TODO: 虽然规格字符串在整个项目中都是按照确定格式输出的，但是直接比较字符串感觉还是有点不稳妥。
-        // 这里是比较规格相等，而在获取轿底工单的逻辑中使用到了将两个规格字符串转化为 BigDecimal 后再进行比较大小的逻辑:
+        // 这里的规格字符串是 Board 对象调用 getSpecification() 传入的，虽然保证写入和获取时使用同一方法，但是直接比较字符串感觉还是有点不稳妥。
+        // TODO: 首先根据类型、材质获取存货集合，定义一个用于比较两个规格字符串的方法，这样就不用借助 Board 对象的比较方法。
         List<Inventory> list = this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE specification = ? AND material = ? AND category = ?", this.inventoryM, specification, material, category);
         return list.isEmpty() ? null : list.get(0);
     }
 
     public void addNewInventory(String specification, String material, int amount, String category) {
+        // 这里的规格字符串是 Board 对象调用 getSpecification() 传入的:
         this.jdbcTemplate.update("INSERT INTO tb_inventory (specification, material, amount, category) VALUES (?, ?, ?, ?)", specification, material, amount, category);
     }
 

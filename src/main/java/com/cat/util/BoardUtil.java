@@ -9,6 +9,7 @@ import java.util.List;
 
 public class BoardUtil {
     public static final String SPEC_SEP = "×";
+    public static final int DEC_SCALE = 2;
 
     public static List<BigDecimal> specStrToDecList(String specification) {
         String[] specifications = specification.split(SPEC_SEP);
@@ -17,7 +18,11 @@ public class BoardUtil {
                 new BigDecimal(specifications[2]));
     }
 
-    public static int compareTwoSpecificationStr(String sp1, String sp2) {
+    /**
+     * 该方法仅用于在排序当中比较两个规格字符串，它一次只考虑规格中的一种度量，
+     * 比如前者高度高，则前者排在前，不考虑后续的宽度和长度条件。
+     */
+    public static int sortTwoSpecStr(String sp1, String sp2) {
         List<BigDecimal> o1List = BoardUtil.specStrToDecList(sp1);
         List<BigDecimal> o2List = BoardUtil.specStrToDecList(sp2);
         if (o1List.get(0).compareTo(o2List.get(0)) != 0) {
@@ -31,9 +36,9 @@ public class BoardUtil {
 
     public static String getSpecStr(BigDecimal height, BigDecimal width, BigDecimal length) {
         // 同步数据表设计时设定的小数位数，规范化输出格式:
-        String heightStr = height.setScale(2, RoundingMode.DOWN).toString();
-        String widthStr = width.setScale(2, RoundingMode.DOWN).toString();
-        String lengthStr = length.setScale(2, RoundingMode.DOWN).toString();
+        String heightStr = height.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
+        String widthStr = width.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
+        String lengthStr = length.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
         return String.join(SPEC_SEP, heightStr, widthStr, lengthStr);
     }
 

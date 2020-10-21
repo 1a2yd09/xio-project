@@ -93,12 +93,14 @@ public class Board implements Comparable<Board> {
         if (other == null) {
             return -1;
         }
-        if (this.material.equals(other.material)) {
-            if (this.height.compareTo(other.height) == 0 && this.width.compareTo(other.width) >= 0 && this.length.compareTo(other.length) >= 0) {
-                // 厚度相等，宽度和长度大于等于:
-                return 1;
-            } else {
+        if (this.material.equals(other.material) && this.height.compareTo(other.height) == 0) {
+            // 在材质相同和厚度相等的前提下，去比较宽度和长度:
+            if (this.width.compareTo(other.width) < 0 || this.length.compareTo(other.length) < 0) {
                 return -1;
+            } else if (this.width.compareTo(other.width) == 0 && this.length.compareTo(other.length) == 0) {
+                return 0;
+            } else {
+                return 1;
             }
         } else {
             return -1;

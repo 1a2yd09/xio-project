@@ -110,7 +110,7 @@ public class MainService {
             logger.info("remainingCutBoard: {}", remainingCutBoard);
             logger.info("nextOrderProductBoard: {}", nextOrderProductBoard);
 
-            if (remainingCutBoard.compareTo(nextOrderProductBoard) > 0) {
+            if (remainingCutBoard.compareTo(nextOrderProductBoard) >= 0) {
                 logger.info("remainingCutBoard can reuse");
 
                 this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);

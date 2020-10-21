@@ -32,9 +32,9 @@ public class WorkOrderService {
     public List<WorkOrder> getBottomOrders(String sortPattern, LocalDate date) {
         List<WorkOrder> orders = this.getBottomOrders(date);
         if (sortPattern.equals(BottomSortPattern.SPEC.value)) {
-            // 如果要求按照成品规格排序，则按照成品规格厚度、宽度、长度从大到小排序工单，规格相同则按ID升序排序:
+            // 如果要求按照成品规格(此处规格指的是依次比较规格的三个度量)排序，则按照成品规格厚度、宽度、长度降序排序工单，都相同则按ID升序排序:
             orders.sort((o1, o2) -> {
-                int retVal = BoardUtil.compareTwoSpecificationStr(o1.getSpecification(), o2.getSpecification());
+                int retVal = BoardUtil.sortTwoSpecStr(o1.getSpecification(), o2.getSpecification());
                 return retVal != 0 ? retVal : o1.getId() - o2.getId();
             });
         }

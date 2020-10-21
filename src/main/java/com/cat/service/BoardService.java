@@ -137,7 +137,7 @@ public class BoardService {
             logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
             return orderCutBoard;
         } else {
-            if (legacyCutBoard.compareTo(productBoard) > 0) {
+            if (legacyCutBoard.compareTo(productBoard) >= 0) {
                 // 有遗留板材，可用于工单成品裁剪，将遗留板材作为此次过程的下料板，遗留板材不需要修边操作:
                 logger.info("Using legacyCutBoard: {}", legacyCutBoard);
                 return legacyCutBoard;

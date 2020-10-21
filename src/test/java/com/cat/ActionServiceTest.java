@@ -31,15 +31,6 @@ public class ActionServiceTest {
         stockSpecificationService = context.getBean(StockSpecificationService.class);
     }
 
-    @Test
-    void testDoneAllAction() {
-        machineActionService.doneAllAction();
-        List<MachineAction> list = machineActionService.getAllActions();
-        for (MachineAction ma : list) {
-            assertEquals(ma.getCompleted(), true);
-        }
-    }
-
     /**
      * 测试处理一组被机器完成的动作语句，
      * 处理后的工单未完成数目=处理前的工单未完成数目-生成的成品语句数目

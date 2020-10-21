@@ -39,6 +39,7 @@ public class InventoryService {
 
     public Inventory getInventory(String specification, String material, String category) {
         // TODO: 虽然规格字符串在整个项目中都是按照确定格式输出的，但是直接比较字符串感觉还是有点不稳妥。
+        // 这里是比较规格相等，而在获取轿底工单的逻辑中使用到了将两个规格字符串转化为 BigDecimal 后再进行比较大小的逻辑:
         List<Inventory> list = this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE specification = ? AND material = ? AND category = ?", this.inventoryM, specification, material, category);
         return list.isEmpty() ? null : list.get(0);
     }

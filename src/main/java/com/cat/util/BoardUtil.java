@@ -10,7 +10,7 @@ import java.util.List;
 public class BoardUtil {
     public static final String SPEC_SEP = "×";
 
-    public static List<BigDecimal> specStrToList(String specification) {
+    public static List<BigDecimal> specStrToDecList(String specification) {
         String[] specifications = specification.split(SPEC_SEP);
         return List.of(new BigDecimal(specifications[0]),
                 new BigDecimal(specifications[1]),
@@ -18,8 +18,8 @@ public class BoardUtil {
     }
 
     public static int compareTwoSpecificationStr(String sp1, String sp2) {
-        List<BigDecimal> o1List = BoardUtil.specStrToList(sp1);
-        List<BigDecimal> o2List = BoardUtil.specStrToList(sp2);
+        List<BigDecimal> o1List = BoardUtil.specStrToDecList(sp1);
+        List<BigDecimal> o2List = BoardUtil.specStrToDecList(sp2);
         if (o1List.get(0).compareTo(o2List.get(0)) != 0) {
             return o2List.get(0).compareTo(o1List.get(0));
         } else if (o1List.get(1).compareTo(o2List.get(1)) != 0) {

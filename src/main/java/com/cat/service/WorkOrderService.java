@@ -55,6 +55,11 @@ public class WorkOrderService {
 
     public void updateOrderCompletedAmount(WorkOrder order) {
         // 查询是从视图中查询，更新是更新回原数据表:
-        this.jdbcTemplate.update("UPDATE local_work_order SET YWGSL = ? WHERE bid = ?", order.getCompletedAmount(), order.getId());
+        if (order.getCompletedAmount() == null) {
+            // 注意 update() 方法后续的参数数组不支持非空对象，在其方法签名上可以看到 @Nullable 注解:
+            this.jdbcTemplate.update("UPDATE local_work_order SET YWGSL = null WHERE bid = ?", order.getId());
+        } else {
+            this.jdbcTemplate.update("UPDATE local_work_order SET YWGSL = ? WHERE bid = ?", order.getCompletedAmount(), order.getId());
+        }
     }
 }

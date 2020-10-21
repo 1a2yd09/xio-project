@@ -166,17 +166,15 @@ public class NotBottomOrderTest {
         // 材质不同，剩的不能用:
         nextOrderProductBoard.setMaterial("冷板");
         // 将工单下料板的宽度改为原来的两倍多一点:
-        order.setCuttingSize("4.0×800×3400");
-        // 是最后一次
-        order.setAmount("1");
+        order.setCuttingSize("4.0×1000×3400");
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         board.setLength(new BigDecimal(3300));
         // 像库存规格数据表中写入一个厚度宽度和成品相同，但长度稍大的库存件规格:
         stockSpecificationService.addSpecification(board);
-        // 该工单需求的是1个成品板，800裁掉1个245剩555，可以裁剪2个245的库存件，并且库存件优先:
+        // 该工单需求的是2个成品板，1000裁掉2个245剩510，可以裁剪2个245的库存件，并且库存件优先:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, nextOrderProductBoard);
-        // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度(3400->3300)-旋转-裁剪库存件(2个)-旋转-裁剪长度(3300->3190)-旋转-裁剪宽度(65)-送成品(1个):
-        assertEquals(machineActionService.getActionCount(), 10);
+        // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度(3400->3300)-旋转-裁剪库存件(2个)-旋转-裁剪长度(3300->3190)-旋转-裁剪宽度-裁剪成品(1个)-送成品:
+        assertEquals(machineActionService.getActionCount(), 11);
     }
 
     /**

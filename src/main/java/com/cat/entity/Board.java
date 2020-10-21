@@ -29,7 +29,7 @@ public class Board implements Comparable<Board> {
     }
 
     public Board(String specification, String material, BoardCategory category) {
-        List<BigDecimal> list = BoardUtil.specStrToList(specification);
+        List<BigDecimal> list = BoardUtil.specStrToDecList(specification);
         this.height = list.get(0);
         this.width = list.get(1);
         this.length = list.get(2);

@@ -1,5 +1,6 @@
 package com.cat.service;
 
+import com.cat.entity.Inventory;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BottomSortPattern;
 import com.cat.entity.enums.WorkOrderModule;
@@ -13,13 +14,39 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class WorkOrderService {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    InventoryService inventoryService;
+
     RowMapper<WorkOrder> workOrderRowMapper = new BeanPropertyRowMapper<>(WorkOrder.class);
+
+    public void preprocessNotBottomOrder(List<WorkOrder> orders) {
+        // 获取全体库存件:
+        Map<String, Inventory> inventoryMap = this.inventoryService.getStockMap();
+
+        for (WorkOrder order : orders) {
+            // 根据成品规格获取指定库存件:
+            Inventory inventory = inventoryMap.get(BoardUtil.getStandardSpecStr(order.getSpecification()));
+            if (inventory != null && order.getMaterial().equals(inventory.getMaterial()) && inventory.getAmount() > 0) {
+                // 存在规格相同的库存件，继续判断材质是否相同，最后判断库存件数目是否大于零，因为可能存在某个库存件被前面的工单全部当成成品使用:
+
+                // 工单未完成数目和库存件数目两者中的最小值就是此次作为成品的数目:
+                int usedInventoryNum = Math.min(order.getUnfinishedAmount(), inventory.getAmount());
+                // 工单的已完工数目加上该数目:
+                this.addOrderCompletedAmount(order.getId(), usedInventoryNum);
+                // 库存件的数目减去该数目:
+                inventory.setAmount(inventory.getAmount() - usedInventoryNum);
+                // 直接在这里将库存件数目写回数据表，不放在最后一起处理的理由是——某个库存件可能不被获取或只获取一次，以及获取之后全部被用作成品:
+                this.inventoryService.updateInventoryAmount(inventory);
+            }
+        }
+    }
 
     public void addOrderCompletedAmount(Integer orderId, int amount) {
         WorkOrder order = this.getWorkOrderById(orderId);

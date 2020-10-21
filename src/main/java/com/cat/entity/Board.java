@@ -14,7 +14,7 @@ public class Board implements Comparable<Board> {
     private BoardCategory category;
 
     public String getSpecification() {
-        return BoardUtil.getSpecStr(this.height, this.width, this.length);
+        return BoardUtil.getStandardSpecStr(this.height, this.width, this.length);
     }
 
     public Board() {

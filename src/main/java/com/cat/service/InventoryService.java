@@ -2,13 +2,16 @@ package com.cat.service;
 
 import com.cat.entity.Board;
 import com.cat.entity.Inventory;
+import com.cat.entity.enums.BoardCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class InventoryService {
@@ -16,6 +19,15 @@ public class InventoryService {
     JdbcTemplate jdbcTemplate;
 
     RowMapper<Inventory> inventoryM = new BeanPropertyRowMapper<>(Inventory.class);
+
+    public Map<String, Inventory> getStockMap() {
+        List<Inventory> inventories = this.getInventories(BoardCategory.STOCK.value);
+        Map<String, Inventory> map = new HashMap<>(inventories.size());
+        for (Inventory inventory : inventories) {
+            map.put(inventory.getSpecification(), inventory);
+        }
+        return map;
+    }
 
     public void addInventory(Board board, int amount) {
         Inventory inventory = this.getInventory(board.getSpecification(), board.getMaterial(), board.getCategory().value);
@@ -42,6 +54,11 @@ public class InventoryService {
         // TODO: 首先根据类型、材质获取存货集合，定义一个用于比较两个规格字符串的方法，这样就不用借助 Board 对象的比较方法。
         List<Inventory> list = this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE specification = ? AND material = ? AND category = ?", this.inventoryM, specification, material, category);
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    public List<Inventory> getInventories(String category) {
+        // 这里只获取那些数量不为零的存货:
+        return this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE amount > 0 AND category = ?", this.inventoryM, category);
     }
 
     public void addNewInventory(String specification, String material, int amount, String category) {

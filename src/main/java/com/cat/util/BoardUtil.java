@@ -23,6 +23,7 @@ public class BoardUtil {
      * 比如前者高度高，则前者排在前，不考虑后续的宽度和长度条件。
      */
     public static int sortTwoSpecStr(String sp1, String sp2) {
+        // TODO: 这里排序可能要考虑宽度和长度的大小关系。
         List<BigDecimal> o1List = BoardUtil.specStrToDecList(sp1);
         List<BigDecimal> o2List = BoardUtil.specStrToDecList(sp2);
         if (o1List.get(0).compareTo(o2List.get(0)) != 0) {
@@ -34,12 +35,17 @@ public class BoardUtil {
         }
     }
 
-    public static String getSpecStr(BigDecimal height, BigDecimal width, BigDecimal length) {
+    public static String getStandardSpecStr(BigDecimal height, BigDecimal width, BigDecimal length) {
         // 同步数据表设计时设定的小数位数，规范化输出格式:
         String heightStr = height.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
         String widthStr = width.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
         String lengthStr = length.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
         return String.join(SPEC_SEP, heightStr, widthStr, lengthStr);
+    }
+
+    public static String getStandardSpecStr(String spec) {
+        List<BigDecimal> list = specStrToDecList(spec);
+        return getStandardSpecStr(list.get(0), list.get(1), list.get(2));
     }
 
     public static BoardCategory calBoardCategory(BigDecimal boardWidth, BigDecimal boardLength, BigDecimal wasteThreshold) {

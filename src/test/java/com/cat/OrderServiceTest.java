@@ -1,7 +1,10 @@
 package com.cat;
 
+import com.cat.entity.Board;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
+import com.cat.entity.enums.BoardCategory;
+import com.cat.service.InventoryService;
 import com.cat.service.ParameterService;
 import com.cat.service.WorkOrderService;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,12 +25,14 @@ public class OrderServiceTest {
     static ApplicationContext context;
     static WorkOrderService workOrderService;
     static ParameterService parameterService;
+    static InventoryService inventoryService;
 
     @BeforeAll
     public static void init() {
         context = new AnnotationConfigApplicationContext(AppConfig.class);
         workOrderService = context.getBean(WorkOrderService.class);
         parameterService = context.getBean(ParameterService.class);
+        inventoryService = context.getBean(InventoryService.class);
     }
 
     @Test
@@ -42,10 +47,17 @@ public class OrderServiceTest {
         orders.forEach(System.out::println);
     }
 
+    /**
+     * 测试预处理直梁工单，逻辑就是如果存货中有和成品规格、材质相同的库存件，就可以作为该直梁工单的成品。
+     */
     @Test
-    public void testCompletedAmount() {
-        workOrderService.addOrderCompletedAmount(3101334, 1);
-        WorkOrder order = workOrderService.getWorkOrderById(3101334);
-        assertEquals(order.getUnfinishedAmount(), 0);
+    public void testPreprocessNotBottomOrder() {
+        // 成品规格:4.0×245×3190，需求数:2个，已完成数目:0个
+        WorkOrder order = workOrderService.getWorkOrderById(3098562);
+        Board stock = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
+        inventoryService.addInventory(stock, 9);
+        LocalDate date = parameterService.getLatestOperatingParameter().getWorkOrderDate();
+        List<WorkOrder> orders = workOrderService.getNotBottomOrders(date);
+        workOrderService.preprocessNotBottomOrder(orders);
     }
 }

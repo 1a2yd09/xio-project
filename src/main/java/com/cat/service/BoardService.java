@@ -2,6 +2,8 @@ package com.cat.service;
 
 import com.cat.entity.Board;
 import com.cat.entity.CutBoard;
+import com.cat.entity.StockSpecification;
+import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,8 @@ public class BoardService {
     MachineActionService actionService;
     @Autowired
     ParameterService parameterService;
+    @Autowired
+    StockSpecificationService stockSpecificationService;
 
     public void rotatingBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < rotateTimes; i++) {
@@ -121,5 +125,39 @@ public class BoardService {
         // TODO: 这里应该改成依旧送走的是下料板，但是此时类型不再是下料板，而是传入的类型。
         this.actionService.addSendingAction(targetBoard, orderId, orderModule);
         cutBoard.setWidth(BigDecimal.ZERO);
+    }
+
+    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, Integer orderId, String orderModule) {
+        BigDecimal wasteThreshold = this.parameterService.getLatestOperatingParameter().getWasteThreshold();
+        List<BigDecimal> trimValues = this.parameterService.getTrimValues();
+
+        if (legacyCutBoard == null) {
+            // 无遗留板材，取工单下料板并修边:
+            this.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
+            logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
+            return orderCutBoard;
+        } else {
+            if (legacyCutBoard.compareTo(productBoard) > 0) {
+                // 有遗留板材，可用于工单成品裁剪，将遗留板材作为此次过程的下料板，遗留板材不需要修边操作:
+                logger.info("Using legacyCutBoard: {}", legacyCutBoard);
+                return legacyCutBoard;
+            } else {
+                // 有遗留板材，不可用于工单成品裁剪，推送遗留板材，取工单下料板并修边:
+                this.sendingTargetBoard(legacyCutBoard, legacyCutBoard, orderId, orderModule);
+                logger.info("Sending legacyCutBoard");
+                this.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
+                logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
+                return orderCutBoard;
+            }
+        }
+    }
+
+    public Board getStockBoard(BigDecimal height, String material) {
+        StockSpecification ss = this.stockSpecificationService.getMatchSpecification(height);
+        if (ss != null) {
+            return new Board(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
+        } else {
+            return new Board(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, material, BoardCategory.STOCK);
+        }
     }
 }

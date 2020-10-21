@@ -127,7 +127,7 @@ public class AppConfigTest {
             }
         }
         // 处理这批机器动作:
-        mainService.processingFinishedAction(actions);
+        machineActionService.processingFinishedAction();
         // 重新获取该工单:
         order = workOrderService.getWorkOrderById(orderId);
         // 此时工单的未完成数目应该等于原来要求的数目减去上面机器动作完成的数目:
@@ -164,25 +164,25 @@ public class AppConfigTest {
 
         machineActionService.clearAllAction();
         // 遗留板材可用时，不会生成任何语句:
-        mainService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
+        boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
         assertEquals(machineActionService.getActionCount(), 0);
 
         machineActionService.clearAllAction();
         // 不存在遗留板材时，会有下料板取板和修边等语句，由于修边值都为零，因此只有取板语句:
-        mainService.processingCutBoard(null, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
+        boardService.processingCutBoard(null, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
         assertEquals(machineActionService.getActionCount(), 1);
 
         machineActionService.clearAllAction();
         legacyCutBoard.setMaterial("不存在的材质");
         // 遗留板材不可用时，会多出一句送板语句:
-        mainService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
+        boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
         assertEquals(machineActionService.getActionCount(), 2);
         legacyCutBoard.setMaterial(order.getMaterial());
 
         machineActionService.clearAllAction();
         legacyCutBoard.setHeight(new BigDecimal(-1));
         // 遗留板材不可用时，会多出一句送板语句:
-        mainService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
+        boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, order.getId(), order.getSiteModule());
         assertEquals(machineActionService.getActionCount(), 2);
     }
 }

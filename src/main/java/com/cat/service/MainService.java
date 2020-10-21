@@ -1,6 +1,9 @@
 package com.cat.service;
 
-import com.cat.entity.*;
+import com.cat.entity.Board;
+import com.cat.entity.CutBoard;
+import com.cat.entity.OperatingParameter;
+import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
 import org.slf4j.Logger;
@@ -9,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Component
 public class MainService {
@@ -17,18 +19,8 @@ public class MainService {
 
     @Autowired
     BoardService boardService;
-
-    @Autowired
-    WorkOrderService orderService;
-
-    @Autowired
-    InventoryService inventoryService;
-
     @Autowired
     ParameterService parameterService;
-
-    @Autowired
-    StockSpecificationService stockSpecificationService;
 
     public int calProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {
         // TODO: 如果能把板材裁剪次数也作为板材的属性之一，就可以在获得板材对象的同时计算板材的裁剪次数。可以从板材基类延申出一个非下料板类型的板材类。
@@ -60,7 +52,7 @@ public class MainService {
         Board productBoard = BoardUtil.getStandardBoard(order.getSpecification(), material, BoardCategory.PRODUCT);
         logger.info("ProductBoard: {}", productBoard);
 
-        CutBoard cutBoard = this.processingCutBoard(null, orderCutBoard, productBoard, orderId, orderModule);
+        CutBoard cutBoard = this.boardService.processingCutBoard(null, orderCutBoard, productBoard, orderId, orderModule);
         logger.info("processingCutBoard: {}", cutBoard);
 
         int productCutTimes = this.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
@@ -88,53 +80,6 @@ public class MainService {
         logger.info("CutBoard after sendingTargetBoard: {}", cutBoard);
     }
 
-    public void processingFinishedAction(List<MachineAction> actions) {
-        for (MachineAction action : actions) {
-            // TODO: 可能需要判断动作是否已完成。
-            String boardCategory = action.getBoardCategory();
-            if (boardCategory.equals(BoardCategory.PRODUCT.value)) {
-                // TODO: 可以改成统一记录，最后一次写入，现在是每有一个成品操作就写入一次数据表。
-                this.orderService.addOrderCompletedAmount(action.getWorkOrderId(), 1);
-            } else if (boardCategory.equals(BoardCategory.SEMI_PRODUCT.value)) {
-                this.inventoryService.addInventory(action.getBoardSpecification(), action.getBoardMaterial(), 1, BoardCategory.SEMI_PRODUCT.value);
-            }
-        }
-    }
-
-    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, Integer orderId, String orderModule) {
-        BigDecimal wasteThreshold = this.parameterService.getLatestOperatingParameter().getWasteThreshold();
-        List<BigDecimal> trimValues = this.parameterService.getTrimValues();
-
-        if (legacyCutBoard == null) {
-            // 无遗留板材，取工单下料板并修边:
-            this.boardService.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
-            logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
-            return orderCutBoard;
-        } else {
-            if (legacyCutBoard.compareTo(productBoard) > 0) {
-                // 有遗留板材，可用于工单成品裁剪，将遗留板材作为此次过程的下料板，遗留板材不需要修边操作:
-                logger.info("Using legacyCutBoard: {}", legacyCutBoard);
-                return legacyCutBoard;
-            } else {
-                // 有遗留板材，不可用于工单成品裁剪，推送遗留板材，取工单下料板并修边:
-                this.boardService.sendingTargetBoard(legacyCutBoard, legacyCutBoard, orderId, orderModule);
-                logger.info("Sending legacyCutBoard");
-                this.boardService.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
-                logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
-                return orderCutBoard;
-            }
-        }
-    }
-
-    public Board getStockBoard(BigDecimal height, String material) {
-        StockSpecification ss = this.stockSpecificationService.getMatchSpecification(height);
-        if (ss != null) {
-            return new Board(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
-        } else {
-            return new Board(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, material, BoardCategory.STOCK);
-        }
-    }
-
     public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {
         String material = order.getMaterial();
         int orderId = order.getId();
@@ -151,7 +96,7 @@ public class MainService {
 
         logger.info("legacyCutBoard: {}", legacyCutBoard);
 
-        CutBoard cutBoard = this.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, orderId, orderModule);
+        CutBoard cutBoard = this.boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, orderId, orderModule);
         logger.info("processingCutBoard: {}", cutBoard);
 
         int productCutTimes = this.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
@@ -176,7 +121,7 @@ public class MainService {
             } else {
                 logger.info("remainingCutBoard can't reuse");
 
-                Board stockBoard = this.getStockBoard(cutBoard.getHeight(), material);
+                Board stockBoard = this.boardService.getStockBoard(cutBoard.getHeight(), material);
                 logger.info("stockBoard: {}", stockBoard);
 
                 int stockBoardCutTimes = this.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, stockBoard.getWidth());

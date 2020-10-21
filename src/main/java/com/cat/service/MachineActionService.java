@@ -27,18 +27,44 @@ public class MachineActionService {
     RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
 
     public void processingFinishedAction() {
+        int orderId = -1;
+        int productCount = 0;
+        Board semiProduct = null;
+        int semiCount = 0;
+        Board stock = null;
+        int stockCount = 0;
+
         List<MachineAction> actions = this.getAllActions();
         for (MachineAction action : actions) {
             // TODO: 可能需要判断动作是否已完成。
             String boardCategory = action.getBoardCategory();
+            // 记录数目，最后统一写入，理由是一次机器动作中，成品、非成品各自的规格和材质都是相同的:
             if (boardCategory.equals(BoardCategory.PRODUCT.value)) {
-                // TODO: 可以改成统一记录，最后一次写入，现在是每有一个成品操作就写入一次数据表。
-                this.orderService.addOrderCompletedAmount(action.getWorkOrderId(), 1);
+                if (orderId == -1) {
+                    orderId = action.getWorkOrderId();
+                }
+                productCount++;
             } else if (boardCategory.equals(BoardCategory.SEMI_PRODUCT.value)) {
-                this.inventoryService.addInventory(action.getBoardSpecification(), action.getBoardMaterial(), 1, BoardCategory.SEMI_PRODUCT.value);
+                if (semiProduct == null) {
+                    semiProduct = new Board(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.SEMI_PRODUCT);
+                }
+                semiCount++;
             } else if (boardCategory.equals(BoardCategory.STOCK.value)) {
-                this.inventoryService.addInventory(action.getBoardSpecification(), action.getBoardMaterial(), 1, BoardCategory.STOCK.value);
+                if (stock == null) {
+                    stock = new Board(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.STOCK);
+                }
+                stockCount++;
             }
+        }
+
+        if (orderId != -1) {
+            this.orderService.addOrderCompletedAmount(orderId, productCount);
+        }
+        if (semiProduct != null) {
+            this.inventoryService.addInventory(semiProduct, semiCount);
+        }
+        if (stock != null) {
+            this.inventoryService.addInventory(stock, stockCount);
         }
     }
 

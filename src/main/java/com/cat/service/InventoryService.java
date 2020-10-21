@@ -1,5 +1,6 @@
 package com.cat.service;
 
+import com.cat.entity.Board;
 import com.cat.entity.Inventory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -16,15 +17,15 @@ public class InventoryService {
 
     RowMapper<Inventory> inventoryM = new BeanPropertyRowMapper<>(Inventory.class);
 
-    public void addInventory(String specification, String material, int amount, String category) {
-        Inventory inventory = this.getInventory(specification, material, category);
+    public void addInventory(Board board, int amount) {
+        Inventory inventory = this.getInventory(board.getSpecification(), board.getMaterial(), board.getCategory().value);
         if (inventory != null) {
             // 如果存在对应的存货数据，将数量进行相加:
             inventory.setAmount(inventory.getAmount() + amount);
             this.updateInventoryAmount(inventory);
         } else {
             // 如果不存在对应的存货数据，插入一条新的存货数据，数量字段取值为1:
-            this.addNewInventory(specification, material, 1, category);
+            this.addNewInventory(board.getSpecification(), board.getMaterial(), 1, board.getCategory().value);
         }
     }
 
@@ -37,7 +38,7 @@ public class InventoryService {
     }
 
     public Inventory getInventory(String specification, String material, String category) {
-        // TODO: 虽然规格字符串在整个项目中都是按照确定格式输出的，但是直接比较规格字符串感觉还是有点不稳妥。
+        // TODO: 虽然规格字符串在整个项目中都是按照确定格式输出的，但是直接比较字符串感觉还是有点不稳妥。
         List<Inventory> list = this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE specification = ? AND material = ? AND category = ?", this.inventoryM, specification, material, category);
         return list.isEmpty() ? null : list.get(0);
     }

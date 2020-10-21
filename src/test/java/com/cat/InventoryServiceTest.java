@@ -18,6 +18,6 @@ public class InventoryServiceTest {
 
     @Test
     public void testAddInventory() {
-        inventoryService.addInventory("1.20×192.00×1500.00", "冷板", 1, "库存件");
+
     }
 }

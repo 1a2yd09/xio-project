@@ -1,7 +1,11 @@
 package com.cat;
 
-import com.cat.entity.*;
+import com.cat.entity.Board;
+import com.cat.entity.CutBoard;
+import com.cat.entity.Inventory;
+import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.enums.OrderState;
 import com.cat.service.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -9,7 +13,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,7 +41,7 @@ public class ActionServiceTest {
      */
     @Test
     void testProcessingFinishedAction1() {
-        // 经过下述直梁流程，将生成2个库存件和2个成品:
+        // 经过下述直梁流程，将生成2个库存件和2个成品，工单本身需求2个成品:
         machineActionService.clearAllAction();
         WorkOrder order = workOrderService.getWorkOrderById(3098562);
         order.setCuttingSize("4.0×1000×3400");
@@ -72,9 +75,14 @@ public class ActionServiceTest {
         // 判断:
         assertEquals(newFinishedCount, oldFinishedCount + 2);
 
-        // 复原工单数目:
+        // 成品数目达到了工单需求量，因此工单状态应为已完工:
+        assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
+
+        // 复原工单数目和工单状态:
         order.setCompletedAmount(oldCompletedAmount);
         workOrderService.updateOrderCompletedAmount(order);
+        order.setOperationState(OrderState.NOT_YET_STARTED.value);
+        workOrderService.updateOrderState(order);
     }
 
     /**
@@ -84,7 +92,7 @@ public class ActionServiceTest {
      */
     @Test
     void testProcessingFinishedAction2() {
-        // 经过下述轿底流程，将生成5个半成品和2个成品:
+        // 经过下述轿底流程，将生成5个半成品和2个成品，工单本身需求2个成品:
         machineActionService.clearAllAction();
         WorkOrder order = workOrderService.getWorkOrderById(3099510);
         mainService.processingBottomOrder(order);
@@ -114,8 +122,13 @@ public class ActionServiceTest {
         // 判断:
         assertEquals(newFinishedCount, oldFinishedCount + 5);
 
+        // 成品数目达到了工单需求量，因此工单状态应为已完工:
+        assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
+
         // 复原工单数目:
         order.setCompletedAmount(oldCompletedAmount);
         workOrderService.updateOrderCompletedAmount(order);
+        order.setOperationState(OrderState.NOT_YET_STARTED.value);
+        workOrderService.updateOrderState(order);
     }
 }

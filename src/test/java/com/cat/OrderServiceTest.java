@@ -47,6 +47,15 @@ public class OrderServiceTest {
         orders.forEach(System.out::println);
     }
 
+    @Test
+    public void testGetNotBottomOrder() {
+        OperatingParameter op = parameterService.getLatestOperatingParameter();
+        LocalDate date = op.getWorkOrderDate();
+        List<WorkOrder> orders = workOrderService.getNotBottomOrders(date);
+        assertEquals(orders.size(), 82);
+        orders.forEach(System.out::println);
+    }
+
     /**
      * 测试预处理直梁工单，逻辑就是如果存货中有和成品规格、材质相同的库存件，就可以作为该直梁工单的成品。
      */

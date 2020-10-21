@@ -3,6 +3,7 @@ package com.cat.service;
 import com.cat.entity.Inventory;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BottomSortPattern;
+import com.cat.entity.enums.OrderState;
 import com.cat.entity.enums.WorkOrderModule;
 import com.cat.util.BoardUtil;
 import com.cat.util.OrderUtil;
@@ -54,6 +55,11 @@ public class WorkOrderService {
         order.setCompletedAmount(String.valueOf(newCompletedAmount));
         // 更新数据表尽量以对象为参数，防止在需要返回对象的逻辑时没有和数据表同步:
         this.updateOrderCompletedAmount(order);
+        // 如果工单已完工数量等于需求量，将工单状态置为已完工:
+        if (order.getAmount().equals(order.getCompletedAmount())) {
+            order.setOperationState(OrderState.COMPLETED.value);
+            this.updateOrderState(order);
+        }
     }
 
     public List<WorkOrder> getBottomOrders(String sortPattern, LocalDate date) {
@@ -69,11 +75,15 @@ public class WorkOrderService {
     }
 
     public List<WorkOrder> getBottomOrders(LocalDate date) {
-        return this.jdbcTemplate.query("SELECT * FROM v_local_work_order WHERE site_module = ? AND CAST(completion_date AS DATE) = ? ORDER BY CAST(sequence_number AS INT), id", this.workOrderRowMapper, WorkOrderModule.BOTTOM.value, date);
+        return this.jdbcTemplate.query("SELECT * FROM v_local_work_order " +
+                "WHERE site_module = ? AND operation_state != ? AND CAST(completion_date AS DATE) = ? " +
+                "ORDER BY CAST(sequence_number AS INT), id", this.workOrderRowMapper, WorkOrderModule.BOTTOM.value, OrderState.COMPLETED.value, date);
     }
 
     public List<WorkOrder> getNotBottomOrders(LocalDate date) {
-        return this.jdbcTemplate.query("SELECT * FROM v_local_work_order WHERE site_module != ? AND CAST(completion_date AS DATE) = ? ORDER BY CAST(sequence_number AS INT), id", this.workOrderRowMapper, WorkOrderModule.BOTTOM.value, date);
+        return this.jdbcTemplate.query("SELECT * FROM v_local_work_order " +
+                "WHERE site_module != ? AND operation_state != ? AND CAST(completion_date AS DATE) = ? " +
+                "ORDER BY CAST(sequence_number AS INT), id", this.workOrderRowMapper, WorkOrderModule.BOTTOM.value, OrderState.COMPLETED.value, date);
     }
 
     public WorkOrder getWorkOrderById(Integer id) {
@@ -88,5 +98,9 @@ public class WorkOrderService {
         } else {
             this.jdbcTemplate.update("UPDATE local_work_order SET YWGSL = ? WHERE bid = ?", order.getCompletedAmount(), order.getId());
         }
+    }
+
+    public void updateOrderState(WorkOrder order) {
+        this.jdbcTemplate.update("UPDATE local_work_order SET ZT = ? WHERE bid = ?", order.getOperationState(), order.getId());
     }
 }

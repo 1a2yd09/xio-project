@@ -9,7 +9,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SignalServiceTest {
+class SignalServiceTest {
     static ApplicationContext context;
     static SignalService signalService;
 
@@ -20,8 +20,15 @@ public class SignalServiceTest {
     }
 
     @Test
-    public void testReceiveNewSignal() {
+    void testReceiveNewSignal() {
         boolean flag = signalService.isReceivedNewSignal(SignalCategory.START_WORK);
         assertTrue(flag);
+    }
+
+    @Test
+    void testAddSignal() {
+        signalService.addNewSignal(SignalCategory.START_WORK);
+        signalService.addNewSignal(SignalCategory.ACTION);
+        assertTrue(true);
     }
 }

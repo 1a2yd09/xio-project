@@ -103,4 +103,18 @@ public class WorkOrderService {
     public void updateOrderState(WorkOrder order) {
         this.jdbcTemplate.update("UPDATE local_work_order SET ZT = ? WHERE bid = ?", order.getOperationState(), order.getId());
     }
+
+    public void truncateOrderTable() {
+        this.jdbcTemplate.update("TRUNCATE TABLE local_work_order");
+    }
+
+    public void copyRemoteOrderToLocal(LocalDate date) {
+        this.jdbcTemplate.update("INSERT INTO local_work_order " +
+                "SELECT * FROM work_order_copy " +
+                "WHERE CAST(jhwgrq AS DATE) = ?", date);
+    }
+
+    public Integer getOrderCount() {
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM v_local_work_order", Integer.class);
+    }
 }

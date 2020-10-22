@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AppConfigTest {
+class AppConfigTest {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     static ApplicationContext context;
@@ -33,15 +33,15 @@ public class AppConfigTest {
     }
 
     @Test
-    public void testSomething() {
+    void testSomething() {
 
     }
 
     @Test
-    public void testGetAllWidthBetterBottomOrder() {
+    void testGetAllWidthBetterBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         List<WorkOrder> orders = workOrderService.getBottomOrders(op.getWorkOrderDate());
-        assertEquals(orders.size(), 914);
+        assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
             Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(board.getLength()) >= 0) {
@@ -53,25 +53,25 @@ public class AppConfigTest {
     }
 
     @Test
-    public void testCompareBoard() {
+    void testCompareBoard() {
         Board b1 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
         Board b2 = new Board("2.5×121×2185", "冷板", BoardCategory.PRODUCT);
-        assertEquals(b1.compareTo(b2), -1);
+        assertEquals(-1, b1.compareTo(b2));
 
         b1 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
         b2 = new Board("2×121×2185", "热板", BoardCategory.PRODUCT);
-        assertEquals(b1.compareTo(b2), -1);
+        assertEquals(-1, b1.compareTo(b2));
 
         b1 = new Board("2.5×120×2180", "热板", BoardCategory.PRODUCT);
         b2 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
-        assertEquals(b1.compareTo(b2), -1);
+        assertEquals(-1, b1.compareTo(b2));
 
         b1 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
         b2 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
-        assertEquals(b1.compareTo(b2), 0);
+        assertEquals(0, b1.compareTo(b2));
 
         b1 = new Board("2.5×122×2186", "热板", BoardCategory.PRODUCT);
         b2 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
-        assertEquals(b1.compareTo(b2), 1);
+        assertEquals(1, b1.compareTo(b2));
     }
 }

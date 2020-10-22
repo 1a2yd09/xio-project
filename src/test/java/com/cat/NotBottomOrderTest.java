@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class NotBottomOrderTest {
+class NotBottomOrderTest {
     static ApplicationContext context;
     static MainService mainService;
     static WorkOrderService workOrderService;
@@ -48,7 +48,7 @@ public class NotBottomOrderTest {
         // 该工单需求2个成品，且1次只能裁剪1个成品，因此不是最后一次:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, legacyBoard, null);
         // 人为模拟流程计算生成的语句数目，旋转-裁剪长度-送板:
-        assertEquals(machineActionService.getActionCount(), 3);
+        assertEquals(3, machineActionService.getActionCount());
     }
 
     /**
@@ -68,7 +68,7 @@ public class NotBottomOrderTest {
         // 该工单需求2个成品，且1次只能裁剪1个成品，因此不是最后一次:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, legacyBoard, null);
         // 人为模拟流程计算生成的语句数目，送板-取板-修边(无)-裁剪长度-送板:
-        assertEquals(machineActionService.getActionCount(), 4);
+        assertEquals(4, machineActionService.getActionCount());
     }
 
     /**
@@ -82,7 +82,7 @@ public class NotBottomOrderTest {
         // 该工单需求2个成品，且1次只能裁剪1个成品，因此不是最后一次:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null);
         // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度-送板:
-        assertEquals(machineActionService.getActionCount(), 3);
+        assertEquals(3, machineActionService.getActionCount());
     }
 
     /**
@@ -101,7 +101,7 @@ public class NotBottomOrderTest {
         order.setAmount("1");
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度-旋转-裁成品(1个):
-        assertEquals(machineActionService.getActionCount(), 4);
+        assertEquals(4, machineActionService.getActionCount());
     }
 
     /**
@@ -124,7 +124,7 @@ public class NotBottomOrderTest {
         // 该工单需求的是2个成品板，500裁掉2个245剩10，无法裁剪245的库存件:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度-旋转-裁剪宽度-裁剪成品(1个)-送成品(1个):
-        assertEquals(machineActionService.getActionCount(), 6);
+        assertEquals(6, machineActionService.getActionCount());
     }
 
     /**
@@ -150,7 +150,7 @@ public class NotBottomOrderTest {
         // 该工单需求的是1个成品板，500裁掉1个245剩255，可以裁剪1个245的库存件，并且成品优先:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度(3400->3190)-旋转-裁剪成品(1个)-旋转-裁剪长度(3190->3100)-旋转-裁剪宽度(10)-送库存件(1个):
-        assertEquals(machineActionService.getActionCount(), 9);
+        assertEquals(9, machineActionService.getActionCount());
     }
 
     /**
@@ -174,7 +174,7 @@ public class NotBottomOrderTest {
         // 该工单需求的是2个成品板，1000裁掉2个245剩510，可以裁剪2个245的库存件，并且库存件优先:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度(3400->3300)-旋转-裁剪库存件(2个)-旋转-裁剪长度(3300->3190)-旋转-裁剪宽度-裁剪成品(1个)-送成品:
-        assertEquals(machineActionService.getActionCount(), 11);
+        assertEquals(11, machineActionService.getActionCount());
     }
 
     /**
@@ -197,7 +197,7 @@ public class NotBottomOrderTest {
         // 留板500的宽度裁掉一个245后剩255，还可以放得下一个成品板:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, legacyBoard, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，旋转-裁剪长度(3400->3190)-旋转-裁剪成品(500->255):
-        assertEquals(machineActionService.getActionCount(), 4);
+        assertEquals(4, machineActionService.getActionCount());
     }
 
     /**
@@ -223,7 +223,7 @@ public class NotBottomOrderTest {
         // 留板250的宽度裁掉一个245后剩5，无法复用也无法用于库存件:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, legacyBoard, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，旋转-裁剪长度(3400->3190)-旋转-裁剪宽度(500->245)-送成品:
-        assertEquals(machineActionService.getActionCount(), 5);
+        assertEquals(5, machineActionService.getActionCount());
     }
 
     /**
@@ -252,6 +252,6 @@ public class NotBottomOrderTest {
         // 留板500的宽度裁掉一个245后剩255，可用于1个245的库存件:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, legacyBoard, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，旋转-裁剪长度(3400->3300)-旋转-裁库存件(1个)-旋转-裁剪长度(3300->3190)-旋转-裁剪宽度(255->245)-送成品:
-        assertEquals(machineActionService.getActionCount(), 9);
+        assertEquals(9, machineActionService.getActionCount());
     }
 }

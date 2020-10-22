@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ActionServiceTest {
+class ActionServiceTest {
     static ApplicationContext context;
     static MachineActionService machineActionService;
     static WorkOrderService workOrderService;
@@ -50,7 +50,7 @@ public class ActionServiceTest {
         board.setLength(new BigDecimal(3300));
         stockSpecificationService.addSpecification(board);
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null);
-        assertEquals(machineActionService.getActionCount(), 11);
+        assertEquals(11, machineActionService.getActionCount());
         // 库存件信息:
         // 获取处理前的工单未完成数目:
         String oldCompletedAmount = order.getCompletedAmount();
@@ -96,7 +96,7 @@ public class ActionServiceTest {
         machineActionService.clearAllAction();
         WorkOrder order = workOrderService.getWorkOrderById(3099510);
         mainService.processingBottomOrder(order);
-        assertEquals(machineActionService.getActionCount(), 13);
+        assertEquals(13, machineActionService.getActionCount());
         // 半成品信息:
         Board semiProduct = new Board("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
         // 获取处理前的工单未完成数目:

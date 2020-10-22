@@ -34,15 +34,19 @@ public class SignalService {
     private Signal getLatestSignal(SignalCategory category) {
         // 测试的时候发现使用时间进行排序会无法判断两个相同时间的先后，因为时间的精度还是不够高，
         // 在实际环境中，两个信号的间隔不可能相同。
-        List<Signal> signals = this.jdbcTemplate.query("SELECT TOP 1 * FROM signal WHERE category = ? ORDER BY id DESC", this.signalRowMapper, category.value);
+        List<Signal> signals = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_signal WHERE category = ? ORDER BY id DESC", this.signalRowMapper, category.value);
         return signals.isEmpty() ? null : signals.get(0);
     }
 
     private void processedSignal(Signal signal) {
-        this.jdbcTemplate.update("UPDATE signal SET processed = ? WHERE id = ?", signal.getProcessed(), signal.getId());
+        this.jdbcTemplate.update("UPDATE tb_signal SET processed = ? WHERE id = ?", signal.getProcessed(), signal.getId());
     }
 
     private void insertSignal(String category) {
-        this.jdbcTemplate.update("INSERT INTO signal(category) VALUES (?)", category);
+        this.jdbcTemplate.update("INSERT INTO tb_signal(category) VALUES (?)", category);
+    }
+
+    public void truncateSignal() {
+        this.jdbcTemplate.update("TRUNCATE TABLE tb_signal");
     }
 }

@@ -29,12 +29,12 @@ public class ParameterService {
     }
 
     public TrimmingParameter getLatestTrimmingParameter() {
-        List<TrimmingParameter> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM trimming_parameter ORDER BY created_at DESC", this.trimM);
+        List<TrimmingParameter> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_trimming_value ORDER BY created_at DESC", this.trimM);
         return list.isEmpty() ? null : list.get(0);
     }
 
     public OperatingParameter getLatestOperatingParameter() {
-        List<OperatingParameter> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM operating_parameter ORDER BY created_at DESC", this.operatorM);
+        List<OperatingParameter> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_operating_parameter ORDER BY created_at DESC", this.operatorM);
         return list.isEmpty() ? null : list.get(0);
     }
 }

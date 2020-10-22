@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -34,6 +35,17 @@ public class MainService {
     @Autowired
     InventoryService inventoryService;
 
+    @PostConstruct
+    public void init() {
+        this.actionService.truncateDoneAction();
+        this.actionService.clearAllAction();
+        this.inventoryService.truncateInventory();
+        this.orderService.truncateOrderTable();
+        this.signalService.truncateSignal();
+        LocalDate orderDate = parameterService.getLatestOperatingParameter().getWorkOrderDate();
+        orderService.copyRemoteOrderToLocal(orderDate);
+    }
+
     public void startService() throws InterruptedException {
         signalService.addNewSignal(SignalCategory.START_WORK);
         while (true) {
@@ -44,13 +56,8 @@ public class MainService {
             logger.info("Not received new start signal...");
             Thread.sleep(3000);
         }
-        orderService.truncateOrderTable();
-        inventoryService.truncateInventory();
-        actionService.clearAllAction();
-        actionService.truncateDoneAction();
         LocalDate orderDate = parameterService.getLatestOperatingParameter().getWorkOrderDate();
         String sortPattern = parameterService.getLatestOperatingParameter().getBottomOrderSort();
-        orderService.copyRemoteOrderToLocal(orderDate);
         List<WorkOrder> orders = orderService.getBottomOrders(sortPattern, orderDate);
         for (WorkOrder order : orders) {
             while (order.getUnfinishedAmount() != 0) {

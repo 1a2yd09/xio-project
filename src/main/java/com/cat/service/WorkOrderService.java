@@ -75,46 +75,46 @@ public class WorkOrderService {
     }
 
     public List<WorkOrder> getBottomOrders(LocalDate date) {
-        return this.jdbcTemplate.query("SELECT * FROM v_local_work_order " +
+        return this.jdbcTemplate.query("SELECT * FROM vi_local_work_order " +
                 "WHERE site_module = ? AND operation_state != ? AND CAST(completion_date AS DATE) = ? " +
                 "ORDER BY CAST(sequence_number AS INT), id", this.workOrderRowMapper, WorkOrderModule.BOTTOM.value, OrderState.COMPLETED.value, date);
     }
 
     public List<WorkOrder> getNotBottomOrders(LocalDate date) {
-        return this.jdbcTemplate.query("SELECT * FROM v_local_work_order " +
+        return this.jdbcTemplate.query("SELECT * FROM vi_local_work_order " +
                 "WHERE site_module != ? AND operation_state != ? AND CAST(completion_date AS DATE) = ? " +
                 "ORDER BY CAST(sequence_number AS INT), id", this.workOrderRowMapper, WorkOrderModule.BOTTOM.value, OrderState.COMPLETED.value, date);
     }
 
     public WorkOrder getWorkOrderById(Integer id) {
-        return this.jdbcTemplate.queryForObject("SELECT * FROM v_local_work_order WHERE id = ?", this.workOrderRowMapper, id);
+        return this.jdbcTemplate.queryForObject("SELECT * FROM vi_local_work_order WHERE id = ?", this.workOrderRowMapper, id);
     }
 
     public void updateOrderCompletedAmount(WorkOrder order) {
         // 查询是从视图中查询，更新是更新回原数据表:
         if (order.getCompletedAmount() == null) {
             // 注意 update() 方法后续的参数数组不支持非空对象，在其方法签名上可以看到 @Nullable 注解:
-            this.jdbcTemplate.update("UPDATE local_work_order SET YWGSL = null WHERE bid = ?", order.getId());
+            this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = null WHERE bid = ?", order.getId());
         } else {
-            this.jdbcTemplate.update("UPDATE local_work_order SET YWGSL = ? WHERE bid = ?", order.getCompletedAmount(), order.getId());
+            this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = ? WHERE bid = ?", order.getCompletedAmount(), order.getId());
         }
     }
 
     public void updateOrderState(WorkOrder order) {
-        this.jdbcTemplate.update("UPDATE local_work_order SET ZT = ? WHERE bid = ?", order.getOperationState(), order.getId());
+        this.jdbcTemplate.update("UPDATE tb_local_work_order SET ZT = ? WHERE bid = ?", order.getOperationState(), order.getId());
     }
 
     public void truncateOrderTable() {
-        this.jdbcTemplate.update("TRUNCATE TABLE local_work_order");
+        this.jdbcTemplate.update("TRUNCATE TABLE tb_local_work_order");
     }
 
     public void copyRemoteOrderToLocal(LocalDate date) {
-        this.jdbcTemplate.update("INSERT INTO local_work_order " +
-                "SELECT * FROM work_order_copy " +
+        this.jdbcTemplate.update("INSERT INTO tb_local_work_order " +
+                "SELECT * FROM tb_remote_work_order " +
                 "WHERE CAST(jhwgrq AS DATE) = ?", date);
     }
 
     public Integer getOrderCount() {
-        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM v_local_work_order", Integer.class);
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vi_local_work_order", Integer.class);
     }
 }

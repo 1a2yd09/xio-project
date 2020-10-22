@@ -78,56 +78,56 @@ public class MachineActionService {
     }
 
     public void clearAllAction() {
-        this.jdbcTemplate.update("TRUNCATE TABLE machine_action");
+        this.jdbcTemplate.update("TRUNCATE TABLE tb_machine_action");
     }
 
     public Integer getActionCount() {
-        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM machine_action", Integer.class);
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_machine_action", Integer.class);
     }
 
     public Integer getDoneActionCount() {
-        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM done_action", Integer.class);
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_completed_action", Integer.class);
     }
 
     public void doneAllAction() {
-        this.jdbcTemplate.update("UPDATE machine_action SET completed = 1 WHERE completed = 0");
+        this.jdbcTemplate.update("UPDATE tb_machine_action SET completed = 1 WHERE completed = 0");
     }
 
     public List<MachineAction> getAllActions() {
-        return this.jdbcTemplate.query("SELECT * FROM machine_action ORDER BY id", this.actionM);
+        return this.jdbcTemplate.query("SELECT * FROM tb_machine_action ORDER BY id", this.actionM);
     }
 
     public void addPickAction(Board board, Integer orderId, String orderModule) {
         // 注意位置参数的类型是否与数据库类型可以相互转换:
-        this.jdbcTemplate.update("INSERT INTO machine_action (action_category, board_category, board_specification, board_material, work_order_id, work_order_module) " +
+        this.jdbcTemplate.update("INSERT INTO tb_machine_action (action_category, board_category, board_specification, board_material, work_order_id, work_order_module) " +
                 "VALUES (?, ?, ?, ?, ?, ?)", ActionCategory.PICK.value, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
     }
 
     public void addRotateAction(Board board, Integer orderId, String orderModule) {
-        this.jdbcTemplate.update("INSERT INTO machine_action (action_category, board_category, board_specification, board_material, work_order_id, work_order_module) " +
+        this.jdbcTemplate.update("INSERT INTO tb_machine_action (action_category, board_category, board_specification, board_material, work_order_id, work_order_module) " +
                 "VALUES (?, ?, ?, ?, ?, ?)", ActionCategory.ROTATE.value, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
     }
 
     public void addCuttingAction(Board board, Integer orderId, String orderModule) {
-        this.jdbcTemplate.update("INSERT INTO machine_action (action_category, cut_distance, board_category, board_specification, board_material, work_order_id, work_order_module) " +
+        this.jdbcTemplate.update("INSERT INTO tb_machine_action (action_category, cut_distance, board_category, board_specification, board_material, work_order_id, work_order_module) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)", ActionCategory.CUT.value, board.getWidth(), board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
     }
 
     public void addCutAction(BigDecimal distance, Board board, Integer orderId, String orderModule) {
-        this.jdbcTemplate.update("INSERT INTO machine_action (action_category, cut_distance, board_category, board_specification, board_material, work_order_id, work_order_module) " +
+        this.jdbcTemplate.update("INSERT INTO tb_machine_action (action_category, cut_distance, board_category, board_specification, board_material, work_order_id, work_order_module) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)", ActionCategory.CUT.value, distance, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
     }
 
     public void addSendingAction(Board board, Integer orderId, String orderModule) {
-        this.jdbcTemplate.update("INSERT INTO machine_action (action_category, board_category, board_specification, board_material, work_order_id, work_order_module) " +
+        this.jdbcTemplate.update("INSERT INTO tb_machine_action (action_category, board_category, board_specification, board_material, work_order_id, work_order_module) " +
                 "VALUES (?, ?, ?, ?, ?, ?)", ActionCategory.SEND.value, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
     }
 
     public void truncateDoneAction() {
-        this.jdbcTemplate.update("TRUNCATE TABLE done_action");
+        this.jdbcTemplate.update("TRUNCATE TABLE tb_completed_action");
     }
 
     public void transferAction() {
-        this.jdbcTemplate.update("INSERT INTO done_action SELECT * FROM machine_action");
+        this.jdbcTemplate.update("INSERT INTO tb_completed_action SELECT * FROM tb_machine_action");
     }
 }

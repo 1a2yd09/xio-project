@@ -4,6 +4,8 @@ import com.cat.entity.Board;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
+import com.cat.service.MachineActionService;
+import com.cat.service.MainService;
 import com.cat.service.ParameterService;
 import com.cat.service.WorkOrderService;
 import com.cat.util.BoardUtil;
@@ -24,17 +26,22 @@ class AppConfigTest {
     static ApplicationContext context;
     static WorkOrderService workOrderService;
     static ParameterService parameterService;
+    static MainService mainService;
+    static MachineActionService actionService;
 
     @BeforeAll
     public static void init() {
         context = new AnnotationConfigApplicationContext(AppConfig.class);
         workOrderService = context.getBean(WorkOrderService.class);
         parameterService = context.getBean(ParameterService.class);
+        mainService = context.getBean(MainService.class);
+        actionService = context.getBean(MachineActionService.class);
     }
 
     @Test
-    void testSomething() {
-
+    void testSomething() throws InterruptedException {
+        mainService.startService();
+        assertEquals(10930, actionService.getDoneActionCount());
     }
 
     @Test

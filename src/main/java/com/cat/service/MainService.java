@@ -5,13 +5,17 @@ import com.cat.entity.CutBoard;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.enums.SignalCategory;
 import com.cat.util.BoardUtil;
+import com.cat.util.OrderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 @Component
 public class MainService {
@@ -21,6 +25,78 @@ public class MainService {
     BoardService boardService;
     @Autowired
     ParameterService parameterService;
+    @Autowired
+    SignalService signalService;
+    @Autowired
+    WorkOrderService orderService;
+    @Autowired
+    MachineActionService actionService;
+    @Autowired
+    InventoryService inventoryService;
+
+    public void startService() throws InterruptedException {
+        signalService.addNewSignal(SignalCategory.START_WORK);
+        while (true) {
+            if (signalService.isReceivedNewSignal(SignalCategory.START_WORK)) {
+                logger.info("Received new start signal!!!");
+                break;
+            }
+            logger.info("Not received new start signal...");
+            Thread.sleep(3000);
+        }
+        orderService.truncateOrderTable();
+        inventoryService.truncateInventory();
+        actionService.clearAllAction();
+        actionService.truncateDoneAction();
+        LocalDate orderDate = parameterService.getLatestOperatingParameter().getWorkOrderDate();
+        String sortPattern = parameterService.getLatestOperatingParameter().getBottomOrderSort();
+        orderService.copyRemoteOrderToLocal(orderDate);
+        List<WorkOrder> orders = orderService.getBottomOrders(sortPattern, orderDate);
+        for (WorkOrder order : orders) {
+            while (order.getUnfinishedAmount() != 0) {
+                // TODO: 已开工没处理。
+                this.processingBottomOrder(order);
+                this.signalService.addNewSignal(SignalCategory.ACTION);
+                while (true) {
+                    if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
+                        logger.info("Received new action signal!!!");
+                        int productCount = actionService.processingFinishedAction();
+                        int newCount = OrderUtil.amountPropertyStrToInt(order.getCompletedAmount()) + productCount;
+                        order.setCompletedAmount(String.valueOf(newCount));
+                        break;
+                    }
+                    logger.info("Not received new action signal...");
+                    Thread.sleep(3000);
+                }
+            }
+        }
+        orders = orderService.getNotBottomOrders(orderDate);
+        CutBoard legacyCutBoard = null;
+        for (int i = 0; i < orders.size(); i++) {
+            WorkOrder order = orders.get(i);
+            Board nextProduct = null;
+            if (i < orders.size() - 1) {
+                WorkOrder nextOrder = orders.get(i + 1);
+                nextProduct = new Board(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
+            }
+            while (order.getUnfinishedAmount() != 0) {
+                // TODO: 已开工没处理。
+                legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct);
+                this.signalService.addNewSignal(SignalCategory.ACTION);
+                while (true) {
+                    if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
+                        logger.info("Received new action signal!!!");
+                        int productCount = actionService.processingFinishedAction();
+                        int newCount = OrderUtil.amountPropertyStrToInt(order.getCompletedAmount()) + productCount;
+                        order.setCompletedAmount(String.valueOf(newCount));
+                        break;
+                    }
+                    logger.info("Not received new action signal...");
+                    Thread.sleep(3000);
+                }
+            }
+        }
+    }
 
     public int calProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {
         // TODO: 如果能把板材裁剪次数也作为板材的属性之一，就可以在获得板材对象的同时计算板材的裁剪次数。可以从板材基类延申出一个非下料板类型的板材类。
@@ -201,6 +277,6 @@ public class MainService {
 
         logger.info("CutBoard in the end: {}", cutBoard);
         // TODO: 既然送板会将下料板的宽度置零，那实际就不需要对遗留板材进行空判断，直接进行板材比较即可。
-        return cutBoard;
+        return cutBoard.getWidth().compareTo(BigDecimal.ZERO) == 0 ? null : cutBoard;
     }
 }

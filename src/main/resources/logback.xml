@@ -7,7 +7,7 @@
         </layout>
     </appender>
 
-    <logger name="com.cat" level="info" additivity="false">
+    <logger name="com.cat" level="warn" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 

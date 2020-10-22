@@ -4,6 +4,8 @@ import com.cat.entity.Board;
 import com.cat.entity.MachineAction;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +17,8 @@ import java.util.List;
 
 @Component
 public class MachineActionService {
+    final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -26,7 +30,7 @@ public class MachineActionService {
 
     RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
 
-    public void processingFinishedAction() {
+    public int processingFinishedAction() {
         int orderId = -1;
         int productCount = 0;
         Board semiProduct = null;
@@ -66,6 +70,11 @@ public class MachineActionService {
         if (stock != null) {
             this.inventoryService.addInventory(stock, stockCount);
         }
+
+        this.transferAction();
+        this.clearAllAction();
+
+        return productCount;
     }
 
     public void clearAllAction() {
@@ -76,12 +85,16 @@ public class MachineActionService {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM machine_action", Integer.class);
     }
 
+    public Integer getDoneActionCount() {
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM done_action", Integer.class);
+    }
+
     public void doneAllAction() {
         this.jdbcTemplate.update("UPDATE machine_action SET completed = 1 WHERE completed = 0");
     }
 
     public List<MachineAction> getAllActions() {
-        return this.jdbcTemplate.query("SELECT * FROM machine_action ORDER BY created_at", this.actionM);
+        return this.jdbcTemplate.query("SELECT * FROM machine_action ORDER BY id", this.actionM);
     }
 
     public void addPickAction(Board board, Integer orderId, String orderModule) {
@@ -108,5 +121,13 @@ public class MachineActionService {
     public void addSendingAction(Board board, Integer orderId, String orderModule) {
         this.jdbcTemplate.update("INSERT INTO machine_action (action_category, board_category, board_specification, board_material, work_order_id, work_order_module) " +
                 "VALUES (?, ?, ?, ?, ?, ?)", ActionCategory.SEND.value, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
+    }
+
+    public void truncateDoneAction() {
+        this.jdbcTemplate.update("TRUNCATE TABLE done_action");
+    }
+
+    public void transferAction() {
+        this.jdbcTemplate.update("INSERT INTO done_action SELECT * FROM machine_action");
     }
 }

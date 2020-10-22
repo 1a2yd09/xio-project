@@ -3,6 +3,8 @@ package com.cat.service;
 import com.cat.entity.Board;
 import com.cat.entity.Inventory;
 import com.cat.entity.enums.BoardCategory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +17,8 @@ import java.util.Map;
 
 @Component
 public class InventoryService {
+    final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -36,8 +40,10 @@ public class InventoryService {
             inventory.setAmount(inventory.getAmount() + amount);
             this.updateInventoryAmount(inventory);
         } else {
-            // 如果不存在对应的存货数据，插入一条新的存货数据，数量字段取值为1:
-            this.addNewInventory(board.getSpecification(), board.getMaterial(), 1, board.getCategory().value);
+            // 如果不存在对应的存货数据，插入一条新的存货数据，数量字段取值为传入的参数数量:
+            // 2020/10/22 BUG: 之前都是一个存货就执行一次添加操作，于是这里 amount 字段直接就传入 1 了，但后续改成多次记录一次添加，这里要改成传入参数:
+            // 之前的测试能通过是因为之前存货表里已经存入了相同数据，导致没有测试到该分支条件。
+            this.addNewInventory(board.getSpecification(), board.getMaterial(), amount, board.getCategory().value);
         }
     }
 
@@ -68,5 +74,9 @@ public class InventoryService {
 
     public void updateInventoryAmount(Inventory inventory) {
         this.jdbcTemplate.update("UPDATE tb_inventory SET amount = ? WHERE id = ?", inventory.getAmount(), inventory.getId());
+    }
+
+    public void truncateInventory() {
+        this.jdbcTemplate.update("TRUNCATE TABLE tb_inventory");
     }
 }

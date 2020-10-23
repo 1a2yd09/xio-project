@@ -160,4 +160,14 @@ public class BoardService {
             return new Board(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, material, BoardCategory.STOCK);
         }
     }
+
+    public Board getCanCutProduct(BigDecimal orderCutBoardWidth, String specification, String material) {
+        Board product = new Board(specification, material, BoardCategory.PRODUCT);
+        if (product.getWidth().compareTo(orderCutBoardWidth) > 0) {
+            BigDecimal tmp = product.getWidth();
+            product.setWidth(product.getLength());
+            product.setLength(tmp);
+        }
+        return product;
+    }
 }

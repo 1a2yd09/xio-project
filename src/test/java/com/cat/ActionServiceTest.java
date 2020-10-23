@@ -43,7 +43,7 @@ class ActionServiceTest {
     void testProcessingFinishedAction1() {
         // 经过下述直梁流程，将生成2个库存件和2个成品，工单本身需求2个成品:
         machineActionService.clearAllAction();
-        WorkOrder order = workOrderService.getWorkOrderById(3098562);
+        WorkOrder order = workOrderService.getOrderById(3098562);
         order.setCuttingSize("4.0×1000×3400");
         // 库存件信息:
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
@@ -64,7 +64,7 @@ class ActionServiceTest {
         machineActionService.processingFinishedAction();
 
         // 获取处理后的工单未完成数目:
-        order = workOrderService.getWorkOrderById(3098562);
+        order = workOrderService.getOrderById(3098562);
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 判断:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
@@ -80,9 +80,9 @@ class ActionServiceTest {
 
         // 复原工单数目和工单状态:
         order.setCompletedAmount(oldCompletedAmount);
-        workOrderService.updateOrderCompletedAmount(order);
+        workOrderService.updateOrderCompletedAmount(order.getCompletedAmount(), order.getId());
         order.setOperationState(OrderState.NOT_YET_STARTED.value);
-        workOrderService.updateOrderState(order);
+        workOrderService.updateOrderState(order.getOperationState(), order.getId());
     }
 
     /**
@@ -94,7 +94,7 @@ class ActionServiceTest {
     void testProcessingFinishedAction2() {
         // 经过下述轿底流程，将生成5个半成品和2个成品，工单本身需求2个成品:
         machineActionService.clearAllAction();
-        WorkOrder order = workOrderService.getWorkOrderById(3099510);
+        WorkOrder order = workOrderService.getOrderById(3099510);
         mainService.processingBottomOrder(order);
         assertEquals(13, machineActionService.getActionCount());
         // 半成品信息:
@@ -111,7 +111,7 @@ class ActionServiceTest {
         machineActionService.processingFinishedAction();
 
         // 获取处理后的工单未完成数目:
-        order = workOrderService.getWorkOrderById(3099510);
+        order = workOrderService.getOrderById(3099510);
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 判断:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
@@ -127,8 +127,8 @@ class ActionServiceTest {
 
         // 复原工单数目:
         order.setCompletedAmount(oldCompletedAmount);
-        workOrderService.updateOrderCompletedAmount(order);
+        workOrderService.updateOrderCompletedAmount(order.getCompletedAmount(), order.getId());
         order.setOperationState(OrderState.NOT_YET_STARTED.value);
-        workOrderService.updateOrderState(order);
+        workOrderService.updateOrderState(order.getOperationState(), order.getId());
     }
 }

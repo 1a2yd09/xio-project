@@ -30,7 +30,7 @@ public class WorkOrder {
     private LocalDateTime completionDate;
 
     public int getUnfinishedAmount() {
-        return OrderUtil.amountPropertyStrToInt(this.amount) - OrderUtil.amountPropertyStrToInt(this.completedAmount);
+        return OrderUtil.amountPropStrToInt(this.amount) - OrderUtil.amountPropStrToInt(this.completedAmount);
     }
 
     public String getBatchNumber() {

@@ -62,7 +62,7 @@ public class MachineActionService {
         }
 
         if (orderId != -1) {
-            this.orderService.addOrderCompletedAmount(orderId, productCount);
+            this.orderService.addOrderCompletedAmount(productCount, orderId);
         }
         if (semiProduct != null) {
             this.inventoryService.addInventory(semiProduct, semiCount);

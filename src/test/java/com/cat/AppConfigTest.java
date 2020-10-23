@@ -5,6 +5,7 @@ import com.cat.entity.CutBoard;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.enums.BottomSortPattern;
 import com.cat.service.MachineActionService;
 import com.cat.service.MainService;
 import com.cat.service.ParameterService;
@@ -47,7 +48,7 @@ class AppConfigTest {
     @Test
     void testGetAllWidthBetterBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
-        List<WorkOrder> orders = workOrderService.getBottomOrders(op.getWorkOrderDate());
+        List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPattern.SEQ.value, op.getWorkOrderDate());
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);

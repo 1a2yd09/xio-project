@@ -6,7 +6,6 @@ import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.SignalCategory;
-import com.cat.util.BoardUtil;
 import com.cat.util.OrderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class MainService {
                     if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                         logger.info("Received new action signal!!!");
                         int productCount = actionService.processingFinishedAction();
-                        int newCount = OrderUtil.amountPropertyStrToInt(order.getCompletedAmount()) + productCount;
+                        int newCount = OrderUtil.amountPropStrToInt(order.getCompletedAmount()) + productCount;
                         order.setCompletedAmount(String.valueOf(newCount));
                         break;
                     }
@@ -77,7 +76,7 @@ public class MainService {
                 }
             }
         }
-        orders = orderService.getNotBottomOrders(orderDate);
+        orders = orderService.getPreprocessNotBottomOrder(orderDate);
         CutBoard legacyCutBoard = null;
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder order = orders.get(i);
@@ -95,7 +94,7 @@ public class MainService {
                     if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                         logger.info("Received new action signal!!!");
                         int productCount = actionService.processingFinishedAction();
-                        int newCount = OrderUtil.amountPropertyStrToInt(order.getCompletedAmount()) + productCount;
+                        int newCount = OrderUtil.amountPropStrToInt(order.getCompletedAmount()) + productCount;
                         order.setCompletedAmount(String.valueOf(newCount));
                         break;
                     }
@@ -133,7 +132,7 @@ public class MainService {
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = BoardUtil.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material);
+        Board productBoard = this.boardService.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material);
         logger.info("ProductBoard: {}", productBoard);
 
         CutBoard cutBoard = this.boardService.processingCutBoard(null, orderCutBoard, productBoard, orderId, orderModule);
@@ -175,7 +174,7 @@ public class MainService {
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = BoardUtil.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material);
+        Board productBoard = this.boardService.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material);
         logger.info("ProductBoard: {}", productBoard);
 
         logger.info("legacyCutBoard: {}", legacyCutBoard);

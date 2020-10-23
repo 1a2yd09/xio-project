@@ -32,13 +32,14 @@ public class WorkOrderService {
         Map<String, Inventory> inventoryMap = this.inventoryService.getStockMap();
 
         for (WorkOrder order : orders) {
+            // 使用输出到存货表的标准规格格式来获取指定的存货对象:
             Inventory inventory = inventoryMap.get(BoardUtil.getStandardSpecStr(order.getSpecification()));
             if (inventory != null && inventory.getMaterial().equals(order.getMaterial()) && inventory.getAmount() > 0) {
                 int usedInventoryNum = Math.min(order.getUnfinishedAmount(), inventory.getAmount());
 
                 this.addOrderCompletedAmount(usedInventoryNum, order.getId());
                 inventory.setAmount(inventory.getAmount() - usedInventoryNum);
-                // 直接在这里将库存件数目写回数据表，不放在最后一起处理的理由是，
+                // 直接在这里就将库存件数目写回数据表，不放在最后一起处理的理由是，
                 // 某批库存件可能不被获取或只获取一次，以及获取之后全部被用作成品，数目归零后不会再进入该判断逻辑:
                 this.inventoryService.updateInventoryAmount(inventory);
             }

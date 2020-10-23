@@ -120,7 +120,7 @@ class NotBottomOrderTest {
         order.setCuttingSize("4.0×500×3400");
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         // 像库存规格数据表中写入一个相同厚度和长度但是宽度比剩余宽度要大的规格:
-        stockSpecificationService.addSpecification(board);
+        stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
         // 该工单需求的是2个成品板，500裁掉2个245剩10，无法裁剪245的库存件:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度-旋转-裁剪宽度-裁剪成品(1个)-送成品(1个):
@@ -146,7 +146,7 @@ class NotBottomOrderTest {
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         board.setLength(new BigDecimal(3100));
         // 像库存规格数据表中写入一个厚度宽度和成品相同，但长度稍小的库存件规格:
-        stockSpecificationService.addSpecification(board);
+        stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
         // 该工单需求的是1个成品板，500裁掉1个245剩255，可以裁剪1个245的库存件，并且成品优先:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度(3400->3190)-旋转-裁剪成品(1个)-旋转-裁剪长度(3190->3100)-旋转-裁剪宽度(10)-送库存件(1个):
@@ -170,7 +170,7 @@ class NotBottomOrderTest {
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         board.setLength(new BigDecimal(3300));
         // 像库存规格数据表中写入一个厚度宽度和成品相同，但长度稍大的库存件规格:
-        stockSpecificationService.addSpecification(board);
+        stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
         // 该工单需求的是2个成品板，1000裁掉2个245剩510，可以裁剪2个245的库存件，并且库存件优先:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，取板-修边(无)-裁剪长度(3400->3300)-旋转-裁剪库存件(2个)-旋转-裁剪长度(3300->3190)-旋转-裁剪宽度-裁剪成品(1个)-送成品:
@@ -219,7 +219,7 @@ class NotBottomOrderTest {
         order.setAmount("1");
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         // 像库存规格数据表中写入一个和成品规格相同的库存件规格:
-        stockSpecificationService.addSpecification(board);
+        stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
         // 留板250的宽度裁掉一个245后剩5，无法复用也无法用于库存件:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, legacyBoard, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，旋转-裁剪长度(3400->3190)-旋转-裁剪宽度(500->245)-送成品:
@@ -248,7 +248,7 @@ class NotBottomOrderTest {
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         // 像库存规格数据表中写入一个厚度宽度和成品相同，但长度稍大的库存件规格:
         board.setLength(new BigDecimal("3300"));
-        stockSpecificationService.addSpecification(board);
+        stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
         // 留板500的宽度裁掉一个245后剩255，可用于1个245的库存件:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, legacyBoard, nextOrderProductBoard);
         // 人为模拟流程计算生成的语句数目，旋转-裁剪长度(3400->3300)-旋转-裁库存件(1个)-旋转-裁剪长度(3300->3190)-旋转-裁剪宽度(255->245)-送成品:

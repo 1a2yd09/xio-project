@@ -48,7 +48,7 @@ class ActionServiceTest {
         // 库存件信息:
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
         board.setLength(new BigDecimal(3300));
-        stockSpecificationService.addSpecification(board);
+        stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null);
         assertEquals(11, machineActionService.getActionCount());
         // 库存件信息:

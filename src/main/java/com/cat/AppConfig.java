@@ -16,10 +16,6 @@ import javax.sql.DataSource;
 @ComponentScan
 @PropertySource("classpath:jdbc.properties")
 public class AppConfig {
-    public static void main(String[] args) {
-
-    }
-
     @Bean
     DataSource createDataSource(@Value("${jdbc.url}") String jdbcUrl) {
         HikariConfig config = new HikariConfig();

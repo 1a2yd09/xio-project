@@ -5,6 +5,7 @@ import com.cat.util.BoardUtil;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 public class Board implements Comparable<Board> {
     private BigDecimal height;
@@ -89,12 +90,26 @@ public class Board implements Comparable<Board> {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(this.material, this.height, this.width, this.length);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Board) {
+            Board b = (Board) obj;
+            // 这里 BigDecimal 按理说也是引用对象，但是它们本身不能用 equals() 方法进行比较:
+            return Objects.equals(this.material, b.material) && this.height.compareTo(b.height) == 0 && this.width.compareTo(b.width) == 0 && this.length.compareTo(b.length) == 0;
+        }
+        return false;
+    }
+
+    @Override
     public int compareTo(Board other) {
         if (other == null) {
             return -1;
         }
         if (this.material.equals(other.material) && this.height.compareTo(other.height) == 0) {
-            // 在材质相同和厚度相等的前提下，去比较宽度和长度:
             if (this.width.compareTo(other.width) < 0 || this.length.compareTo(other.length) < 0) {
                 return -1;
             } else if (this.width.compareTo(other.width) == 0 && this.length.compareTo(other.length) == 0) {

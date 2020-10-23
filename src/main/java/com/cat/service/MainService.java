@@ -133,7 +133,7 @@ public class MainService {
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = BoardUtil.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material, BoardCategory.PRODUCT);
+        Board productBoard = BoardUtil.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material);
         logger.info("ProductBoard: {}", productBoard);
 
         CutBoard cutBoard = this.boardService.processingCutBoard(null, orderCutBoard, productBoard, orderId, orderModule);
@@ -175,7 +175,7 @@ public class MainService {
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = BoardUtil.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material, BoardCategory.PRODUCT);
+        Board productBoard = BoardUtil.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material);
         logger.info("ProductBoard: {}", productBoard);
 
         logger.info("legacyCutBoard: {}", legacyCutBoard);

@@ -65,8 +65,7 @@ public class WorkOrderService {
     public List<WorkOrder> getBottomOrders(String sortPattern, LocalDate date) {
         List<WorkOrder> orders = this.getBottomOrders(date);
         if (sortPattern.equals(BottomSortPattern.SPEC.value)) {
-            // 如果要求按照成品规格(此处规格指的是依次比较规格的三个度量)排序，则按照成品规格厚度、宽度、长度降序排序工单，都相同则按ID升序排序:
-            // TODO: 既然获取成品板是按照标准格式获取，那比较排序也应该按照标准格式排序。
+            // 如果要求按照规格排序，指的是”依次“根据成品的厚度、宽度、长度降序排序，三者都相同则按工单ID升序排序:
             orders.sort((o1, o2) -> {
                 int retVal = BoardUtil.sortTwoSpecStr(o1.getSpecification(), o2.getSpecification());
                 return retVal != 0 ? retVal : o1.getId() - o2.getId();

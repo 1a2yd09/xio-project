@@ -11,6 +11,9 @@ public class BoardUtil {
     public static final String SPEC_SEP = "×";
     public static final int DEC_SCALE = 2;
 
+    private BoardUtil() {
+    }
+
     public static List<BigDecimal> specStrToDecList(String specification) {
         String[] specifications = specification.split(SPEC_SEP);
         return List.of(new BigDecimal(specifications[0]),
@@ -19,24 +22,22 @@ public class BoardUtil {
     }
 
     /**
-     * 该方法仅用于在排序当中比较两个规格字符串，它一次只考虑规格中的一种度量，
-     * 比如前者高度高，则前者排在前，不考虑后续的宽度和长度条件。
+     * 该方法仅用于在排序当中比较两个成品规格字符串，它一次只考虑规格中的一种度量，比如前者高度高，则前者排在前，不再考虑后续的宽度和长度度量。
      */
     public static int sortTwoSpecStr(String sp1, String sp2) {
-        // TODO: 这里排序可能要考虑宽度和长度的大小关系。
-        List<BigDecimal> o1List = BoardUtil.specStrToDecList(sp1);
-        List<BigDecimal> o2List = BoardUtil.specStrToDecList(sp2);
-        if (o1List.get(0).compareTo(o2List.get(0)) != 0) {
-            return o2List.get(0).compareTo(o1List.get(0));
-        } else if (o1List.get(1).compareTo(o2List.get(1)) != 0) {
-            return o2List.get(1).compareTo(o1List.get(1));
+        List<BigDecimal> decList1 = BoardUtil.specStrToDecList(sp1);
+        List<BigDecimal> decList2 = BoardUtil.specStrToDecList(sp2);
+        if (decList1.get(0).compareTo(decList2.get(0)) != 0) {
+            return decList2.get(0).compareTo(decList1.get(0));
+        } else if (decList1.get(1).compareTo(decList2.get(1)) != 0) {
+            return decList2.get(1).compareTo(decList1.get(1));
         } else {
-            return o2List.get(2).compareTo(o1List.get(2));
+            return decList2.get(2).compareTo(decList1.get(2));
         }
     }
 
     public static String getStandardSpecStr(BigDecimal height, BigDecimal width, BigDecimal length) {
-        // 同步数据表设计时设定的小数位数，规范化输出格式:
+        // 同步数据表设计时设定的小数位数，规范输出格式:
         String heightStr = height.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
         String widthStr = width.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
         String lengthStr = length.setScale(DEC_SCALE, RoundingMode.DOWN).toString();
@@ -48,6 +49,9 @@ public class BoardUtil {
         return getStandardSpecStr(list.get(0), list.get(1), list.get(2));
     }
 
+    /**
+     * 虽取名叫计算板材类型，但实际是计算板材是属于余料或者废料类型。
+     */
     public static BoardCategory calBoardCategory(BigDecimal boardWidth, BigDecimal boardLength, BigDecimal wasteThreshold) {
         if (boardWidth.compareTo(wasteThreshold) >= 0 && boardLength.compareTo(wasteThreshold) >= 0) {
             return BoardCategory.REMAINING;
@@ -56,8 +60,8 @@ public class BoardUtil {
         }
     }
 
-    public static Board getCanCutProduct(BigDecimal orderCutBoardWidth, String specification, String material, BoardCategory category) {
-        Board product = new Board(specification, material, category);
+    public static Board getCanCutProduct(BigDecimal orderCutBoardWidth, String specification, String material) {
+        Board product = new Board(specification, material, BoardCategory.PRODUCT);
         if (product.getWidth().compareTo(orderCutBoardWidth) > 0) {
             BigDecimal tmp = product.getWidth();
             product.setWidth(product.getLength());

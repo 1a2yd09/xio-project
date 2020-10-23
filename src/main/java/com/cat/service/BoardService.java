@@ -130,7 +130,7 @@ public class BoardService {
     }
 
     public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, Integer orderId, String orderModule) {
-        BigDecimal wasteThreshold = this.parameterService.getLatestOperatingParameter().getWasteThreshold();
+        BigDecimal wasteThreshold = this.parameterService.getOperatingParameter().getWasteThreshold();
         List<BigDecimal> trimValues = this.trimmingValueService.getTrimValues();
 
         if (legacyCutBoard == null) {

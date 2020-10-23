@@ -39,14 +39,14 @@ class OrderServiceTest {
     void testCopyOrder() {
         workOrderService.truncateOrderTable();
         assertEquals(0, workOrderService.getOrderCount());
-        LocalDate date = parameterService.getLatestOperatingParameter().getWorkOrderDate();
+        LocalDate date = parameterService.getOperatingParameter().getWorkOrderDate();
         workOrderService.copyRemoteOrderToLocal(date);
         assertEquals(996, workOrderService.getOrderCount());
     }
 
     @Test
     void testGetBottomOrder() {
-        OperatingParameter op = parameterService.getLatestOperatingParameter();
+        OperatingParameter op = parameterService.getOperatingParameter();
         String sortPattern = op.getBottomOrderSort();
         logger.info("sortPattern: {}", sortPattern);
         LocalDate date = op.getWorkOrderDate();
@@ -58,7 +58,7 @@ class OrderServiceTest {
 
     @Test
     void testGetNotBottomOrder() {
-        OperatingParameter op = parameterService.getLatestOperatingParameter();
+        OperatingParameter op = parameterService.getOperatingParameter();
         LocalDate date = op.getWorkOrderDate();
         List<WorkOrder> orders = workOrderService.getNotBottomOrders(date);
         assertEquals(82, orders.size());
@@ -74,7 +74,7 @@ class OrderServiceTest {
         WorkOrder order = workOrderService.getOrderById(3098562);
         Board stock = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
         inventoryService.addInventory(stock, 9);
-        LocalDate date = parameterService.getLatestOperatingParameter().getWorkOrderDate();
+        LocalDate date = parameterService.getOperatingParameter().getWorkOrderDate();
         List<WorkOrder> orders = workOrderService.getPreprocessNotBottomOrder(date);
     }
 }

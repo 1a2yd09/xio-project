@@ -41,7 +41,7 @@ public class MainService {
         this.inventoryService.truncateInventory();
         this.orderService.truncateOrderTable();
         this.signalService.truncateSignal();
-        LocalDate orderDate = parameterService.getLatestOperatingParameter().getWorkOrderDate();
+        LocalDate orderDate = parameterService.getOperatingParameter().getWorkOrderDate();
         orderService.copyRemoteOrderToLocal(orderDate);
     }
 
@@ -55,8 +55,8 @@ public class MainService {
             logger.info("Not received new start signal...");
             Thread.sleep(3000);
         }
-        LocalDate orderDate = parameterService.getLatestOperatingParameter().getWorkOrderDate();
-        String sortPattern = parameterService.getLatestOperatingParameter().getBottomOrderSort();
+        LocalDate orderDate = parameterService.getOperatingParameter().getWorkOrderDate();
+        String sortPattern = parameterService.getOperatingParameter().getBottomOrderSort();
         List<WorkOrder> orders = orderService.getBottomOrders(sortPattern, orderDate);
         for (WorkOrder order : orders) {
             while (order.getUnfinishedAmount() != 0) {
@@ -125,7 +125,7 @@ public class MainService {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
-        OperatingParameter op = this.parameterService.getLatestOperatingParameter();
+        OperatingParameter op = this.parameterService.getOperatingParameter();
 
         logger.info("Order: {}", order);
 
@@ -167,7 +167,7 @@ public class MainService {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
-        OperatingParameter op = this.parameterService.getLatestOperatingParameter();
+        OperatingParameter op = this.parameterService.getOperatingParameter();
 
         logger.info("Order: {}", order);
 

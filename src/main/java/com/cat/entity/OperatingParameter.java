@@ -12,6 +12,18 @@ public class OperatingParameter {
     private String bottomOrderSort;
     private LocalDateTime createdAt;
 
+    public OperatingParameter() {
+    }
+
+    public OperatingParameter(Integer id, LocalDate workOrderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String bottomOrderSort, LocalDateTime createdAt) {
+        this.id = id;
+        this.workOrderDate = workOrderDate;
+        this.fixedWidth = fixedWidth;
+        this.wasteThreshold = wasteThreshold;
+        this.bottomOrderSort = bottomOrderSort;
+        this.createdAt = createdAt;
+    }
+
     public Integer getId() {
         return id;
     }

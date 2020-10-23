@@ -18,7 +18,7 @@ public class TrimmingValueService {
     RowMapper<TrimmingValue> trimM = new BeanPropertyRowMapper<>(TrimmingValue.class);
 
     public List<BigDecimal> getTrimValues() {
-        TrimmingValue tp = this.getLatestTrimmingParameter();
+        TrimmingValue tp = this.getLatestTrimmingValue();
         if (tp != null) {
             return List.of(tp.getTrimTop(), tp.getTrimLeft(), tp.getTrimBottom(), tp.getTrimRight());
         } else {
@@ -26,7 +26,7 @@ public class TrimmingValueService {
         }
     }
 
-    public TrimmingValue getLatestTrimmingParameter() {
+    public TrimmingValue getLatestTrimmingValue() {
         List<TrimmingValue> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_trimming_value ORDER BY id DESC", this.trimM);
         return list.isEmpty() ? null : list.get(0);
     }

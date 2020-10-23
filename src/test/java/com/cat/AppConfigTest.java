@@ -47,7 +47,7 @@ class AppConfigTest {
 
     @Test
     void testGetAllWidthBetterBottomOrder() {
-        OperatingParameter op = parameterService.getLatestOperatingParameter();
+        OperatingParameter op = parameterService.getOperatingParameter();
         List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPattern.SEQ.value, op.getWorkOrderDate());
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
@@ -61,7 +61,7 @@ class AppConfigTest {
 
     @Test
     void testGetAllWidthBetterNotBottomOrder() {
-        OperatingParameter op = parameterService.getLatestOperatingParameter();
+        OperatingParameter op = parameterService.getOperatingParameter();
         List<WorkOrder> orders = workOrderService.getNotBottomOrders(op.getWorkOrderDate());
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {

@@ -56,17 +56,13 @@ public class BoardUtil {
         }
     }
 
-    public static void standardizingBoard(Board board) {
-        if (board.getWidth().compareTo(board.getLength()) > 0) {
-            BigDecimal tmp = board.getWidth();
-            board.setWidth(board.getLength());
-            board.setLength(tmp);
+    public static Board getCanCutProduct(BigDecimal orderCutBoardWidth, String specification, String material, BoardCategory category) {
+        Board product = new Board(specification, material, category);
+        if (product.getWidth().compareTo(orderCutBoardWidth) > 0) {
+            BigDecimal tmp = product.getWidth();
+            product.setWidth(product.getLength());
+            product.setLength(tmp);
         }
-    }
-
-    public static Board getStandardBoard(String specification, String material, BoardCategory category) {
-        Board board = new Board(specification, material, category);
-        BoardUtil.standardizingBoard(board);
-        return board;
+        return product;
     }
 }

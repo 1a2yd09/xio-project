@@ -1,6 +1,7 @@
 package com.cat;
 
 import com.cat.entity.Board;
+import com.cat.entity.CutBoard;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
@@ -8,7 +9,6 @@ import com.cat.service.MachineActionService;
 import com.cat.service.MainService;
 import com.cat.service.ParameterService;
 import com.cat.service.WorkOrderService;
-import com.cat.util.BoardUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ class AppConfigTest {
     @Test
     void testSomething() throws InterruptedException {
         mainService.startService();
-        assertEquals(10930, actionService.getDoneActionCount());
+        assertEquals(10898, actionService.getDoneActionCount());
     }
 
     @Test
@@ -50,11 +50,24 @@ class AppConfigTest {
         List<WorkOrder> orders = workOrderService.getBottomOrders(op.getWorkOrderDate());
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
             Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
-            if (board.getWidth().compareTo(board.getLength()) >= 0) {
-                System.out.println(board);
-                BoardUtil.standardizingBoard(board);
-                System.out.println(board);
+            if (board.getWidth().compareTo(cutBoard.getWidth()) == 0) {
+                System.out.println(order);
+            }
+        }
+    }
+
+    @Test
+    void testGetAllWidthBetterNotBottomOrder() {
+        OperatingParameter op = parameterService.getLatestOperatingParameter();
+        List<WorkOrder> orders = workOrderService.getNotBottomOrders(op.getWorkOrderDate());
+        assertEquals(82, orders.size());
+        for (WorkOrder order : orders) {
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+            Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
+                System.out.println(order);
             }
         }
     }

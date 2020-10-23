@@ -84,6 +84,7 @@ public class MainService {
             Board nextProduct = null;
             if (i < orders.size() - 1) {
                 WorkOrder nextOrder = orders.get(i + 1);
+                // TODO: 这个成品板是和剩余板材比较用的，这里没有获取标准板。
                 nextProduct = new Board(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
             }
             while (order.getUnfinishedAmount() != 0) {
@@ -132,7 +133,7 @@ public class MainService {
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = BoardUtil.getStandardBoard(order.getSpecification(), material, BoardCategory.PRODUCT);
+        Board productBoard = BoardUtil.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material, BoardCategory.PRODUCT);
         logger.info("ProductBoard: {}", productBoard);
 
         CutBoard cutBoard = this.boardService.processingCutBoard(null, orderCutBoard, productBoard, orderId, orderModule);
@@ -174,7 +175,7 @@ public class MainService {
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = BoardUtil.getStandardBoard(order.getSpecification(), material, BoardCategory.PRODUCT);
+        Board productBoard = BoardUtil.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material, BoardCategory.PRODUCT);
         logger.info("ProductBoard: {}", productBoard);
 
         logger.info("legacyCutBoard: {}", legacyCutBoard);

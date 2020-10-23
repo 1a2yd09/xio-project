@@ -22,6 +22,8 @@ public class BoardService {
     @Autowired
     ParameterService parameterService;
     @Autowired
+    TrimmingValueService trimmingValueService;
+    @Autowired
     StockSpecificationService stockSpecificationService;
 
     public void rotatingBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
@@ -129,7 +131,7 @@ public class BoardService {
 
     public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, Integer orderId, String orderModule) {
         BigDecimal wasteThreshold = this.parameterService.getLatestOperatingParameter().getWasteThreshold();
-        List<BigDecimal> trimValues = this.parameterService.getTrimValues();
+        List<BigDecimal> trimValues = this.trimmingValueService.getTrimValues();
 
         if (legacyCutBoard == null) {
             // 无遗留板材，取工单下料板并修边:

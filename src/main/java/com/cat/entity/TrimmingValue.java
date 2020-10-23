@@ -3,7 +3,7 @@ package com.cat.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class TrimmingParameter {
+public class TrimmingValue {
     private Integer id;
     private BigDecimal trimTop;
     private BigDecimal trimLeft;

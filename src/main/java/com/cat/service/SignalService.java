@@ -15,35 +15,30 @@ public class SignalService {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    RowMapper<Signal> signalRowMapper = new BeanPropertyRowMapper<>(Signal.class);
-
-    public void addNewSignal(SignalCategory category) {
-        this.insertSignal(category.value);
-    }
+    RowMapper<Signal> sigM = new BeanPropertyRowMapper<>(Signal.class);
 
     public boolean isReceivedNewSignal(SignalCategory category) {
         Signal signal = this.getLatestSignal(category);
         if (signal != null && !signal.getProcessed()) {
             signal.setProcessed(true);
-            this.processedSignal(signal);
+            this.processedSignal(signal.getProcessed(), signal.getId());
             return true;
         }
         return false;
     }
 
-    private Signal getLatestSignal(SignalCategory category) {
-        // 测试的时候发现使用时间进行排序会无法判断两个相同时间的先后，因为时间的精度还是不够高，
-        // 在实际环境中，两个信号的间隔不可能相同。
-        List<Signal> signals = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_signal WHERE category = ? ORDER BY id DESC", this.signalRowMapper, category.value);
+    public Signal getLatestSignal(SignalCategory category) {
+        // 在单测的时候发现使用时间进行排序会无法判断两个相同时间的先后，原因是时间精度不够高，因此选择同样能够分辨数据先后顺序的ID字段，在实际环境中，两个信号的时间几乎不可能相同:
+        List<Signal> signals = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_signal WHERE category = ? ORDER BY id DESC", this.sigM, category.value);
         return signals.isEmpty() ? null : signals.get(0);
     }
 
-    private void processedSignal(Signal signal) {
-        this.jdbcTemplate.update("UPDATE tb_signal SET processed = ? WHERE id = ?", signal.getProcessed(), signal.getId());
+    public void processedSignal(Boolean processed, Integer id) {
+        this.jdbcTemplate.update("UPDATE tb_signal SET processed = ? WHERE id = ?", processed, id);
     }
 
-    private void insertSignal(String category) {
-        this.jdbcTemplate.update("INSERT INTO tb_signal(category) VALUES (?)", category);
+    public void addNewSignal(SignalCategory category) {
+        this.jdbcTemplate.update("INSERT INTO tb_signal(category) VALUES (?)", category.value);
     }
 
     public void truncateSignal() {

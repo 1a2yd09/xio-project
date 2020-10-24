@@ -31,7 +31,7 @@ class BottomOrderTest {
     @Test
     void test1() {
         // 清空一下动作表:
-        machineActionService.clearAllAction();
+        machineActionService.truncateAction();
         // 下料板:2.5×1250×2504，成品板:2.5×121×2185，需求2个成品板
         WorkOrder order = workOrderService.getOrderById(3099510);
         // 半成品固定宽度192，(1250-121*2)/192=5个半成品，1250-192*5=290，290-121*2=48
@@ -46,7 +46,7 @@ class BottomOrderTest {
     @Test
     void test2() {
         // 清空一下动作表:
-        machineActionService.clearAllAction();
+        machineActionService.truncateAction();
         // 下料板:2.5×1250×1589，成品板:2.5×1345.5×1189，需求1个成品板
         WorkOrder order = workOrderService.getOrderById(3098575);
         // 半成品固定宽度192，(1250-1189)/192=0个半成品，1250-1189=61，1589-1345.5=243.5

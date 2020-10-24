@@ -36,8 +36,8 @@ public class MainService {
 
     @PostConstruct
     public void init() {
-        this.actionService.truncateDoneAction();
-        this.actionService.clearAllAction();
+        this.actionService.truncateCompletedAction();
+        this.actionService.truncateAction();
         this.inventoryService.truncateInventory();
         this.orderService.truncateOrderTable();
         this.signalService.truncateSignal();
@@ -66,7 +66,7 @@ public class MainService {
                 while (true) {
                     if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                         logger.info("Received new action signal!!!");
-                        int productCount = actionService.processingFinishedAction();
+                        int productCount = actionService.processCompletedAction();
                         int newCount = OrderUtil.amountPropStrToInt(order.getCompletedAmount()) + productCount;
                         order.setCompletedAmount(String.valueOf(newCount));
                         break;
@@ -93,7 +93,7 @@ public class MainService {
                 while (true) {
                     if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                         logger.info("Received new action signal!!!");
-                        int productCount = actionService.processingFinishedAction();
+                        int productCount = actionService.processCompletedAction();
                         int newCount = OrderUtil.amountPropStrToInt(order.getCompletedAmount()) + productCount;
                         order.setCompletedAmount(String.valueOf(newCount));
                         break;

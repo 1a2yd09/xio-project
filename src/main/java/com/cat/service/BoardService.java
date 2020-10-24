@@ -3,6 +3,7 @@ package com.cat.service;
 import com.cat.entity.Board;
 import com.cat.entity.CutBoard;
 import com.cat.entity.StockSpecification;
+import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class BoardService {
 
     public void rotatingBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < rotateTimes; i++) {
-            this.actionService.addRotateAction(cutBoard, orderId, orderModule);
+            this.actionService.addAction(ActionCategory.ROTATE, BigDecimal.ZERO, cutBoard, orderId, orderModule);
             if (cutBoard.getForwardEdge() == 1) {
                 cutBoard.setForwardEdge(0);
             } else {
@@ -39,7 +40,7 @@ public class BoardService {
 
     public void cuttingBoard(CutBoard cutBoard, Board targetBoard, int cutTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < cutTimes; i++) {
-            this.actionService.addCuttingAction(targetBoard, orderId, orderModule);
+            this.actionService.addAction(ActionCategory.CUT, targetBoard.getWidth(), targetBoard, orderId, orderModule);
             if (cutBoard.getForwardEdge() == 1) {
                 cutBoard.setWidth(cutBoard.getWidth().subtract(targetBoard.getWidth()));
             } else {
@@ -49,7 +50,7 @@ public class BoardService {
     }
 
     public void pickingCutBoard(CutBoard cutBoard, Integer orderId, String orderModule) {
-        this.actionService.addPickAction(cutBoard, orderId, orderModule);
+        this.actionService.addAction(ActionCategory.PICK, BigDecimal.ZERO, cutBoard, orderId, orderModule);
     }
 
     public void trimmingCutBoard(CutBoard cutBoard, List<BigDecimal> trimValues, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
@@ -125,7 +126,7 @@ public class BoardService {
 
     public void sendingTargetBoard(CutBoard cutBoard, Board targetBoard, Integer orderId, String orderModule) {
         // TODO: 这里应该改成依旧送走的是下料板，但是此时类型不再是下料板，而是传入的类型。
-        this.actionService.addSendingAction(targetBoard, orderId, orderModule);
+        this.actionService.addAction(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId, orderModule);
         cutBoard.setWidth(BigDecimal.ZERO);
     }
 

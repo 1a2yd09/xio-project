@@ -42,7 +42,7 @@ class AppConfigTest {
     @Test
     void testSomething() throws InterruptedException {
         mainService.startService();
-        assertEquals(10898, actionService.getDoneActionCount());
+        assertEquals(10898, actionService.getCompletedActionCount());
     }
 
     @Test

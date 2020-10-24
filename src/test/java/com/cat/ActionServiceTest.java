@@ -42,7 +42,7 @@ class ActionServiceTest {
     @Test
     void testProcessingFinishedAction1() {
         // 经过下述直梁流程，将生成2个库存件和2个成品，工单本身需求2个成品:
-        machineActionService.clearAllAction();
+        machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3098562);
         order.setCuttingSize("4.0×1000×3400");
         // 库存件信息:
@@ -61,7 +61,7 @@ class ActionServiceTest {
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
         // 处理动作:
-        machineActionService.processingFinishedAction();
+        machineActionService.processCompletedAction();
 
         // 获取处理后的工单未完成数目:
         order = workOrderService.getOrderById(3098562);
@@ -93,7 +93,7 @@ class ActionServiceTest {
     @Test
     void testProcessingFinishedAction2() {
         // 经过下述轿底流程，将生成5个半成品和2个成品，工单本身需求2个成品:
-        machineActionService.clearAllAction();
+        machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3099510);
         mainService.processingBottomOrder(order);
         assertEquals(13, machineActionService.getActionCount());
@@ -108,7 +108,7 @@ class ActionServiceTest {
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
         // 处理动作:
-        machineActionService.processingFinishedAction();
+        machineActionService.processCompletedAction();
 
         // 获取处理后的工单未完成数目:
         order = workOrderService.getOrderById(3099510);

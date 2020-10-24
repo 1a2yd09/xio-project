@@ -204,7 +204,7 @@ public class MainService {
             } else {
                 logger.info("remainingCutBoard can't reuse");
 
-                Board stockBoard = this.boardService.getStockBoard(cutBoard.getHeight(), material);
+                Board stockBoard = this.boardService.getMatchStockBoard(cutBoard.getHeight(), material);
                 logger.info("stockBoard: {}", stockBoard);
 
                 int stockBoardCutTimes = this.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, stockBoard.getWidth());

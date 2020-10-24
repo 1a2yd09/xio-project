@@ -20,6 +20,22 @@ public class CutBoard extends Board {
         this.forwardEdge = 0;
     }
 
+    public void changeForwardEdge() {
+        if (this.forwardEdge == 1) {
+            this.forwardEdge = 0;
+        } else {
+            this.forwardEdge = 1;
+        }
+    }
+
+    public void modifySpec(BigDecimal val) {
+        if (this.forwardEdge == 1) {
+            this.setWidth(this.getWidth().subtract(val));
+        } else {
+            this.setLength(this.getLength().subtract(val));
+        }
+    }
+
     public Integer getForwardEdge() {
         return forwardEdge;
     }

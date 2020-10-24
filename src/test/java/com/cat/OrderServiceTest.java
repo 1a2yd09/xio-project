@@ -1,16 +1,14 @@
 package com.cat;
 
-import com.cat.entity.Board;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.enums.BottomSortPattern;
 import com.cat.service.InventoryService;
 import com.cat.service.ParameterService;
 import com.cat.service.WorkOrderService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -20,8 +18,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrderServiceTest {
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     static ApplicationContext context;
     static WorkOrderService workOrderService;
     static ParameterService parameterService;
@@ -36,24 +32,16 @@ class OrderServiceTest {
     }
 
     @Test
-    void testCopyOrder() {
-        workOrderService.truncateOrderTable();
-        assertEquals(0, workOrderService.getOrderCount());
-        LocalDate date = parameterService.getOperatingParameter().getWorkOrderDate();
-        workOrderService.copyRemoteOrderToLocal(date);
+    void testSomething() {
         assertEquals(996, workOrderService.getOrderCount());
     }
 
     @Test
     void testGetBottomOrder() {
         OperatingParameter op = parameterService.getOperatingParameter();
-        String sortPattern = op.getBottomOrderSort();
-        logger.info("sortPattern: {}", sortPattern);
         LocalDate date = op.getWorkOrderDate();
-        logger.info("date: {}", date);
-        List<WorkOrder> orders = workOrderService.getBottomOrders(sortPattern, date);
+        List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPattern.SPEC.value, date);
         assertEquals(914, orders.size());
-        orders.forEach(System.out::println);
     }
 
     @Test
@@ -62,19 +50,9 @@ class OrderServiceTest {
         LocalDate date = op.getWorkOrderDate();
         List<WorkOrder> orders = workOrderService.getNotBottomOrders(date);
         assertEquals(82, orders.size());
-        orders.forEach(System.out::println);
-    }
-
-    /**
-     * 测试预处理直梁工单，逻辑就是如果存货中有和成品规格、材质相同的库存件，就可以作为该直梁工单的成品。
-     */
-    @Test
-    void testPreprocessNotBottomOrder() {
-        // 成品规格:4.0×245×3190，需求数:2个，已完成数目:0个
-        WorkOrder order = workOrderService.getOrderById(3098562);
-        Board stock = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
-        inventoryService.addInventoryAmount(stock, 9);
-        LocalDate date = parameterService.getOperatingParameter().getWorkOrderDate();
-        List<WorkOrder> orders = workOrderService.getPreprocessNotBottomOrder(date);
+        inventoryService.addNewInventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value);
+        inventoryService.addNewInventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value);
+        orders = workOrderService.getPreprocessNotBottomOrders(date);
+        assertEquals(76, orders.size());
     }
 }

@@ -39,8 +39,8 @@ public class MainService {
         this.actionService.truncateCompletedAction();
         this.actionService.truncateAction();
         this.inventoryService.truncateInventory();
-        this.orderService.truncateOrderTable();
         this.signalService.truncateSignal();
+        this.orderService.truncateOrderTable();
         LocalDate orderDate = parameterService.getOperatingParameter().getWorkOrderDate();
         orderService.copyRemoteOrderToLocal(orderDate);
     }
@@ -76,7 +76,7 @@ public class MainService {
                 }
             }
         }
-        orders = orderService.getPreprocessNotBottomOrder(orderDate);
+        orders = orderService.getPreprocessNotBottomOrders(orderDate);
         CutBoard legacyCutBoard = null;
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder order = orders.get(i);

@@ -138,11 +138,7 @@ public class BoardService {
 
     public Board getMatchStockBoard(BigDecimal height, String material) {
         StockSpecification ss = this.stockSpecificationService.getMatchSpecification(height);
-        if (ss != null) {
-            return new Board(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
-        } else {
-            return new Board(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, material, BoardCategory.STOCK);
-        }
+        return new Board(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
     }
 
     public Board getCanCutProduct(BigDecimal orderCutBoardWidth, String specification, String material) {

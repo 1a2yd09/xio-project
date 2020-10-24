@@ -30,5 +30,8 @@ class StockSpecTest {
         StockSpecification ss = stockSpecificationService.getMatchSpecification(new BigDecimal(3));
         assertNotNull(ss);
         System.out.println(ss);
+        ss = stockSpecificationService.getMatchSpecification(new BigDecimal(6));
+        assertNotNull(ss);
+        System.out.println(ss);
     }
 }

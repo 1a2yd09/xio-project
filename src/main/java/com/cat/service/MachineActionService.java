@@ -26,6 +26,7 @@ public class MachineActionService {
     RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
 
     public int processCompletedAction() {
+        // TODO: 可以在处理完成动作的时候把工单对象传进来，修改它的完工数目，这样就不用返回成品数目了。
         int orderId = -1;
         int productCount = 0;
         Board semiProduct = null;

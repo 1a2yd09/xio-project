@@ -10,6 +10,17 @@ public class StockSpecification {
     private BigDecimal length;
     private LocalDateTime createdAt;
 
+    public StockSpecification() {
+    }
+
+    public StockSpecification(Integer id, BigDecimal height, BigDecimal width, BigDecimal length, LocalDateTime createdAt) {
+        this.id = id;
+        this.height = height;
+        this.width = width;
+        this.length = length;
+        this.createdAt = createdAt;
+    }
+
     public Integer getId() {
         return id;
     }

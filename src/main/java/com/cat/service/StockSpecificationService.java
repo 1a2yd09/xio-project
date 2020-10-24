@@ -1,6 +1,7 @@
 package com.cat.service;
 
 import com.cat.entity.StockSpecification;
+import com.cat.util.StockSpecUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,12 +19,7 @@ public class StockSpecificationService {
     RowMapper<StockSpecification> specM = new BeanPropertyRowMapper<>(StockSpecification.class);
 
     public StockSpecification getMatchSpecification(BigDecimal height) {
-        for (StockSpecification spec : this.getGroupSpecification()) {
-            if (height.compareTo(spec.getHeight()) == 0) {
-                return spec;
-            }
-        }
-        return null;
+        return this.getGroupSpecification().stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(StockSpecUtil.getEmptyStockSpec());
     }
 
     public List<StockSpecification> getGroupSpecification() {

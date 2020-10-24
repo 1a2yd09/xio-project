@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class WorkOrderService {
@@ -27,7 +28,7 @@ public class WorkOrderService {
 
     RowMapper<WorkOrder> orderM = new BeanPropertyRowMapper<>(WorkOrder.class);
 
-    public List<WorkOrder> getPreprocessNotBottomOrder(LocalDate date) {
+    public List<WorkOrder> getPreprocessNotBottomOrders(LocalDate date) {
         List<WorkOrder> orders = this.getNotBottomOrders(date);
         Map<String, Inventory> inventoryMap = this.inventoryService.getStockMap();
 
@@ -36,8 +37,7 @@ public class WorkOrderService {
             Inventory inventory = inventoryMap.get(BoardUtil.getStandardSpecStr(order.getSpecification()));
             if (inventory != null && inventory.getMaterial().equals(order.getMaterial()) && inventory.getAmount() > 0) {
                 int usedInventoryNum = Math.min(order.getUnfinishedAmount(), inventory.getAmount());
-
-                this.addOrderCompletedAmount(usedInventoryNum, order.getId());
+                this.addOrderCompletedAmount(order, usedInventoryNum);
                 inventory.setAmount(inventory.getAmount() - usedInventoryNum);
                 // 直接在这里就将库存件数目写回数据表，不放在最后一起处理的理由是，
                 // 某批库存件可能不被获取或只获取一次，以及获取之后全部被用作成品，数目归零后不会再进入该判断逻辑:
@@ -45,12 +45,22 @@ public class WorkOrderService {
             }
         }
 
-        return orders;
+        return orders.stream().filter(order -> order.getUnfinishedAmount() > 0).collect(Collectors.toList());
     }
 
     public void addOrderCompletedAmount(int amount, Integer id) {
         WorkOrder order = this.getOrderById(id);
 
+        order.setCompletedAmount(OrderUtil.addAmountPropWithInt(order.getCompletedAmount(), amount));
+        this.updateOrderCompletedAmount(order.getCompletedAmount(), order.getId());
+
+        if (order.getUnfinishedAmount() == 0) {
+            order.setOperationState(OrderState.COMPLETED.value);
+            this.updateOrderState(order.getOperationState(), order.getId());
+        }
+    }
+
+    public void addOrderCompletedAmount(WorkOrder order, int amount) {
         order.setCompletedAmount(OrderUtil.addAmountPropWithInt(order.getCompletedAmount(), amount));
         this.updateOrderCompletedAmount(order.getCompletedAmount(), order.getId());
 
@@ -74,14 +84,14 @@ public class WorkOrderService {
 
     public List<WorkOrder> getBottomOrders(LocalDate date) {
         return this.jdbcTemplate.query("SELECT * FROM vi_local_work_order " +
-                "WHERE site_module = ? AND operation_state != ? AND CAST(completion_date AS DATE) = ? " +
-                "ORDER BY CAST(sequence_number AS INT), id", this.orderM, WorkOrderModule.BOTTOM.value, OrderState.COMPLETED.value, date);
+                "WHERE site_module = ? AND CAST(completion_date AS DATE) = ? " +
+                "ORDER BY CAST(sequence_number AS INT), id", this.orderM, WorkOrderModule.BOTTOM.value, date);
     }
 
     public List<WorkOrder> getNotBottomOrders(LocalDate date) {
         return this.jdbcTemplate.query("SELECT * FROM vi_local_work_order " +
-                "WHERE site_module != ? AND operation_state != ? AND CAST(completion_date AS DATE) = ? " +
-                "ORDER BY CAST(sequence_number AS INT), id", this.orderM, WorkOrderModule.BOTTOM.value, OrderState.COMPLETED.value, date);
+                "WHERE site_module != ? AND CAST(completion_date AS DATE) = ? " +
+                "ORDER BY CAST(sequence_number AS INT), id", this.orderM, WorkOrderModule.BOTTOM.value, date);
     }
 
     public WorkOrder getOrderById(Integer id) {

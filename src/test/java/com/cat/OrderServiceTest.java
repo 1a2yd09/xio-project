@@ -73,7 +73,7 @@ class OrderServiceTest {
         // 成品规格:4.0×245×3190，需求数:2个，已完成数目:0个
         WorkOrder order = workOrderService.getOrderById(3098562);
         Board stock = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
-        inventoryService.addInventory(stock, 9);
+        inventoryService.addInventoryAmount(stock, 9);
         LocalDate date = parameterService.getOperatingParameter().getWorkOrderDate();
         List<WorkOrder> orders = workOrderService.getPreprocessNotBottomOrder(date);
     }

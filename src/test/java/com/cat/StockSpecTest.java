@@ -10,7 +10,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import java.math.BigDecimal;
 import java.util.List;
 
-public class StockSpecTest {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+class StockSpecTest {
     static ApplicationContext context;
     static StockSpecificationService stockSpecificationService;
 
@@ -23,8 +25,10 @@ public class StockSpecTest {
     @Test
     void testSpecification() {
         List<StockSpecification> specs = stockSpecificationService.getGroupSpecification();
+        assertNotNull(specs);
         specs.forEach(System.out::println);
         StockSpecification ss = stockSpecificationService.getMatchSpecification(new BigDecimal(3));
+        assertNotNull(ss);
         System.out.println(ss);
     }
 }

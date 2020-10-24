@@ -1,6 +1,5 @@
 package com.cat.util;
 
-import com.cat.entity.Board;
 import com.cat.entity.enums.BoardCategory;
 
 import java.math.BigDecimal;

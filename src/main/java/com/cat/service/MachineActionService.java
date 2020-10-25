@@ -2,6 +2,7 @@ package com.cat.service;
 
 import com.cat.entity.Board;
 import com.cat.entity.MachineAction;
+import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,7 @@ public class MachineActionService {
 
     RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
 
-    public int processCompletedAction() {
-        // TODO: 可以在处理完成动作的时候把工单对象传进来，修改它的完工数目，这样就不用返回成品数目了。
-        int orderId = -1;
+    public void processCompletedAction(WorkOrder order) {
         int productCount = 0;
         Board semiProduct = null;
         int semiCount = 0;
@@ -38,9 +37,6 @@ public class MachineActionService {
             String boardCategory = action.getBoardCategory();
             // 记录数目，最后统一写入，理由是一次机器动作中，成品、非成品各自的规格和材质都是相同的:
             if (BoardCategory.PRODUCT.value.equals(boardCategory)) {
-                if (orderId == -1) {
-                    orderId = action.getWorkOrderId();
-                }
                 productCount++;
             } else if (BoardCategory.SEMI_PRODUCT.value.equals(boardCategory)) {
                 if (semiProduct == null) {
@@ -55,9 +51,9 @@ public class MachineActionService {
             }
         }
 
-        if (orderId != -1) {
-            this.orderService.addOrderCompletedAmount(productCount, orderId);
-        }
+
+        this.orderService.addOrderCompletedAmount(order, productCount);
+
         if (semiProduct != null) {
             this.inventoryService.addInventoryAmount(semiProduct, semiCount);
         }
@@ -67,8 +63,6 @@ public class MachineActionService {
 
         this.transferAllActions();
         this.truncateAction();
-
-        return productCount;
     }
 
     public void addAction(ActionCategory category, BigDecimal dis, Board board, Integer orderId, String orderModule) {

@@ -6,7 +6,6 @@ import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.SignalCategory;
-import com.cat.util.OrderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +65,7 @@ public class MainService {
                 while (true) {
                     if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                         logger.info("Received new action signal!!!");
-                        int productCount = actionService.processCompletedAction();
-                        int newCount = OrderUtil.amountPropStrToInt(order.getCompletedAmount()) + productCount;
-                        order.setCompletedAmount(String.valueOf(newCount));
+                        actionService.processCompletedAction(order);
                         break;
                     }
                     logger.info("Not received new action signal...");
@@ -93,9 +90,7 @@ public class MainService {
                 while (true) {
                     if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                         logger.info("Received new action signal!!!");
-                        int productCount = actionService.processCompletedAction();
-                        int newCount = OrderUtil.amountPropStrToInt(order.getCompletedAmount()) + productCount;
-                        order.setCompletedAmount(String.valueOf(newCount));
+                        actionService.processCompletedAction(order);
                         break;
                     }
                     logger.info("Not received new action signal...");

@@ -61,7 +61,7 @@ class ActionServiceTest {
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
         // 处理动作:
-        machineActionService.processCompletedAction();
+        machineActionService.processCompletedAction(order);
 
         // 获取处理后的工单未完成数目:
         order = workOrderService.getOrderById(3098562);
@@ -108,7 +108,7 @@ class ActionServiceTest {
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
         // 处理动作:
-        machineActionService.processCompletedAction();
+        machineActionService.processCompletedAction(order);
 
         // 获取处理后的工单未完成数目:
         order = workOrderService.getOrderById(3099510);

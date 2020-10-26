@@ -48,7 +48,7 @@ class ActionServiceTest {
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
         board.setLength(new BigDecimal(3300));
         stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
-        CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null, parameterService.getOperatingParameter().getWasteThreshold());
+        CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null);
         assertEquals(11, machineActionService.getActionCount());
         // 库存件信息:
         // 获取处理前的工单未完成数目:
@@ -95,7 +95,7 @@ class ActionServiceTest {
         machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3099510);
         OperatingParameter op = parameterService.getOperatingParameter();
-        mainService.processingBottomOrder(order, op.getFixedWidth(), op.getWasteThreshold());
+        mainService.processingBottomOrder(order);
         assertEquals(13, machineActionService.getActionCount());
         // 半成品信息:
         Board semiProduct = new Board("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);

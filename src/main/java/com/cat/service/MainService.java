@@ -63,7 +63,7 @@ public class MainService {
 
         for (WorkOrder order : orders) {
             while (order.getUnfinishedAmount() != 0) {
-                this.processingBottomOrder(order, op.getFixedWidth(), op.getWasteThreshold());
+                this.processingBottomOrder(order);
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (true) {
                     if (this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
@@ -88,7 +88,7 @@ public class MainService {
                 nextProduct = new Board(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
             }
             while (order.getUnfinishedAmount() != 0) {
-                legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct, op.getWasteThreshold());
+                legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct);
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (true) {
                     if (this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
@@ -103,10 +103,13 @@ public class MainService {
         }
     }
 
-    public void processingBottomOrder(WorkOrder order, BigDecimal fixedWidth, BigDecimal wasteThreshold) {
+    public void processingBottomOrder(WorkOrder order) {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
+        OperatingParameter op = this.parameterService.getOperatingParameter();
+        BigDecimal fixedWidth = op.getFixedWidth();
+        BigDecimal wasteThreshold = op.getWasteThreshold();
 
         logger.info("Order: {}", order);
 
@@ -144,10 +147,11 @@ public class MainService {
         logger.info("CutBoard after sendingTargetBoard: {}", cutBoard);
     }
 
-    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard, BigDecimal wasteThreshold) {
+    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
+        BigDecimal wasteThreshold = this.parameterService.getOperatingParameter().getWasteThreshold();
 
         logger.info("Order: {}", order);
 

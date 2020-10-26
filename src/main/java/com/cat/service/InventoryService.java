@@ -36,7 +36,6 @@ public class InventoryService {
     }
 
     public Inventory getInventory(String specification, String material, String category) {
-        // TODO: 这里直接比较规格字符串还是有点不妥，可以先根据材质和类型获取集合，然后调用比较规格字符串是否相等的函数一一比较。
         List<Inventory> list = this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE specification = ? AND material = ? AND category = ?", this.inventoryM, specification, material, category);
         return list.isEmpty() ? null : list.get(0);
     }

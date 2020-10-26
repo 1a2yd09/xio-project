@@ -51,7 +51,6 @@ public class MachineActionService {
             }
         }
 
-
         this.orderService.addOrderCompletedAmount(order, productCount);
 
         if (semiProduct != null) {

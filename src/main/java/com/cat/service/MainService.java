@@ -40,32 +40,32 @@ public class MainService {
         this.inventoryService.truncateInventory();
         this.signalService.truncateSignal();
         this.orderService.truncateOrderTable();
-        LocalDate orderDate = parameterService.getOperatingParameter().getWorkOrderDate();
+        LocalDate orderDate = this.parameterService.getOperatingParameter().getWorkOrderDate();
         orderService.copyRemoteOrderToLocal(orderDate);
     }
 
     public void startService() throws InterruptedException {
-        signalService.addNewSignal(SignalCategory.START_WORK);
+        this.signalService.addNewSignal(SignalCategory.START_WORK);
         while (true) {
-            if (signalService.isReceivedNewSignal(SignalCategory.START_WORK)) {
+            if (this.signalService.isReceivedNewSignal(SignalCategory.START_WORK)) {
                 logger.info("Received new start signal!!!");
                 break;
             }
             logger.info("Not received new start signal...");
             Thread.sleep(3000);
         }
-        LocalDate orderDate = parameterService.getOperatingParameter().getWorkOrderDate();
-        String sortPattern = parameterService.getOperatingParameter().getBottomOrderSort();
-        List<WorkOrder> orders = orderService.getBottomOrders(sortPattern, orderDate);
+
+        OperatingParameter op = this.parameterService.getOperatingParameter();
+        List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
+
         for (WorkOrder order : orders) {
             while (order.getUnfinishedAmount() != 0) {
-                // TODO: 已开工没处理。
-                this.processingBottomOrder(order);
+                this.processingBottomOrder(order, op.getFixedWidth(), op.getWasteThreshold());
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (true) {
-                    if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
+                    if (this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                         logger.info("Received new action signal!!!");
-                        actionService.processCompletedAction(order);
+                        this.actionService.processCompletedAction(order);
                         break;
                     }
                     logger.info("Not received new action signal...");
@@ -73,24 +73,24 @@ public class MainService {
                 }
             }
         }
-        orders = orderService.getPreprocessNotBottomOrders(orderDate);
+
+        orders = orderService.getPreprocessNotBottomOrders(op.getWorkOrderDate());
         CutBoard legacyCutBoard = null;
+
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder order = orders.get(i);
             Board nextProduct = null;
             if (i < orders.size() - 1) {
                 WorkOrder nextOrder = orders.get(i + 1);
-                // TODO: 这个成品板是和剩余板材比较用的，这里没有获取标准板。
                 nextProduct = new Board(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
             }
             while (order.getUnfinishedAmount() != 0) {
-                // TODO: 已开工没处理。
-                legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct);
+                legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct, op.getWasteThreshold());
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (true) {
-                    if (signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
+                    if (this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                         logger.info("Received new action signal!!!");
-                        actionService.processCompletedAction(order);
+                        this.actionService.processCompletedAction(order);
                         break;
                     }
                     logger.info("Not received new action signal...");
@@ -101,7 +101,6 @@ public class MainService {
     }
 
     public int calProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {
-        // TODO: 如果能把板材裁剪次数也作为板材的属性之一，就可以在获得板材对象的同时计算板材的裁剪次数。可以从板材基类延申出一个非下料板类型的板材类。
         int maxProductBoardCutTimes = cutBoardWidth.divideToIntegralValue(productBoardWidth).intValue();
         return Math.min(maxProductBoardCutTimes, orderUnfinishedTimes);
     }
@@ -115,12 +114,11 @@ public class MainService {
         }
     }
 
-    public void processingBottomOrder(WorkOrder order) {
+    public void processingBottomOrder(WorkOrder order, BigDecimal fixedWidth, BigDecimal wasteThreshold) {
         // 如果是和处理工单对象有关的流程，要保证是从数据库中最新获取的，防止前面的流程有对相应的数据表写的操作:
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
-        OperatingParameter op = this.parameterService.getOperatingParameter();
 
         logger.info("Order: {}", order);
 
@@ -136,7 +134,7 @@ public class MainService {
         int productCutTimes = this.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
         logger.info("ProductCutTimes: {}", productCutTimes);
 
-        Board semiProductBoard = new Board(cutBoard.getHeight(), op.getFixedWidth(), cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
+        Board semiProductBoard = new Board(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
         logger.info("SemiProductBoard: {}", semiProductBoard);
 
         int semiProductCutTimes = this.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, semiProductBoard.getWidth());
@@ -145,10 +143,10 @@ public class MainService {
         this.boardService.cuttingTargetBoard(cutBoard, semiProductBoard, semiProductCutTimes, orderId, orderModule);
         logger.info("CutBoard after cuttingSemiBoard: {}", cutBoard);
 
-        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
         logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
 
-        this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+        this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), wasteThreshold, orderId, orderModule);
         logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
 
         this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
@@ -158,11 +156,10 @@ public class MainService {
         logger.info("CutBoard after sendingTargetBoard: {}", cutBoard);
     }
 
-    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {
+    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard, BigDecimal wasteThreshold) {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
-        OperatingParameter op = this.parameterService.getOperatingParameter();
 
         logger.info("Order: {}", order);
 
@@ -182,7 +179,6 @@ public class MainService {
 
         if (productCutTimes == order.getUnfinishedAmount()) {
             logger.info("order last time processing");
-            // TODO: 这个剩余宽度可以在计算库存件次数时被使用。
             BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
             CutBoard remainingCutBoard = new CutBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.CUTTING);
             logger.info("remainingCutBoard: {}", remainingCutBoard);
@@ -191,7 +187,7 @@ public class MainService {
             if (remainingCutBoard.compareTo(nextOrderProductBoard) >= 0) {
                 logger.info("remainingCutBoard can reuse");
 
-                this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
                 logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
 
                 this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes, orderId, orderModule);
@@ -211,16 +207,16 @@ public class MainService {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
                         logger.info("first cutting productBoard");
 
-                        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
                         logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
 
                         this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes, orderId, orderModule);
                         logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
 
-                        this.boardService.cuttingExtraLength(cutBoard, stockBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                        this.boardService.cuttingExtraLength(cutBoard, stockBoard.getLength(), wasteThreshold, orderId, orderModule);
                         logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
 
-                        this.boardService.cuttingExtraWidth(cutBoard, stockBoard.getWidth().multiply(new BigDecimal(stockBoardCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+                        this.boardService.cuttingExtraWidth(cutBoard, stockBoard.getWidth().multiply(new BigDecimal(stockBoardCutTimes)), wasteThreshold, orderId, orderModule);
                         logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
 
                         this.boardService.cuttingTargetBoard(cutBoard, stockBoard, stockBoardCutTimes - 1, orderId, orderModule);
@@ -230,16 +226,16 @@ public class MainService {
                     } else {
                         logger.info("first cutting stockBoard");
 
-                        this.boardService.cuttingExtraLength(cutBoard, stockBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                        this.boardService.cuttingExtraLength(cutBoard, stockBoard.getLength(), wasteThreshold, orderId, orderModule);
                         logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
 
                         this.boardService.cuttingTargetBoard(cutBoard, stockBoard, stockBoardCutTimes, orderId, orderModule);
                         logger.info("CutBoard after cuttingStockBoard: {}", cutBoard);
 
-                        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
                         logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
 
-                        this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+                        this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), wasteThreshold, orderId, orderModule);
                         logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
 
                         this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
@@ -250,10 +246,10 @@ public class MainService {
                 } else {
                     logger.info("can't cutting stockBoard");
 
-                    this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+                    this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
                     logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
 
-                    this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+                    this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), wasteThreshold, orderId, orderModule);
                     logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
 
                     this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
@@ -265,10 +261,10 @@ public class MainService {
         } else {
             logger.info("order not last time processing");
 
-            this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), op.getWasteThreshold(), orderId, orderModule);
+            this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
             logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
 
-            this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), op.getWasteThreshold(), orderId, orderModule);
+            this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), wasteThreshold, orderId, orderModule);
             logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
 
             this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);

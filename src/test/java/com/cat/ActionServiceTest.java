@@ -1,9 +1,6 @@
 package com.cat;
 
-import com.cat.entity.Board;
-import com.cat.entity.CutBoard;
-import com.cat.entity.Inventory;
-import com.cat.entity.WorkOrder;
+import com.cat.entity.*;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
 import com.cat.service.*;
@@ -23,6 +20,7 @@ class ActionServiceTest {
     static MainService mainService;
     static InventoryService inventoryService;
     static StockSpecificationService stockSpecificationService;
+    static ParameterService parameterService;
 
     @BeforeAll
     public static void init() {
@@ -32,6 +30,7 @@ class ActionServiceTest {
         mainService = context.getBean(MainService.class);
         inventoryService = context.getBean(InventoryService.class);
         stockSpecificationService = context.getBean(StockSpecificationService.class);
+        parameterService = context.getBean(ParameterService.class);
     }
 
     /**
@@ -49,7 +48,7 @@ class ActionServiceTest {
         Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
         board.setLength(new BigDecimal(3300));
         stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
-        CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null);
+        CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null, parameterService.getOperatingParameter().getWasteThreshold());
         assertEquals(11, machineActionService.getActionCount());
         // 库存件信息:
         // 获取处理前的工单未完成数目:
@@ -95,7 +94,8 @@ class ActionServiceTest {
         // 经过下述轿底流程，将生成5个半成品和2个成品，工单本身需求2个成品:
         machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3099510);
-        mainService.processingBottomOrder(order);
+        OperatingParameter op = parameterService.getOperatingParameter();
+        mainService.processingBottomOrder(order, op.getFixedWidth(), op.getWasteThreshold());
         assertEquals(13, machineActionService.getActionCount());
         // 半成品信息:
         Board semiProduct = new Board("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);

@@ -114,10 +114,10 @@ public class BoardService {
         cutBoard.setWidth(BigDecimal.ZERO);
     }
 
-    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, Integer orderId, String orderModule) {
-        BigDecimal wasteThreshold = this.parameterService.getOperatingParameter().getWasteThreshold();
+    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         List<BigDecimal> trimValues = this.trimmingValueService.getTrimmingValue().getTrimValues();
-
+        // 这个方法应该改为选择下料板，是要剩余板材还是要工单板材，确定了以后返回出来，
+        // 然后创建一个新的方法用于处理板材，不然将阈值和修边值再传入进来，整个参数过于臃肿。
         if (legacyCutBoard == null) {
             this.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
             logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
@@ -141,7 +141,7 @@ public class BoardService {
         return new Board(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
     }
 
-    public Board getCanCutProduct(BigDecimal orderCutBoardWidth, String specification, String material) {
+    public Board getCanCutProduct(String specification, String material, BigDecimal orderCutBoardWidth) {
         Board product = new Board(specification, material, BoardCategory.PRODUCT);
         if (product.getWidth().compareTo(orderCutBoardWidth) > 0) {
             // 如果成品板宽度大于下料板宽度，则需要交换成品板的宽度和长度，不然会导致裁剪逻辑出错:
@@ -150,5 +150,19 @@ public class BoardService {
             product.setLength(tmp);
         }
         return product;
+    }
+
+    public int calProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {
+        int maxProductBoardCutTimes = cutBoardWidth.divideToIntegralValue(productBoardWidth).intValue();
+        return Math.min(maxProductBoardCutTimes, orderUnfinishedTimes);
+    }
+
+    public int calNotProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, int productCutTimes, BigDecimal notProductWidth) {
+        if (notProductWidth.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal remainingWidth = cutBoardWidth.subtract(productBoardWidth.multiply(new BigDecimal(productCutTimes)));
+            return remainingWidth.divideToIntegralValue(notProductWidth).intValue();
+        } else {
+            return 0;
+        }
     }
 }

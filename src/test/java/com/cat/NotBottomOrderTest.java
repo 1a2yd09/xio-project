@@ -41,7 +41,7 @@ class NotBottomOrderTest {
         machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
-        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，因此肯定是长边朝前:
         legacyBoard.setForwardEdge(1);
         // 该工单需求2个成品，且1次只能裁剪1个成品，因此不是最后一次:
@@ -59,7 +59,7 @@ class NotBottomOrderTest {
         machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
-        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，因此肯定是长边朝前:
         legacyBoard.setForwardEdge(1);
         // 将留板改成不能用:
@@ -185,7 +185,7 @@ class NotBottomOrderTest {
         machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
-        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，因此肯定是长边朝前:
         legacyBoard.setForwardEdge(1);
         legacyBoard.setWidth(new BigDecimal("500"));
@@ -208,7 +208,7 @@ class NotBottomOrderTest {
         machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
-        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，因此肯定是长边朝前:
         legacyBoard.setForwardEdge(1);
         legacyBoard.setWidth(new BigDecimal("250"));
@@ -234,7 +234,7 @@ class NotBottomOrderTest {
         machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
-        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+        CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，因此肯定是长边朝前:
         legacyBoard.setForwardEdge(1);
         legacyBoard.setWidth(new BigDecimal("500"));

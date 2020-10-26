@@ -32,6 +32,8 @@ public class MainService {
     MachineActionService actionService;
     @Autowired
     InventoryService inventoryService;
+    @Autowired
+    TrimmingValueService trimmingValueService;
 
     @PostConstruct
     public void init() {
@@ -56,6 +58,7 @@ public class MainService {
         }
 
         OperatingParameter op = this.parameterService.getOperatingParameter();
+
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 
         for (WorkOrder order : orders) {
@@ -100,44 +103,29 @@ public class MainService {
         }
     }
 
-    public int calProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {
-        int maxProductBoardCutTimes = cutBoardWidth.divideToIntegralValue(productBoardWidth).intValue();
-        return Math.min(maxProductBoardCutTimes, orderUnfinishedTimes);
-    }
-
-    public int calNotProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, int productCutTimes, BigDecimal notProductWidth) {
-        if (notProductWidth.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal remainingWidth = cutBoardWidth.subtract(productBoardWidth.multiply(new BigDecimal(productCutTimes)));
-            return remainingWidth.divideToIntegralValue(notProductWidth).intValue();
-        } else {
-            return 0;
-        }
-    }
-
     public void processingBottomOrder(WorkOrder order, BigDecimal fixedWidth, BigDecimal wasteThreshold) {
-        // 如果是和处理工单对象有关的流程，要保证是从数据库中最新获取的，防止前面的流程有对相应的数据表写的操作:
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
 
         logger.info("Order: {}", order);
 
-        CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
+        CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = this.boardService.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material);
+        Board productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, orderCutBoard.getWidth());
         logger.info("ProductBoard: {}", productBoard);
 
-        CutBoard cutBoard = this.boardService.processingCutBoard(null, orderCutBoard, productBoard, orderId, orderModule);
+        CutBoard cutBoard = this.boardService.processingCutBoard(null, orderCutBoard, productBoard, wasteThreshold, orderId, orderModule);
         logger.info("processingCutBoard: {}", cutBoard);
 
-        int productCutTimes = this.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
+        int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
         logger.info("ProductCutTimes: {}", productCutTimes);
 
         Board semiProductBoard = new Board(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
         logger.info("SemiProductBoard: {}", semiProductBoard);
 
-        int semiProductCutTimes = this.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, semiProductBoard.getWidth());
+        int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, semiProductBoard.getWidth());
         logger.info("SemiProductCutTimes: {}", semiProductCutTimes);
 
         this.boardService.cuttingTargetBoard(cutBoard, semiProductBoard, semiProductCutTimes, orderId, orderModule);
@@ -163,24 +151,24 @@ public class MainService {
 
         logger.info("Order: {}", order);
 
-        CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material, BoardCategory.CUTTING);
+        CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = this.boardService.getCanCutProduct(orderCutBoard.getWidth(), order.getSpecification(), material);
+        Board productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, orderCutBoard.getWidth());
         logger.info("ProductBoard: {}", productBoard);
 
         logger.info("legacyCutBoard: {}", legacyCutBoard);
 
-        CutBoard cutBoard = this.boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, orderId, orderModule);
+        CutBoard cutBoard = this.boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, wasteThreshold, orderId, orderModule);
         logger.info("processingCutBoard: {}", cutBoard);
 
-        int productCutTimes = this.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
+        int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
         logger.info("ProductCutTimes: {}", productCutTimes);
 
         if (productCutTimes == order.getUnfinishedAmount()) {
             logger.info("order last time processing");
             BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
-            CutBoard remainingCutBoard = new CutBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.CUTTING);
+            CutBoard remainingCutBoard = new CutBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material);
             logger.info("remainingCutBoard: {}", remainingCutBoard);
             logger.info("nextOrderProductBoard: {}", nextOrderProductBoard);
 
@@ -198,7 +186,7 @@ public class MainService {
                 Board stockBoard = this.boardService.getMatchStockBoard(cutBoard.getHeight(), material);
                 logger.info("stockBoard: {}", stockBoard);
 
-                int stockBoardCutTimes = this.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, stockBoard.getWidth());
+                int stockBoardCutTimes = this.boardService.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, stockBoard.getWidth());
                 logger.info("stockBoardCutTimes: {}", stockBoardCutTimes);
 
                 if (stockBoardCutTimes > 0) {
@@ -274,7 +262,7 @@ public class MainService {
         }
 
         logger.info("CutBoard in the end: {}", cutBoard);
-        // TODO: 既然送板会将下料板的宽度置零，那实际就不需要对遗留板材进行空判断，直接进行板材比较即可。
+
         return cutBoard.getWidth().compareTo(BigDecimal.ZERO) == 0 ? null : cutBoard;
     }
 }

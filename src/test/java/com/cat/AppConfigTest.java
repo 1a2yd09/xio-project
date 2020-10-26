@@ -47,7 +47,7 @@ class AppConfigTest {
         List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPattern.SEQ.value, op.getWorkOrderDate());
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
-            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
             Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) == 0) {
                 System.out.println(order);
@@ -61,7 +61,7 @@ class AppConfigTest {
         List<WorkOrder> orders = workOrderService.getNotBottomOrders(op.getWorkOrderDate());
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
-            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), BoardCategory.CUTTING);
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
             Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
                 System.out.println(order);

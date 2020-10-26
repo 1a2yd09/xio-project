@@ -10,13 +10,13 @@ public class CutBoard extends Board {
      */
     private Integer forwardEdge;
 
-    public CutBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category) {
-        super(height, width, length, material, category);
+    public CutBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material) {
+        super(height, width, length, material, BoardCategory.CUTTING);
         this.forwardEdge = 0;
     }
 
-    public CutBoard(String specification, String material, BoardCategory category) {
-        super(specification, material, category);
+    public CutBoard(String specification, String material) {
+        super(specification, material, BoardCategory.CUTTING);
         this.forwardEdge = 0;
     }
 

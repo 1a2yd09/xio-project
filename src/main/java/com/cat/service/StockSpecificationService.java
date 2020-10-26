@@ -19,7 +19,7 @@ public class StockSpecificationService {
     RowMapper<StockSpecification> specM = new BeanPropertyRowMapper<>(StockSpecification.class);
 
     public StockSpecification getMatchSpecification(BigDecimal height) {
-        return this.getGroupSpecification().stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(StockSpecUtil.getEmptyStockSpec());
+        return this.getGroupSpecification().stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(StockSpecUtil.getDefaultStockSpec());
     }
 
     public List<StockSpecification> getGroupSpecification() {

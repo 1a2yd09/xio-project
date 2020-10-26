@@ -1,16 +1,13 @@
 package com.cat.service;
 
 import com.cat.entity.OperatingParameter;
-import com.cat.entity.enums.BottomSortPattern;
+import com.cat.util.ParameterUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,8 +19,7 @@ public class ParameterService {
     RowMapper<OperatingParameter> opM = new BeanPropertyRowMapper<>(OperatingParameter.class);
 
     public OperatingParameter getOperatingParameter() {
-        OperatingParameter op = this.getLatestOperatingParameter();
-        return Objects.requireNonNullElseGet(op, () -> new OperatingParameter(-1, LocalDate.now(), BigDecimal.ZERO, BigDecimal.ZERO, BottomSortPattern.SEQ.value, LocalDateTime.now()));
+        return Objects.requireNonNullElseGet(this.getLatestOperatingParameter(), ParameterUtil::getDefaultParameter);
     }
 
     public OperatingParameter getLatestOperatingParameter() {

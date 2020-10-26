@@ -48,18 +48,6 @@ public class WorkOrderService {
         return orders.stream().filter(order -> order.getUnfinishedAmount() > 0).collect(Collectors.toList());
     }
 
-    public void addOrderCompletedAmount(int amount, Integer id) {
-        WorkOrder order = this.getOrderById(id);
-
-        order.setCompletedAmount(OrderUtil.addAmountPropWithInt(order.getCompletedAmount(), amount));
-        this.updateOrderCompletedAmount(order.getCompletedAmount(), order.getId());
-
-        if (order.getUnfinishedAmount() == 0) {
-            order.setOperationState(OrderState.COMPLETED.value);
-            this.updateOrderState(order.getOperationState(), order.getId());
-        }
-    }
-
     public void addOrderCompletedAmount(WorkOrder order, int amount) {
         order.setCompletedAmount(OrderUtil.addAmountPropWithInt(order.getCompletedAmount(), amount));
         this.updateOrderCompletedAmount(order.getCompletedAmount(), order.getId());

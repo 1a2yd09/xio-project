@@ -2,6 +2,7 @@ package com.cat.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class TrimmingValue {
     private Integer id;
@@ -10,6 +11,22 @@ public class TrimmingValue {
     private BigDecimal trimBottom;
     private BigDecimal trimRight;
     private LocalDateTime createdAt;
+
+    public List<BigDecimal> getTrimValues() {
+        return List.of(this.trimTop, this.trimLeft, this.trimBottom, this.trimRight);
+    }
+
+    public TrimmingValue() {
+    }
+
+    public TrimmingValue(Integer id, BigDecimal trimTop, BigDecimal trimLeft, BigDecimal trimBottom, BigDecimal trimRight, LocalDateTime createdAt) {
+        this.id = id;
+        this.trimTop = trimTop;
+        this.trimLeft = trimLeft;
+        this.trimBottom = trimBottom;
+        this.trimRight = trimRight;
+        this.createdAt = createdAt;
+    }
 
     public Integer getId() {
         return id;

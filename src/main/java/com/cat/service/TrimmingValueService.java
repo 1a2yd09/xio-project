@@ -1,14 +1,15 @@
 package com.cat.service;
 
 import com.cat.entity.TrimmingValue;
+import com.cat.util.TrimUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class TrimmingValueService {
@@ -17,13 +18,8 @@ public class TrimmingValueService {
 
     RowMapper<TrimmingValue> trimM = new BeanPropertyRowMapper<>(TrimmingValue.class);
 
-    public List<BigDecimal> getTrimValues() {
-        TrimmingValue tp = this.getLatestTrimmingValue();
-        if (tp != null) {
-            return List.of(tp.getTrimTop(), tp.getTrimLeft(), tp.getTrimBottom(), tp.getTrimRight());
-        } else {
-            return List.of(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        }
+    public TrimmingValue getTrimmingValue() {
+        return Objects.requireNonNullElseGet(this.getLatestTrimmingValue(), TrimUtil::getDefaultValue);
     }
 
     public TrimmingValue getLatestTrimmingValue() {

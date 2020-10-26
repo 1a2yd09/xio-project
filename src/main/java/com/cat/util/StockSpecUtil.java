@@ -10,7 +10,7 @@ public class StockSpecUtil {
 
     }
 
-    public static StockSpecification getEmptyStockSpec() {
+    public static StockSpecification getDefaultStockSpec() {
         return new StockSpecification(-1, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, LocalDateTime.now());
     }
 }

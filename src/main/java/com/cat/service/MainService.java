@@ -32,8 +32,6 @@ public class MainService {
     MachineActionService actionService;
     @Autowired
     InventoryService inventoryService;
-    @Autowired
-    TrimmingValueService trimmingValueService;
 
     @PostConstruct
     public void init() {
@@ -131,20 +129,9 @@ public class MainService {
         int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, semiProductBoard.getWidth());
         logger.info("SemiProductCutTimes: {}", semiProductCutTimes);
 
-        this.boardService.cuttingTargetBoard(cutBoard, semiProductBoard, semiProductCutTimes, orderId, orderModule);
-        logger.info("CutBoard after cuttingSemiBoard: {}", cutBoard);
+        this.boardService.none1(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId, orderModule);
 
-        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
-        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
-
-        this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), wasteThreshold, orderId, orderModule);
-        logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
-
-        this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
-        logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
-
-        this.boardService.sendingTargetBoard(cutBoard, productBoard, orderId, orderModule);
-        logger.info("CutBoard after sendingTargetBoard: {}", cutBoard);
+        this.boardService.none2(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
     }
 
     public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {
@@ -179,11 +166,7 @@ public class MainService {
             if (remainingCutBoard.compareTo(nextOrderProductBoard) >= 0) {
                 logger.info("remainingCutBoard can reuse");
 
-                this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
-                logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
-
-                this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes, orderId, orderModule);
-                logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
+                this.boardService.none1(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
             } else {
                 logger.info("remainingCutBoard can't reuse");
 
@@ -199,70 +182,26 @@ public class MainService {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
                         logger.info("first cutting productBoard");
 
-                        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
-                        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+                        this.boardService.none1(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
 
-                        this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes, orderId, orderModule);
-                        logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
-
-                        this.boardService.cuttingExtraLength(cutBoard, stockBoard.getLength(), wasteThreshold, orderId, orderModule);
-                        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
-
-                        this.boardService.cuttingExtraWidth(cutBoard, stockBoard.getWidth().multiply(new BigDecimal(stockBoardCutTimes)), wasteThreshold, orderId, orderModule);
-                        logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
-
-                        this.boardService.cuttingTargetBoard(cutBoard, stockBoard, stockBoardCutTimes - 1, orderId, orderModule);
-                        logger.info("CutBoard after cuttingStockBoard: {}", cutBoard);
-
-                        this.boardService.sendingTargetBoard(cutBoard, stockBoard, orderId, orderModule);
+                        this.boardService.none2(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
                     } else {
                         logger.info("first cutting stockBoard");
 
-                        this.boardService.cuttingExtraLength(cutBoard, stockBoard.getLength(), wasteThreshold, orderId, orderModule);
-                        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
+                        this.boardService.none1(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
 
-                        this.boardService.cuttingTargetBoard(cutBoard, stockBoard, stockBoardCutTimes, orderId, orderModule);
-                        logger.info("CutBoard after cuttingStockBoard: {}", cutBoard);
-
-                        this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
-                        logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
-
-                        this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), wasteThreshold, orderId, orderModule);
-                        logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
-
-                        this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
-                        logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
-
-                        this.boardService.sendingTargetBoard(cutBoard, productBoard, orderId, orderModule);
+                        this.boardService.none2(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
                     }
                 } else {
                     logger.info("can't cutting stockBoard");
 
-                    this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
-                    logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
-
-                    this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), wasteThreshold, orderId, orderModule);
-                    logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
-
-                    this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
-                    logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
-
-                    this.boardService.sendingTargetBoard(cutBoard, productBoard, orderId, orderModule);
+                    this.boardService.none2(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
                 }
             }
         } else {
             logger.info("order not last time processing");
 
-            this.boardService.cuttingExtraLength(cutBoard, productBoard.getLength(), wasteThreshold, orderId, orderModule);
-            logger.info("CutBoard after cuttingExtraLength: {}", cutBoard);
-
-            this.boardService.cuttingExtraWidth(cutBoard, productBoard.getWidth().multiply(new BigDecimal(productCutTimes)), wasteThreshold, orderId, orderModule);
-            logger.info("CutBoard after cuttingExtraWidth: {}", cutBoard);
-
-            this.boardService.cuttingTargetBoard(cutBoard, productBoard, productCutTimes - 1, orderId, orderModule);
-            logger.info("CutBoard after cuttingProductBoard: {}", cutBoard);
-
-            this.boardService.sendingTargetBoard(cutBoard, productBoard, orderId, orderModule);
+            this.boardService.none2(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
         }
 
         logger.info("CutBoard in the end: {}", cutBoard);

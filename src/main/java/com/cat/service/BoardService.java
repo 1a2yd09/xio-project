@@ -21,8 +21,6 @@ public class BoardService {
     @Autowired
     MachineActionService actionService;
     @Autowired
-    ParameterService parameterService;
-    @Autowired
     TrimmingValueService trimmingValueService;
     @Autowired
     StockSpecificationService stockSpecificationService;
@@ -107,11 +105,25 @@ public class BoardService {
             this.rotatingCutBoard(cutBoard, rotateTimes, orderId, orderModule);
             this.cuttingCutBoard(cutBoard, targetBoard, cutTimes, orderId, orderModule);
         }
+        if (cutBoard.getWidth().compareTo(targetBoard.getWidth()) == 0) {
+            this.sendingTargetBoard(cutBoard, targetBoard, orderId, orderModule);
+        }
     }
 
     public void sendingTargetBoard(CutBoard cutBoard, Board targetBoard, Integer orderId, String orderModule) {
         this.actionService.addAction(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId, orderModule);
         cutBoard.setWidth(BigDecimal.ZERO);
+    }
+
+    public void none1(CutBoard cutBoard, Board targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+        this.cuttingExtraLength(cutBoard, targetBoard.getLength(), wasteThreshold, orderId, orderModule);
+        this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes, orderId, orderModule);
+    }
+
+    public void none2(CutBoard cutBoard, Board targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+        this.cuttingExtraLength(cutBoard, targetBoard.getLength(), wasteThreshold, orderId, orderModule);
+        this.cuttingExtraWidth(cutBoard, targetBoard.getWidth().multiply(new BigDecimal(cutTimes)), wasteThreshold, orderId, orderModule);
+        this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes - 1, orderId, orderModule);
     }
 
     public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, BigDecimal wasteThreshold, Integer orderId, String orderModule) {

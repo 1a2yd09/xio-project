@@ -115,12 +115,12 @@ public class BoardService {
         cutBoard.setWidth(BigDecimal.ZERO);
     }
 
-    public void none1(CutBoard cutBoard, Board targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+    public void twoStep(CutBoard cutBoard, Board targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         this.cuttingExtraLength(cutBoard, targetBoard.getLength(), wasteThreshold, orderId, orderModule);
         this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes, orderId, orderModule);
     }
 
-    public void none2(CutBoard cutBoard, Board targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+    public void threeStep(CutBoard cutBoard, Board targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         this.cuttingExtraLength(cutBoard, targetBoard.getLength(), wasteThreshold, orderId, orderModule);
         this.cuttingExtraWidth(cutBoard, targetBoard.getWidth().multiply(new BigDecimal(cutTimes)), wasteThreshold, orderId, orderModule);
         this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes - 1, orderId, orderModule);

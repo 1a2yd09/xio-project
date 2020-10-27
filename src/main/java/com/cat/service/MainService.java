@@ -42,16 +42,11 @@ public class MainService {
         this.orderService.truncateOrderTable();
         LocalDate orderDate = this.parameterService.getOperatingParameter().getWorkOrderDate();
         orderService.copyRemoteOrderToLocal(orderDate);
+        this.signalService.addNewSignal(SignalCategory.START_WORK);
     }
 
     public void startService() throws InterruptedException {
-        this.signalService.addNewSignal(SignalCategory.START_WORK);
-        while (true) {
-            if (this.signalService.isReceivedNewSignal(SignalCategory.START_WORK)) {
-                logger.info("Received new start signal!!!");
-                break;
-            }
-            logger.info("Not received new start signal...");
+        while (!this.signalService.isReceivedNewSignal(SignalCategory.START_WORK)) {
             Thread.sleep(3000);
         }
 
@@ -63,15 +58,10 @@ public class MainService {
             while (order.getUnfinishedAmount() != 0) {
                 this.processingBottomOrder(order);
                 this.signalService.addNewSignal(SignalCategory.ACTION);
-                while (true) {
-                    if (this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
-                        logger.info("Received new action signal!!!");
-                        this.actionService.processCompletedAction(order);
-                        break;
-                    }
-                    logger.info("Not received new action signal...");
+                while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                     Thread.sleep(3000);
                 }
+                this.actionService.processCompletedAction(order);
             }
         }
 
@@ -88,15 +78,10 @@ public class MainService {
             while (order.getUnfinishedAmount() != 0) {
                 legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct);
                 this.signalService.addNewSignal(SignalCategory.ACTION);
-                while (true) {
-                    if (this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
-                        logger.info("Received new action signal!!!");
-                        this.actionService.processCompletedAction(order);
-                        break;
-                    }
-                    logger.info("Not received new action signal...");
+                while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                     Thread.sleep(3000);
                 }
+                this.actionService.processCompletedAction(order);
             }
         }
     }
@@ -129,9 +114,9 @@ public class MainService {
         int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, semiProductBoard.getWidth());
         logger.info("SemiProductCutTimes: {}", semiProductCutTimes);
 
-        this.boardService.none1(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId, orderModule);
+        this.boardService.twoStep(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId, orderModule);
 
-        this.boardService.none2(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+        this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
     }
 
     public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {
@@ -166,7 +151,7 @@ public class MainService {
             if (remainingCutBoard.compareTo(nextOrderProductBoard) >= 0) {
                 logger.info("remainingCutBoard can reuse");
 
-                this.boardService.none1(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+                this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
             } else {
                 logger.info("remainingCutBoard can't reuse");
 
@@ -182,26 +167,26 @@ public class MainService {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
                         logger.info("first cutting productBoard");
 
-                        this.boardService.none1(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+                        this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
 
-                        this.boardService.none2(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
+                        this.boardService.threeStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
                     } else {
                         logger.info("first cutting stockBoard");
 
-                        this.boardService.none1(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
+                        this.boardService.twoStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
 
-                        this.boardService.none2(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+                        this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
                     }
                 } else {
                     logger.info("can't cutting stockBoard");
 
-                    this.boardService.none2(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+                    this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
                 }
             }
         } else {
             logger.info("order not last time processing");
 
-            this.boardService.none2(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+            this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
         }
 
         logger.info("CutBoard in the end: {}", cutBoard);

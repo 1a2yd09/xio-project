@@ -1,6 +1,5 @@
 package com.cat;
 
-import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.service.MachineActionService;
 import com.cat.service.MainService;
@@ -34,7 +33,6 @@ class BottomOrderTest {
      */
     @Test
     void test1() {
-        OperatingParameter op = parameterService.getOperatingParameter();
         // 清空一下动作表:
         machineActionService.truncateAction();
         // 下料板:2.5×1250×2504，成品板:2.5×121×2185，需求2个成品板
@@ -50,7 +48,6 @@ class BottomOrderTest {
      */
     @Test
     void test2() {
-        OperatingParameter op = parameterService.getOperatingParameter();
         // 清空一下动作表:
         machineActionService.truncateAction();
         // 下料板:2.5×1250×1589，成品板:2.5×1345.5×1189，需求1个成品板

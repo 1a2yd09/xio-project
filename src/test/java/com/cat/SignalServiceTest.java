@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SignalServiceTest {
@@ -21,14 +22,10 @@ class SignalServiceTest {
 
     @Test
     void testReceiveNewSignal() {
-        boolean flag = signalService.isReceivedNewSignal(SignalCategory.START_WORK);
-        assertTrue(flag);
-    }
-
-    @Test
-    void testAddSignal() {
-        signalService.addNewSignal(SignalCategory.START_WORK);
+        boolean flag = signalService.isReceivedNewSignal(SignalCategory.ACTION);
+        assertFalse(flag);
         signalService.addNewSignal(SignalCategory.ACTION);
-        assertTrue(true);
+        flag = signalService.isReceivedNewSignal(SignalCategory.ACTION);
+        assertTrue(flag);
     }
 }

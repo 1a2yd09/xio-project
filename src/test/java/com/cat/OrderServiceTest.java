@@ -1,5 +1,7 @@
 package com.cat;
 
+import com.cat.entity.Board;
+import com.cat.entity.CutBoard;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
@@ -42,6 +44,27 @@ class OrderServiceTest {
         LocalDate date = op.getWorkOrderDate();
         List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPattern.SPEC.value, date);
         assertEquals(914, orders.size());
+        for (WorkOrder order : orders) {
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
+            Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            if (board.getWidth().compareTo(cutBoard.getWidth()) == 0) {
+                System.out.println(order);
+            }
+        }
+    }
+
+    @Test
+    void testGetAllWidthBetterNotBottomOrder() {
+        OperatingParameter op = parameterService.getOperatingParameter();
+        List<WorkOrder> orders = workOrderService.getNotBottomOrders(op.getWorkOrderDate());
+        assertEquals(82, orders.size());
+        for (WorkOrder order : orders) {
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
+            Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
+                System.out.println(order);
+            }
+        }
     }
 
     @Test
@@ -49,10 +72,12 @@ class OrderServiceTest {
         OperatingParameter op = parameterService.getOperatingParameter();
         LocalDate date = op.getWorkOrderDate();
         List<WorkOrder> orders = workOrderService.getNotBottomOrders(date);
+        // 获取未预处理的直梁工单，共82个:
         assertEquals(82, orders.size());
         inventoryService.addNewInventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value);
         inventoryService.addNewInventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value);
         orders = workOrderService.getPreprocessNotBottomOrders(date);
+        // 获取预处理的直梁工单，其中有6个工单因为使用了已有的库存件作为成品，因此工单数量变为76个:
         assertEquals(76, orders.size());
     }
 }

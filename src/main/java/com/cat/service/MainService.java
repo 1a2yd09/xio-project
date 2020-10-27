@@ -42,10 +42,10 @@ public class MainService {
         this.orderService.truncateOrderTable();
         LocalDate orderDate = this.parameterService.getOperatingParameter().getWorkOrderDate();
         orderService.copyRemoteOrderToLocal(orderDate);
-        this.signalService.addNewSignal(SignalCategory.START_WORK);
     }
 
     public void startService() throws InterruptedException {
+        this.signalService.addNewSignal(SignalCategory.START_WORK);
         while (!this.signalService.isReceivedNewSignal(SignalCategory.START_WORK)) {
             Thread.sleep(3000);
         }

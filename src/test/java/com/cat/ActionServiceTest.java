@@ -1,9 +1,6 @@
 package com.cat;
 
-import com.cat.entity.Board;
-import com.cat.entity.CutBoard;
-import com.cat.entity.Inventory;
-import com.cat.entity.WorkOrder;
+import com.cat.entity.*;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
 import com.cat.service.*;
@@ -13,9 +10,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ActionServiceTest {
     static ApplicationContext context;
@@ -55,6 +52,16 @@ class ActionServiceTest {
         // 测试二，没有剩余板材:
         assertNull(legacyCutBoard);
 
+        List<MachineAction> actions = machineActionService.getAllActions();
+        for (MachineAction action : actions) {
+            assertFalse(action.getCompleted());
+        }
+        machineActionService.completedAllActions();
+        actions = machineActionService.getAllActions();
+        for (MachineAction action : actions) {
+            assertTrue(action.getCompleted());
+        }
+
         int oldUnfinishedCount = order.getUnfinishedAmount();
         Inventory inventory = inventoryService.getInventory(stock.getSpecification(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
@@ -88,6 +95,16 @@ class ActionServiceTest {
         // 测试一，生成13个机器动作:
         assertEquals(13, machineActionService.getActionCount());
 
+        List<MachineAction> actions = machineActionService.getAllActions();
+        for (MachineAction action : actions) {
+            assertFalse(action.getCompleted());
+        }
+        machineActionService.completedAllActions();
+        actions = machineActionService.getAllActions();
+        for (MachineAction action : actions) {
+            assertTrue(action.getCompleted());
+        }
+
         int oldUnfinishedCount = order.getUnfinishedAmount();
         Inventory inventory = inventoryService.getInventory(semiProduct.getSpecification(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
@@ -104,5 +121,16 @@ class ActionServiceTest {
         int newFinishedCount = inventory == null ? 0 : inventory.getAmount();
         // 测试四，该半成品的数目等于原来的数目加上上面生成的半成品数目:
         assertEquals(newFinishedCount, oldFinishedCount + 5);
+    }
+
+    @Test
+    void testCompletedAllActions() {
+        WorkOrder order = workOrderService.getOrderById(3101165);
+        mainService.processingBottomOrder(order);
+        assertFalse(machineActionService.allActionsCompleted());
+        machineActionService.completedAllActions(1);
+        assertFalse(machineActionService.allActionsCompleted());
+        machineActionService.completedAllActions();
+        assertTrue(machineActionService.allActionsCompleted());
     }
 }

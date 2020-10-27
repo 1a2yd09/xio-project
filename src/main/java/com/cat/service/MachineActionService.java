@@ -26,6 +26,15 @@ public class MachineActionService {
 
     RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
 
+    public boolean allActionsCompleted() {
+        for (MachineAction action : this.getAllActions()) {
+            if (Boolean.FALSE.equals(action.getCompleted())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void processCompletedAction(WorkOrder order) {
         int productCount = 0;
         Board semiProduct = null;
@@ -92,6 +101,10 @@ public class MachineActionService {
 
     public void completedAllActions() {
         this.jdbcTemplate.update("UPDATE tb_machine_action SET completed = 1 WHERE completed = 0");
+    }
+
+    public void completedAllActions(Integer id) {
+        this.jdbcTemplate.update("UPDATE tb_machine_action SET completed = 1 WHERE id = ?", id);
     }
 
     public void transferAllActions() {

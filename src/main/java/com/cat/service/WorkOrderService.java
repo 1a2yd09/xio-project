@@ -28,6 +28,11 @@ public class WorkOrderService {
 
     RowMapper<WorkOrder> orderM = new BeanPropertyRowMapper<>(WorkOrder.class);
 
+    public void startOrder(WorkOrder order) {
+        order.setOperationState(OrderState.ALREADY_STARTED.value);
+        this.updateOrderState(order.getOperationState(), order.getId());
+    }
+
     public List<WorkOrder> getPreprocessNotBottomOrders(LocalDate date) {
         List<WorkOrder> orders = this.getNotBottomOrders(date);
         Map<String, Inventory> inventoryMap = this.inventoryService.getStockMap();

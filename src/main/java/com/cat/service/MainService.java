@@ -55,8 +55,10 @@ public class MainService {
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 
         for (WorkOrder order : orders) {
+            this.orderService.startOrder(order);
             while (order.getUnfinishedAmount() != 0) {
                 this.processingBottomOrder(order);
+                this.actionService.completedAllActions();
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                     Thread.sleep(3000);
@@ -75,8 +77,10 @@ public class MainService {
                 WorkOrder nextOrder = orders.get(i + 1);
                 nextProduct = new Board(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
             }
+            this.orderService.startOrder(order);
             while (order.getUnfinishedAmount() != 0) {
                 legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct);
+                this.actionService.completedAllActions();
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                     Thread.sleep(3000);

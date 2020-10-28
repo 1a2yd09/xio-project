@@ -43,7 +43,7 @@ class NotBottomOrderTest {
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，设置其为长边朝前:
-        legacyBoard.setForwardEdge(1);
+        legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
         // 该工单需求2个成品，但1次只能裁剪1个成品，因此不是最后一次:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, legacyBoard, null);
         // 旋转-裁剪长度-送板:
@@ -59,7 +59,7 @@ class NotBottomOrderTest {
         machineActionService.truncateAction();
         WorkOrder order = workOrderService.getOrderById(3098562);
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-        legacyBoard.setForwardEdge(1);
+        legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
         // 将留板改成不能用:
         legacyBoard.setWidth(BigDecimal.ZERO);
         // 该工单需求2个成品，但1次只能裁剪1个成品，因此不是最后一次:
@@ -186,7 +186,7 @@ class NotBottomOrderTest {
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，因此肯定是长边朝前:
-        legacyBoard.setForwardEdge(1);
+        legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
         legacyBoard.setWidth(new BigDecimal("500"));
         // 直接用工单本身成品板作为下一工单的成品板:
         Board nextOrderProductBoard = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
@@ -210,7 +210,7 @@ class NotBottomOrderTest {
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，因此肯定是长边朝前:
-        legacyBoard.setForwardEdge(1);
+        legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
         legacyBoard.setWidth(new BigDecimal("250"));
         // 直接用工单本身成品板作为下一工单的成品板:
         Board nextOrderProductBoard = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
@@ -236,7 +236,7 @@ class NotBottomOrderTest {
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         // 留板因为是裁剪了成品之后才留下来的，因此肯定是长边朝前:
-        legacyBoard.setForwardEdge(1);
+        legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
         legacyBoard.setWidth(new BigDecimal("500"));
         // 直接用工单本身成品板作为下一工单的成品板:
         Board nextOrderProductBoard = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);

@@ -77,7 +77,7 @@ public class BoardService {
             extraBoard.setMaterial(cutBoard.getMaterial());
             extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
 
-            int rotateTimes = cutBoard.getForwardEdge() == 1 ? 1 : 0;
+            int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 1 : 0;
             this.rotatingCutBoard(cutBoard, rotateTimes, orderId, orderModule);
             this.cuttingCutBoard(cutBoard, extraBoard, 1, orderId, orderModule);
         }
@@ -93,7 +93,7 @@ public class BoardService {
             extraBoard.setMaterial(cutBoard.getMaterial());
             extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
 
-            int rotateTimes = cutBoard.getForwardEdge() == 1 ? 0 : 1;
+            int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 0 : 1;
             this.rotatingCutBoard(cutBoard, rotateTimes, orderId, orderModule);
             this.cuttingCutBoard(cutBoard, extraBoard, 1, orderId, orderModule);
         }
@@ -101,7 +101,7 @@ public class BoardService {
 
     public void cuttingTargetBoard(CutBoard cutBoard, Board targetBoard, int cutTimes, Integer orderId, String orderModule) {
         if (cutTimes > 0) {
-            int rotateTimes = cutBoard.getForwardEdge() == 1 ? 0 : 1;
+            int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 0 : 1;
             this.rotatingCutBoard(cutBoard, rotateTimes, orderId, orderModule);
             this.cuttingCutBoard(cutBoard, targetBoard, cutTimes, orderId, orderModule);
         }

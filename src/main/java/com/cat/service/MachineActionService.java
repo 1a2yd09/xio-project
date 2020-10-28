@@ -108,6 +108,8 @@ public class MachineActionService {
     }
 
     public void transferAllActions() {
-        this.jdbcTemplate.update("INSERT INTO tb_completed_action SELECT * FROM tb_machine_action");
+        this.jdbcTemplate.update("INSERT INTO tb_completed_action " +
+                "SELECT id, action_category, cut_distance, board_category, board_specification, board_material, work_order_id, work_order_module " +
+                "FROM tb_machine_action");
     }
 }

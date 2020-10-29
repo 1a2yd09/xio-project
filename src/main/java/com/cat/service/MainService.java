@@ -54,10 +54,12 @@ public class MainService {
 
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 
+        CutBoard legacyCutBoard = null;
+
         for (WorkOrder order : orders) {
             this.orderService.startOrder(order);
             while (order.getUnfinishedAmount() != 0) {
-                this.processingBottomOrder(order);
+                legacyCutBoard = this.processingBottomOrder(order, legacyCutBoard);
                 this.actionService.completedAllActions();
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
@@ -68,7 +70,6 @@ public class MainService {
         }
 
         orders = orderService.getPreprocessNotBottomOrders(op.getWorkOrderDate());
-        CutBoard legacyCutBoard = null;
 
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder order = orders.get(i);
@@ -90,7 +91,7 @@ public class MainService {
         }
     }
 
-    public void processingBottomOrder(WorkOrder order) {
+    public CutBoard processingBottomOrder(WorkOrder order, CutBoard legacyCutBoard) {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
@@ -106,7 +107,7 @@ public class MainService {
         Board productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, orderCutBoard.getWidth());
         logger.info("ProductBoard: {}", productBoard);
 
-        CutBoard cutBoard = this.boardService.processingCutBoard(null, orderCutBoard, productBoard, wasteThreshold, orderId, orderModule);
+        CutBoard cutBoard = this.boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, wasteThreshold, orderId, orderModule);
         logger.info("processingCutBoard: {}", cutBoard);
 
         int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
@@ -121,6 +122,8 @@ public class MainService {
         this.boardService.twoStep(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId, orderModule);
 
         this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+
+        return cutBoard.getWidth().compareTo(BigDecimal.ZERO) == 0 ? null : cutBoard;
     }
 
     public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {

@@ -90,7 +90,7 @@ class ActionServiceTest {
         WorkOrder order = workOrderService.getOrderById(3099510);
         Board semiProduct = new Board("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
 
-        mainService.processingBottomOrder(order);
+        mainService.processingBottomOrder(order, null);
         // 取板-修边(无)-旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
         // 测试一，生成13个机器动作:
         assertEquals(13, machineActionService.getActionCount());
@@ -126,7 +126,7 @@ class ActionServiceTest {
     @Test
     void testCompletedAllActions() {
         WorkOrder order = workOrderService.getOrderById(3101165);
-        mainService.processingBottomOrder(order);
+        mainService.processingBottomOrder(order, null);
         assertFalse(machineActionService.allActionsCompleted());
         machineActionService.completedAllActions(1);
         assertFalse(machineActionService.allActionsCompleted());

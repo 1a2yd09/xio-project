@@ -42,6 +42,8 @@ public class WorkOrderService {
             Inventory inventory = inventoryMap.get(BoardUtil.getStandardSpecStr(order.getSpecification()));
             if (inventory != null && inventory.getMaterial().equals(order.getMaterial()) && inventory.getAmount() > 0) {
                 int usedInventoryNum = Math.min(order.getUnfinishedAmount(), inventory.getAmount());
+
+                this.startOrder(order);
                 this.addOrderCompletedAmount(order, usedInventoryNum);
                 inventory.setAmount(inventory.getAmount() - usedInventoryNum);
                 // 直接在这里就将库存件数目写回数据表，不放在最后一起处理的理由是，

@@ -115,7 +115,7 @@ public class MainService {
         Board semiProductBoard = new Board(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
         logger.info("SemiProductBoard: {}", semiProductBoard);
 
-        int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, semiProductBoard.getWidth());
+        int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, semiProductBoard);
         logger.info("SemiProductCutTimes: {}", semiProductCutTimes);
 
         this.boardService.twoStep(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId, orderModule);
@@ -162,7 +162,7 @@ public class MainService {
                 Board stockBoard = this.boardService.getMatchStockBoard(cutBoard.getHeight(), material);
                 logger.info("stockBoard: {}", stockBoard);
 
-                int stockBoardCutTimes = this.boardService.calNotProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), productCutTimes, stockBoard.getWidth());
+                int stockBoardCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, stockBoard);
                 logger.info("stockBoardCutTimes: {}", stockBoardCutTimes);
 
                 if (stockBoardCutTimes > 0) {

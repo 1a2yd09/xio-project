@@ -169,10 +169,11 @@ public class BoardService {
         return Math.min(maxProductBoardCutTimes, orderUnfinishedTimes);
     }
 
-    public int calNotProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, int productCutTimes, BigDecimal notProductWidth) {
-        if (notProductWidth.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal remainingWidth = cutBoardWidth.subtract(productBoardWidth.multiply(new BigDecimal(productCutTimes)));
-            return remainingWidth.divideToIntegralValue(notProductWidth).intValue();
+    public int calNotProductCutTimes(CutBoard cutBoard, BigDecimal productBoardWidth, int productCutTimes, Board notProductBoard) {
+        // 一、固定宽度和库存规格宽度可能为零，二、库存规格长度可能超出下料板长度:
+        if (notProductBoard.getWidth().compareTo(BigDecimal.ZERO) > 0 && cutBoard.getLength().compareTo(notProductBoard.getLength()) >= 0) {
+            BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoardWidth.multiply(new BigDecimal(productCutTimes)));
+            return remainingWidth.divideToIntegralValue(notProductBoard.getWidth()).intValue();
         } else {
             return 0;
         }

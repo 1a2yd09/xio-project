@@ -48,6 +48,17 @@ public class BoardUtil {
         return getStandardSpecStr(list.get(0), list.get(1), list.get(2));
     }
 
+    public static boolean compareTwoSpecStr(String spec1, String spec2) {
+        List<BigDecimal> decList1 = BoardUtil.specStrToDecList(spec1);
+        List<BigDecimal> decList2 = BoardUtil.specStrToDecList(spec2);
+        for (int i = 0; i < decList1.size(); i++) {
+            if (decList1.get(i).compareTo(decList2.get(i)) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * 虽取名叫计算板材类型，但实际是计算板材是属于余料或者废料类型。
      */

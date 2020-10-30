@@ -3,6 +3,7 @@ package com.cat.service;
 import com.cat.entity.Inventory;
 import com.cat.entity.NormalBoard;
 import com.cat.entity.enums.BoardCategory;
+import com.cat.util.BoardUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,7 +23,7 @@ public class InventoryService {
     RowMapper<Inventory> inventoryM = new BeanPropertyRowMapper<>(Inventory.class);
 
     public Map<String, Inventory> getStockMap() {
-        return this.getInventoriesByCategory(BoardCategory.STOCK.value).stream().collect(Collectors.toMap(Inventory::getSpecification, Function.identity()));
+        return this.getInventories(BoardCategory.STOCK.value).stream().collect(Collectors.toMap(Inventory::getSpecification, Function.identity()));
     }
 
     public void addInventoryAmount(NormalBoard board, int amount) {
@@ -36,11 +37,20 @@ public class InventoryService {
     }
 
     public Inventory getInventory(String specification, String material, String category) {
-        List<Inventory> list = this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE specification = ? AND material = ? AND category = ?", this.inventoryM, specification, material, category);
-        return list.isEmpty() ? null : list.get(0);
+        List<Inventory> inventories = this.getInventories(material, category);
+        for (Inventory inventory : inventories) {
+            if (BoardUtil.compareTwoSpecStr(specification, inventory.getSpecification())) {
+                return inventory;
+            }
+        }
+        return null;
     }
 
-    public List<Inventory> getInventoriesByCategory(String category) {
+    public List<Inventory> getInventories(String material, String category) {
+        return this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE material = ? AND category = ?", this.inventoryM, material, category);
+    }
+
+    public List<Inventory> getInventories(String category) {
         return this.jdbcTemplate.query("SELECT * FROM tb_inventory WHERE amount > 0 AND category = ?", this.inventoryM, category);
     }
 

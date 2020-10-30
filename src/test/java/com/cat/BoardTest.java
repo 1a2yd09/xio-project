@@ -4,12 +4,13 @@ import com.cat.entity.CutBoard;
 import com.cat.entity.NormalBoard;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.service.BoardService;
+import com.cat.util.BoardUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BoardTest {
     static ApplicationContext context;
@@ -60,5 +61,15 @@ class BoardTest {
         b3 = new NormalBoard("2.5×300×2200", "热板", BoardCategory.STOCK);
         ret = boardService.calNotProductCutTimes(b1, b2.getWidth(), 1, b3);
         assertEquals(0, ret);
+    }
+
+    @Test
+    void testCompareTwoSpecStr() {
+        String s1 = "2.5×200×2185";
+        String s2 = "2.50×200.00×2185.00";
+        assertTrue(BoardUtil.compareTwoSpecStr(s1, s2));
+        s1 = "2.5×200×2185";
+        s2 = "2.4×200×2185";
+        assertFalse(BoardUtil.compareTwoSpecStr(s1, s2));
     }
 }

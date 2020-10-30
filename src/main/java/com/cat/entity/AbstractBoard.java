@@ -7,21 +7,17 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
-public class Board implements Comparable<Board> {
+public abstract class AbstractBoard implements Comparable<AbstractBoard> {
     private BigDecimal height;
     private BigDecimal width;
     private BigDecimal length;
     private String material;
     private BoardCategory category;
 
-    public String getSpecification() {
-        return BoardUtil.getStandardSpecStr(this.height, this.width, this.length);
+    public AbstractBoard() {
     }
 
-    public Board() {
-    }
-
-    public Board(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category) {
+    public AbstractBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category) {
         this.height = height;
         this.width = width;
         this.length = length;
@@ -29,13 +25,49 @@ public class Board implements Comparable<Board> {
         this.category = category;
     }
 
-    public Board(String specification, String material, BoardCategory category) {
+    public AbstractBoard(String specification, String material, BoardCategory category) {
         List<BigDecimal> list = BoardUtil.specStrToDecList(specification);
         this.height = list.get(0);
         this.width = list.get(1);
         this.length = list.get(2);
         this.material = material;
         this.category = category;
+    }
+
+    public String getSpecification() {
+        return BoardUtil.getStandardSpecStr(this.height, this.width, this.length);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.material, this.height, this.width, this.length);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AbstractBoard) {
+            AbstractBoard ab = (AbstractBoard) obj;
+            return Objects.equals(this.material, ab.material) && this.height.compareTo(ab.height) == 0 && this.width.compareTo(ab.width) == 0 && this.length.compareTo(ab.length) == 0;
+        }
+        return false;
+    }
+
+    @Override
+    public int compareTo(AbstractBoard o) {
+        if (o == null) {
+            return -1;
+        }
+        if (this.material.equals(o.material) && this.height.compareTo(o.height) == 0) {
+            if (this.width.compareTo(o.width) < 0 || this.length.compareTo(o.length) < 0) {
+                return -1;
+            } else if (this.width.compareTo(o.width) == 0 && this.length.compareTo(o.length) == 0) {
+                return 0;
+            } else {
+                return 1;
+            }
+        } else {
+            return -1;
+        }
     }
 
     public BigDecimal getHeight() {
@@ -80,45 +112,12 @@ public class Board implements Comparable<Board> {
 
     @Override
     public String toString() {
-        return "Board{" +
+        return "AbstractBoard{" +
                 "height=" + height +
                 ", width=" + width +
                 ", length=" + length +
                 ", material='" + material + '\'' +
                 ", category=" + category +
                 '}';
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.material, this.height, this.width, this.length);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Board) {
-            Board b = (Board) obj;
-            // 这里 BigDecimal 按理说也是引用对象，但是它们本身不能用 equals() 方法进行比较:
-            return Objects.equals(this.material, b.material) && this.height.compareTo(b.height) == 0 && this.width.compareTo(b.width) == 0 && this.length.compareTo(b.length) == 0;
-        }
-        return false;
-    }
-
-    @Override
-    public int compareTo(Board other) {
-        if (other == null) {
-            return -1;
-        }
-        if (this.material.equals(other.material) && this.height.compareTo(other.height) == 0) {
-            if (this.width.compareTo(other.width) < 0 || this.length.compareTo(other.length) < 0) {
-                return -1;
-            } else if (this.width.compareTo(other.width) == 0 && this.length.compareTo(other.length) == 0) {
-                return 0;
-            } else {
-                return 1;
-            }
-        } else {
-            return -1;
-        }
     }
 }

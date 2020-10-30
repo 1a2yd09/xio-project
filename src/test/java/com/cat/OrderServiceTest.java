@@ -1,7 +1,7 @@
 package com.cat;
 
-import com.cat.entity.Board;
 import com.cat.entity.CutBoard;
+import com.cat.entity.NormalBoard;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
@@ -46,7 +46,7 @@ class OrderServiceTest {
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) == 0) {
                 System.out.println(order);
             }
@@ -60,7 +60,7 @@ class OrderServiceTest {
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            Board board = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
                 System.out.println(order);
             }

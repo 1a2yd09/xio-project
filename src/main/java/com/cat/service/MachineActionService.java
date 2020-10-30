@@ -1,7 +1,8 @@
 package com.cat.service;
 
-import com.cat.entity.Board;
+import com.cat.entity.AbstractBoard;
 import com.cat.entity.MachineAction;
+import com.cat.entity.NormalBoard;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
@@ -37,9 +38,9 @@ public class MachineActionService {
 
     public void processCompletedAction(WorkOrder order) {
         int productCount = 0;
-        Board semiProduct = null;
+        NormalBoard semiProduct = null;
         int semiCount = 0;
-        Board stock = null;
+        NormalBoard stock = null;
         int stockCount = 0;
 
         for (MachineAction action : this.getAllActions()) {
@@ -49,12 +50,12 @@ public class MachineActionService {
                 productCount++;
             } else if (BoardCategory.SEMI_PRODUCT.value.equals(boardCategory)) {
                 if (semiProduct == null) {
-                    semiProduct = new Board(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.SEMI_PRODUCT);
+                    semiProduct = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.SEMI_PRODUCT);
                 }
                 semiCount++;
             } else if (BoardCategory.STOCK.value.equals(boardCategory)) {
                 if (stock == null) {
-                    stock = new Board(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.STOCK);
+                    stock = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.STOCK);
                 }
                 stockCount++;
             }
@@ -73,7 +74,7 @@ public class MachineActionService {
         this.truncateAction();
     }
 
-    public void addAction(ActionCategory category, BigDecimal dis, Board board, Integer orderId, String orderModule) {
+    public void addAction(ActionCategory category, BigDecimal dis, AbstractBoard board, Integer orderId, String orderModule) {
         // 注意位置参数的类型是否与数据库类型可以相互转换:
         this.jdbcTemplate.update("INSERT INTO tb_machine_action (action_category, cut_distance, board_category, board_specification, board_material, work_order_id, work_order_module) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)", category.value, dis, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);

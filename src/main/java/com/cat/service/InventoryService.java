@@ -1,7 +1,7 @@
 package com.cat.service;
 
-import com.cat.entity.Board;
 import com.cat.entity.Inventory;
+import com.cat.entity.NormalBoard;
 import com.cat.entity.enums.BoardCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -25,7 +25,7 @@ public class InventoryService {
         return this.getInventoriesByCategory(BoardCategory.STOCK.value).stream().collect(Collectors.toMap(Inventory::getSpecification, Function.identity()));
     }
 
-    public void addInventoryAmount(Board board, int amount) {
+    public void addInventoryAmount(NormalBoard board, int amount) {
         Inventory inventory = this.getInventory(board.getSpecification(), board.getMaterial(), board.getCategory().value);
         if (inventory != null) {
             inventory.setAmount(inventory.getAmount() + amount);

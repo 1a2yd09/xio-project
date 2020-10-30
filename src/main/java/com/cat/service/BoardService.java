@@ -1,7 +1,8 @@
 package com.cat.service;
 
-import com.cat.entity.Board;
+import com.cat.entity.AbstractBoard;
 import com.cat.entity.CutBoard;
+import com.cat.entity.NormalBoard;
 import com.cat.entity.StockSpecification;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
@@ -28,14 +29,22 @@ public class BoardService {
     public void rotatingCutBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < rotateTimes; i++) {
             this.actionService.addAction(ActionCategory.ROTATE, BigDecimal.ZERO, cutBoard, orderId, orderModule);
-            cutBoard.changeForwardEdge();
+            if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
+                cutBoard.setForwardEdge(CutBoard.EdgeType.SHORT);
+            } else {
+                cutBoard.setForwardEdge(CutBoard.EdgeType.LONG);
+            }
         }
     }
 
-    public void cuttingCutBoard(CutBoard cutBoard, Board targetBoard, int cutTimes, Integer orderId, String orderModule) {
+    public void cuttingCutBoard(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < cutTimes; i++) {
             this.actionService.addAction(ActionCategory.CUT, targetBoard.getWidth(), targetBoard, orderId, orderModule);
-            cutBoard.modifySpec(targetBoard.getWidth());
+            if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
+                cutBoard.setWidth(cutBoard.getWidth().subtract(targetBoard.getWidth()));
+            } else {
+                cutBoard.setLength(cutBoard.getLength().subtract(targetBoard.getWidth()));
+            }
         }
     }
 
@@ -48,7 +57,7 @@ public class BoardService {
         for (int i = 0; i < trimValues.size(); i++) {
             BigDecimal trimValue = trimValues.get(i);
             if (trimValue.compareTo(BigDecimal.ZERO) > 0) {
-                Board wastedBoard = new Board();
+                NormalBoard wastedBoard = new NormalBoard();
                 wastedBoard.setHeight(cutBoard.getHeight());
                 wastedBoard.setWidth(trimValue);
                 wastedBoard.setMaterial(cutBoard.getMaterial());
@@ -70,7 +79,7 @@ public class BoardService {
     public void cuttingExtraLength(CutBoard cutBoard, BigDecimal targetLength, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         BigDecimal extraLength = cutBoard.getLength().subtract(targetLength);
         if (extraLength.compareTo(BigDecimal.ZERO) > 0) {
-            Board extraBoard = new Board();
+            NormalBoard extraBoard = new NormalBoard();
             extraBoard.setHeight(cutBoard.getHeight());
             extraBoard.setWidth(extraLength);
             extraBoard.setLength(cutBoard.getWidth());
@@ -86,7 +95,7 @@ public class BoardService {
     public void cuttingExtraWidth(CutBoard cutBoard, BigDecimal targetWidth, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         BigDecimal extraWidth = cutBoard.getWidth().subtract(targetWidth);
         if (extraWidth.compareTo(BigDecimal.ZERO) > 0) {
-            Board extraBoard = new Board();
+            NormalBoard extraBoard = new NormalBoard();
             extraBoard.setHeight(cutBoard.getHeight());
             extraBoard.setWidth(extraWidth);
             extraBoard.setLength(cutBoard.getLength());
@@ -99,7 +108,7 @@ public class BoardService {
         }
     }
 
-    public void cuttingTargetBoard(CutBoard cutBoard, Board targetBoard, int cutTimes, Integer orderId, String orderModule) {
+    public void cuttingTargetBoard(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, Integer orderId, String orderModule) {
         if (cutTimes > 0) {
             int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 0 : 1;
             this.rotatingCutBoard(cutBoard, rotateTimes, orderId, orderModule);
@@ -110,23 +119,23 @@ public class BoardService {
         }
     }
 
-    public void sendingTargetBoard(CutBoard cutBoard, Board targetBoard, Integer orderId, String orderModule) {
+    public void sendingTargetBoard(CutBoard cutBoard, AbstractBoard targetBoard, Integer orderId, String orderModule) {
         this.actionService.addAction(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId, orderModule);
         cutBoard.setWidth(BigDecimal.ZERO);
     }
 
-    public void twoStep(CutBoard cutBoard, Board targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+    public void twoStep(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         this.cuttingExtraLength(cutBoard, targetBoard.getLength(), wasteThreshold, orderId, orderModule);
         this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes, orderId, orderModule);
     }
 
-    public void threeStep(CutBoard cutBoard, Board targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+    public void threeStep(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         this.cuttingExtraLength(cutBoard, targetBoard.getLength(), wasteThreshold, orderId, orderModule);
         this.cuttingExtraWidth(cutBoard, targetBoard.getWidth().multiply(new BigDecimal(cutTimes)), wasteThreshold, orderId, orderModule);
         this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes - 1, orderId, orderModule);
     }
 
-    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, Board productBoard, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
+    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, NormalBoard productBoard, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         List<BigDecimal> trimValues = this.trimmingValueService.getTrimmingValue().getTrimValues();
         // 这个方法应该改为选择下料板，是要剩余板材还是要工单板材，确定了以后返回出来，
         // 然后创建一个新的方法用于处理板材，不然将阈值和修边值再传入进来，整个参数过于臃肿。
@@ -148,13 +157,13 @@ public class BoardService {
         }
     }
 
-    public Board getMatchStockBoard(BigDecimal height, String material) {
+    public NormalBoard getMatchStockBoard(BigDecimal height, String material) {
         StockSpecification ss = this.stockSpecificationService.getMatchSpecification(height);
-        return new Board(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
+        return new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
     }
 
-    public Board getCanCutProduct(String specification, String material, BigDecimal orderCutBoardWidth) {
-        Board product = new Board(specification, material, BoardCategory.PRODUCT);
+    public NormalBoard getCanCutProduct(String specification, String material, BigDecimal orderCutBoardWidth) {
+        NormalBoard product = new NormalBoard(specification, material, BoardCategory.PRODUCT);
         if (product.getWidth().compareTo(orderCutBoardWidth) > 0) {
             // 如果成品板宽度大于下料板宽度，则需要交换成品板的宽度和长度，不然会导致裁剪逻辑出错:
             BigDecimal tmp = product.getWidth();
@@ -169,7 +178,7 @@ public class BoardService {
         return Math.min(maxProductBoardCutTimes, orderUnfinishedTimes);
     }
 
-    public int calNotProductCutTimes(CutBoard cutBoard, BigDecimal productBoardWidth, int productCutTimes, Board notProductBoard) {
+    public int calNotProductCutTimes(CutBoard cutBoard, BigDecimal productBoardWidth, int productCutTimes, NormalBoard notProductBoard) {
         // 一、固定宽度和库存规格宽度可能为零，二、库存规格长度可能超出下料板长度:
         if (notProductBoard.getWidth().compareTo(BigDecimal.ZERO) > 0 && cutBoard.getLength().compareTo(notProductBoard.getLength()) >= 0) {
             BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoardWidth.multiply(new BigDecimal(productCutTimes)));

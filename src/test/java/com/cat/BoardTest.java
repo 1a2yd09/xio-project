@@ -1,7 +1,7 @@
 package com.cat;
 
-import com.cat.entity.Board;
 import com.cat.entity.CutBoard;
+import com.cat.entity.NormalBoard;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.service.BoardService;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,41 +23,41 @@ class BoardTest {
 
     @Test
     void testCompareBoard() {
-        Board b1 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
-        Board b2 = new Board("2.5×121×2185", "冷板", BoardCategory.PRODUCT);
+        NormalBoard b1 = new NormalBoard("2.5×121×2185", "热板", BoardCategory.PRODUCT);
+        NormalBoard b2 = new NormalBoard("2.5×121×2185", "冷板", BoardCategory.PRODUCT);
         assertEquals(-1, b1.compareTo(b2));
 
-        b1 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
-        b2 = new Board("2×121×2185", "热板", BoardCategory.PRODUCT);
+        b1 = new NormalBoard("2.5×121×2185", "热板", BoardCategory.PRODUCT);
+        b2 = new NormalBoard("2×121×2185", "热板", BoardCategory.PRODUCT);
         assertEquals(-1, b1.compareTo(b2));
 
-        b1 = new Board("2.5×120×2180", "热板", BoardCategory.PRODUCT);
-        b2 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
+        b1 = new NormalBoard("2.5×120×2180", "热板", BoardCategory.PRODUCT);
+        b2 = new NormalBoard("2.5×121×2185", "热板", BoardCategory.PRODUCT);
         assertEquals(-1, b1.compareTo(b2));
 
-        b1 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
-        b2 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
+        b1 = new NormalBoard("2.5×121×2185", "热板", BoardCategory.PRODUCT);
+        b2 = new NormalBoard("2.5×121×2185", "热板", BoardCategory.PRODUCT);
         assertEquals(0, b1.compareTo(b2));
 
-        b1 = new Board("2.5×122×2186", "热板", BoardCategory.PRODUCT);
-        b2 = new Board("2.5×121×2185", "热板", BoardCategory.PRODUCT);
+        b1 = new NormalBoard("2.5×122×2186", "热板", BoardCategory.PRODUCT);
+        b2 = new NormalBoard("2.5×121×2185", "热板", BoardCategory.PRODUCT);
         assertEquals(1, b1.compareTo(b2));
     }
 
     @Test
     void testCalNotProductCutTimes() {
         CutBoard b1 = new CutBoard("2.5×400×2185", "热板");
-        Board b2 = new Board("2.5×200×2185", "热板", BoardCategory.PRODUCT);
-        Board b3 = new Board("2.5×100×2185", "热板", BoardCategory.STOCK);
+        NormalBoard b2 = new NormalBoard("2.5×200×2185", "热板", BoardCategory.PRODUCT);
+        NormalBoard b3 = new NormalBoard("2.5×100×2185", "热板", BoardCategory.STOCK);
         int ret = boardService.calNotProductCutTimes(b1, b2.getWidth(), 1, b3);
         assertEquals(2, ret);
-        b3 = new Board("2.5×0×2185", "热板", BoardCategory.STOCK);
+        b3 = new NormalBoard("2.5×0×2185", "热板", BoardCategory.STOCK);
         ret = boardService.calNotProductCutTimes(b1, b2.getWidth(), 1, b3);
         assertEquals(0, ret);
-        b3 = new Board("2.5×0×2200", "热板", BoardCategory.STOCK);
+        b3 = new NormalBoard("2.5×0×2200", "热板", BoardCategory.STOCK);
         ret = boardService.calNotProductCutTimes(b1, b2.getWidth(), 1, b3);
         assertEquals(0, ret);
-        b3 = new Board("2.5×300×2200", "热板", BoardCategory.STOCK);
+        b3 = new NormalBoard("2.5×300×2200", "热板", BoardCategory.STOCK);
         ret = boardService.calNotProductCutTimes(b1, b2.getWidth(), 1, b3);
         assertEquals(0, ret);
     }

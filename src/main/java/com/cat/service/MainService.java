@@ -1,7 +1,7 @@
 package com.cat.service;
 
-import com.cat.entity.Board;
 import com.cat.entity.CutBoard;
+import com.cat.entity.NormalBoard;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
@@ -60,7 +60,6 @@ public class MainService {
             this.orderService.startOrder(order);
             while (order.getUnfinishedAmount() != 0) {
                 legacyCutBoard = this.processingBottomOrder(order, legacyCutBoard);
-                this.actionService.completedAllActions();
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                     Thread.sleep(3000);
@@ -73,15 +72,14 @@ public class MainService {
 
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder order = orders.get(i);
-            Board nextProduct = null;
+            NormalBoard nextProduct = null;
             if (i < orders.size() - 1) {
                 WorkOrder nextOrder = orders.get(i + 1);
-                nextProduct = new Board(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
+                nextProduct = new NormalBoard(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
             }
             this.orderService.startOrder(order);
             while (order.getUnfinishedAmount() != 0) {
                 legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct);
-                this.actionService.completedAllActions();
                 this.signalService.addNewSignal(SignalCategory.ACTION);
                 while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                     Thread.sleep(3000);
@@ -104,7 +102,7 @@ public class MainService {
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, orderCutBoard.getWidth());
+        NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, orderCutBoard.getWidth());
         logger.info("ProductBoard: {}", productBoard);
 
         CutBoard cutBoard = this.boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, wasteThreshold, orderId, orderModule);
@@ -113,7 +111,7 @@ public class MainService {
         int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
         logger.info("ProductCutTimes: {}", productCutTimes);
 
-        Board semiProductBoard = new Board(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
+        NormalBoard semiProductBoard = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
         logger.info("SemiProductBoard: {}", semiProductBoard);
 
         int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, semiProductBoard);
@@ -126,7 +124,7 @@ public class MainService {
         return cutBoard.getWidth().compareTo(BigDecimal.ZERO) == 0 ? null : cutBoard;
     }
 
-    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, Board nextOrderProductBoard) {
+    public CutBoard processingNotBottomOrder(WorkOrder order, CutBoard legacyCutBoard, NormalBoard nextOrderProductBoard) {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
@@ -137,7 +135,7 @@ public class MainService {
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material);
         logger.info("OrderCutBoard: {}", orderCutBoard);
 
-        Board productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, orderCutBoard.getWidth());
+        NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, orderCutBoard.getWidth());
         logger.info("ProductBoard: {}", productBoard);
 
         logger.info("legacyCutBoard: {}", legacyCutBoard);
@@ -151,18 +149,18 @@ public class MainService {
         if (productCutTimes == order.getUnfinishedAmount()) {
             logger.info("order last time processing");
             BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
-            CutBoard remainingCutBoard = new CutBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material);
-            logger.info("remainingCutBoard: {}", remainingCutBoard);
+            NormalBoard remainingBoard = new NormalBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.REMAINING);
+            logger.info("remainingCutBoard: {}", remainingBoard);
             logger.info("nextOrderProductBoard: {}", nextOrderProductBoard);
 
-            if (remainingCutBoard.compareTo(nextOrderProductBoard) >= 0) {
+            if (remainingBoard.compareTo(nextOrderProductBoard) >= 0) {
                 logger.info("remainingCutBoard can reuse");
 
                 this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
             } else {
                 logger.info("remainingCutBoard can't reuse");
 
-                Board stockBoard = this.boardService.getMatchStockBoard(cutBoard.getHeight(), material);
+                NormalBoard stockBoard = this.boardService.getMatchStockBoard(cutBoard.getHeight(), material);
                 logger.info("stockBoard: {}", stockBoard);
 
                 int stockBoardCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, stockBoard);

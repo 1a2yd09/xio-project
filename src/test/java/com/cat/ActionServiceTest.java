@@ -41,7 +41,7 @@ class ActionServiceTest {
 
         WorkOrder order = workOrderService.getOrderById(3098562);
         order.setCuttingSize("4.0×1000×3400");
-        Board stock = new Board(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
+        NormalBoard stock = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
         stock.setLength(new BigDecimal(3300));
         stockSpecificationService.addStockSpecification(stock.getHeight(), stock.getWidth(), stock.getLength());
 
@@ -88,7 +88,7 @@ class ActionServiceTest {
         // 半成品 2.5×192×2504:
 
         WorkOrder order = workOrderService.getOrderById(3099510);
-        Board semiProduct = new Board("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
+        NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
 
         mainService.processingBottomOrder(order, null);
         // 取板-修边(无)-旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):

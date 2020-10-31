@@ -40,7 +40,7 @@ public class MainService {
         this.inventoryService.truncateInventory();
         this.signalService.truncateSignal();
         this.orderService.truncateOrderTable();
-        LocalDate orderDate = this.parameterService.getOperatingParameter().getWorkOrderDate();
+        LocalDate orderDate = this.parameterService.getLatestOperatingParameter().getWorkOrderDate();
         orderService.copyRemoteOrderToLocal(orderDate);
     }
 
@@ -50,7 +50,7 @@ public class MainService {
             Thread.sleep(3000);
         }
 
-        OperatingParameter op = this.parameterService.getOperatingParameter();
+        OperatingParameter op = this.parameterService.getLatestOperatingParameter();
 
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 
@@ -93,7 +93,7 @@ public class MainService {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
-        OperatingParameter op = this.parameterService.getOperatingParameter();
+        OperatingParameter op = this.parameterService.getLatestOperatingParameter();
         BigDecimal fixedWidth = op.getFixedWidth();
         BigDecimal wasteThreshold = op.getWasteThreshold();
 
@@ -128,7 +128,7 @@ public class MainService {
         String material = order.getMaterial();
         int orderId = order.getId();
         String orderModule = order.getSiteModule();
-        BigDecimal wasteThreshold = this.parameterService.getOperatingParameter().getWasteThreshold();
+        BigDecimal wasteThreshold = this.parameterService.getLatestOperatingParameter().getWasteThreshold();
 
         logger.info("Order: {}", order);
 

@@ -18,11 +18,11 @@ public class TrimmingValueService {
 
     RowMapper<TrimmingValue> trimM = new BeanPropertyRowMapper<>(TrimmingValue.class);
 
-    public TrimmingValue getTrimmingValue() {
-        return Objects.requireNonNullElseGet(this.getLatestTrimmingValue(), TrimUtil::getDefaultValue);
+    public TrimmingValue getLatestTrimmingValue() {
+        return Objects.requireNonNullElseGet(this.getTrimmingValue(), TrimUtil::getDefaultValue);
     }
 
-    public TrimmingValue getLatestTrimmingValue() {
+    private TrimmingValue getTrimmingValue() {
         List<TrimmingValue> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_trimming_value ORDER BY id DESC", this.trimM);
         return list.isEmpty() ? null : list.get(0);
     }

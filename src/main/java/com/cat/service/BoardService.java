@@ -136,7 +136,7 @@ public class BoardService {
     }
 
     public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, NormalBoard productBoard, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
-        List<BigDecimal> trimValues = this.trimmingValueService.getTrimmingValue().getTrimValues();
+        List<BigDecimal> trimValues = this.trimmingValueService.getLatestTrimmingValue().getTrimValues();
         // 这个方法应该改为选择下料板，是要剩余板材还是要工单板材，确定了以后返回出来，
         // 然后创建一个新的方法用于处理板材，不然将阈值和修边值再传入进来，整个参数过于臃肿。
         if (legacyCutBoard == null) {

@@ -40,7 +40,7 @@ class OrderServiceTest {
 
     @Test
     void testGetBottomOrder() {
-        OperatingParameter op = parameterService.getOperatingParameter();
+        OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getWorkOrderDate();
         List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPattern.SPEC.value, date);
         assertEquals(914, orders.size());
@@ -55,7 +55,7 @@ class OrderServiceTest {
 
     @Test
     void testGetAllWidthBetterNotBottomOrder() {
-        OperatingParameter op = parameterService.getOperatingParameter();
+        OperatingParameter op = parameterService.getLatestOperatingParameter();
         List<WorkOrder> orders = workOrderService.getNotBottomOrders(op.getWorkOrderDate());
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
@@ -69,7 +69,7 @@ class OrderServiceTest {
 
     @Test
     void testGetNotBottomOrder() {
-        OperatingParameter op = parameterService.getOperatingParameter();
+        OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getWorkOrderDate();
         List<WorkOrder> orders = workOrderService.getNotBottomOrders(date);
         // 获取未预处理的直梁工单，共82个:

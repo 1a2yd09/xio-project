@@ -18,11 +18,11 @@ public class ParameterService {
 
     RowMapper<OperatingParameter> opM = new BeanPropertyRowMapper<>(OperatingParameter.class);
 
-    public OperatingParameter getOperatingParameter() {
-        return Objects.requireNonNullElseGet(this.getLatestOperatingParameter(), ParameterUtil::getDefaultParameter);
+    public OperatingParameter getLatestOperatingParameter() {
+        return Objects.requireNonNullElseGet(this.getOperatingParameter(), ParameterUtil::getDefaultParameter);
     }
 
-    public OperatingParameter getLatestOperatingParameter() {
+    private OperatingParameter getOperatingParameter() {
         List<OperatingParameter> list = jdbcTemplate.query("SELECT TOP 1 * FROM tb_operating_parameter ORDER BY id DESC", this.opM);
         return list.isEmpty() ? null : list.get(0);
     }

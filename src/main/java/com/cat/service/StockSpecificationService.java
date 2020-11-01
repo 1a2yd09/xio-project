@@ -18,10 +18,6 @@ public class StockSpecificationService {
 
     RowMapper<StockSpecification> specM = new BeanPropertyRowMapper<>(StockSpecification.class);
 
-    public StockSpecification getMatchSpecification(BigDecimal height) {
-        return this.getGroupSpecification().stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(StockSpecUtil.getDefaultStockSpec());
-    }
-
     public List<StockSpecification> getGroupSpecification() {
         return this.jdbcTemplate.query("SELECT id, height, width, length, created_at " +
                 "FROM (SELECT id, height, width, length, created_at, ROW_NUMBER() OVER (PARTITION BY height ORDER BY id DESC) AS row_number " +

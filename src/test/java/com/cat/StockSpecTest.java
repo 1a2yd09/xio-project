@@ -1,6 +1,8 @@
 package com.cat;
 
+import com.cat.entity.NormalBoard;
 import com.cat.entity.StockSpecification;
+import com.cat.service.BoardService;
 import com.cat.service.StockSpecificationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,11 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class StockSpecTest {
     static ApplicationContext context;
     static StockSpecificationService stockSpecificationService;
+    static BoardService boardService;
 
     @BeforeAll
     static void init() {
         context = new AnnotationConfigApplicationContext(AppConfig.class);
         stockSpecificationService = context.getBean(StockSpecificationService.class);
+        boardService = context.getBean(BoardService.class);
     }
 
     @Test
@@ -27,11 +31,11 @@ class StockSpecTest {
         List<StockSpecification> specs = stockSpecificationService.getGroupSpecification();
         assertNotNull(specs);
         specs.forEach(System.out::println);
-        StockSpecification ss = stockSpecificationService.getMatchSpecification(new BigDecimal(3));
-        assertNotNull(ss);
-        System.out.println(ss);
-        ss = stockSpecificationService.getMatchSpecification(new BigDecimal(6));
-        assertNotNull(ss);
-        System.out.println(ss);
+        NormalBoard board = boardService.getMatchStockBoard(specs, new BigDecimal(3), "热板");
+        assertNotNull(board);
+        System.out.println(board);
+        board = boardService.getMatchStockBoard(specs, new BigDecimal(6), "热板");
+        assertNotNull(board);
+        System.out.println(board);
     }
 }

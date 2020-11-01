@@ -21,6 +21,8 @@ class ActionServiceTest {
     static MainService mainService;
     static InventoryService inventoryService;
     static StockSpecificationService stockSpecificationService;
+    static ParameterService parameterService;
+    static TrimmingValueService trimmingValueService;
 
     @BeforeAll
     public static void init() {
@@ -30,6 +32,8 @@ class ActionServiceTest {
         mainService = context.getBean(MainService.class);
         inventoryService = context.getBean(InventoryService.class);
         stockSpecificationService = context.getBean(StockSpecificationService.class);
+        parameterService = context.getBean(ParameterService.class);
+        trimmingValueService = context.getBean(TrimmingValueService.class);
     }
 
     @Test
@@ -45,7 +49,7 @@ class ActionServiceTest {
         stock.setLength(new BigDecimal(3300));
         stockSpecificationService.addStockSpecification(stock.getHeight(), stock.getWidth(), stock.getLength());
 
-        CutBoard legacyCutBoard = mainService.processingNotBottomOrder(order, null, null);
+        CutBoard legacyCutBoard = mainService.processingNotBottomOrder(order, null, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue(), stockSpecificationService.getGroupSpecification());
         // 取板-修边(无)-修长度(3400->3300)-旋转-进刀2个库存(1000->510)-旋转-修长度(3300->3190)-旋转-修宽度(510->490)-进刀1个成品(490->245)-送1个成品(245->0):
         // 测试一，生成11个机器动作:
         assertEquals(11, machineActionService.getActionCount());
@@ -90,7 +94,7 @@ class ActionServiceTest {
         WorkOrder order = workOrderService.getOrderById(3099510);
         NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
 
-        mainService.processingBottomOrder(order, null);
+        mainService.processingBottomOrder(order, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue());
         // 取板-修边(无)-旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
         // 测试一，生成13个机器动作:
         assertEquals(13, machineActionService.getActionCount());
@@ -126,7 +130,7 @@ class ActionServiceTest {
     @Test
     void testCompletedAllActions() {
         WorkOrder order = workOrderService.getOrderById(3101165);
-        mainService.processingBottomOrder(order, null);
+        mainService.processingBottomOrder(order, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue());
         assertFalse(machineActionService.allActionsCompleted());
         machineActionService.completedAllActions(1);
         assertFalse(machineActionService.allActionsCompleted());

@@ -7,6 +7,7 @@ import com.cat.entity.StockSpecification;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
+import com.cat.util.StockSpecUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,6 @@ public class BoardService {
 
     @Autowired
     MachineActionService actionService;
-    @Autowired
-    TrimmingValueService trimmingValueService;
-    @Autowired
-    StockSpecificationService stockSpecificationService;
 
     public void rotatingCutBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < rotateTimes; i++) {
@@ -135,8 +132,7 @@ public class BoardService {
         this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes - 1, orderId, orderModule);
     }
 
-    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, NormalBoard productBoard, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
-        List<BigDecimal> trimValues = this.trimmingValueService.getLatestTrimmingValue().getTrimValues();
+    public CutBoard processingCutBoard(CutBoard legacyCutBoard, CutBoard orderCutBoard, NormalBoard productBoard, List<BigDecimal> trimValues, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         // 这个方法应该改为选择下料板，是要剩余板材还是要工单板材，确定了以后返回出来，
         // 然后创建一个新的方法用于处理板材，不然将阈值和修边值再传入进来，整个参数过于臃肿。
         if (legacyCutBoard == null) {
@@ -157,8 +153,8 @@ public class BoardService {
         }
     }
 
-    public NormalBoard getMatchStockBoard(BigDecimal height, String material) {
-        StockSpecification ss = this.stockSpecificationService.getMatchSpecification(height);
+    public NormalBoard getMatchStockBoard(List<StockSpecification> specs, BigDecimal height, String material) {
+        StockSpecification ss = specs.stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(StockSpecUtil.getDefaultStockSpec());
         return new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
     }
 

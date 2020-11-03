@@ -2,6 +2,7 @@ package com.cat.service;
 
 import com.cat.entity.*;
 import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.enums.OrderState;
 import com.cat.entity.enums.SignalCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,9 @@ public class MainService {
     public void init() {
         this.actionService.truncateCompletedAction();
         this.actionService.truncateAction();
-        this.inventoryService.truncateInventory();
-        this.signalService.truncateSignal();
-        this.orderService.truncateOrderTable();
+        this.inventoryService.clearInventoryTable();
+        this.signalService.clearSignalTable();
+        this.orderService.clearOrderTable();
         LocalDate orderDate = this.parameterService.getLatestOperatingParameter().getWorkOrderDate();
         orderService.copyRemoteOrderToLocal(orderDate);
     }
@@ -60,7 +61,7 @@ public class MainService {
         CutBoard legacyCutBoard = null;
 
         for (WorkOrder order : orders) {
-            this.orderService.startOrder(order);
+            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
                 legacyCutBoard = this.processingBottomOrder(order, legacyCutBoard, op, tv);
                 this.signalService.addNewSignal(SignalCategory.ACTION);
@@ -80,7 +81,7 @@ public class MainService {
                 WorkOrder nextOrder = orders.get(i + 1);
                 nextProduct = new NormalBoard(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
             }
-            this.orderService.startOrder(order);
+            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
                 legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct, op, tv, specs);
                 this.signalService.addNewSignal(SignalCategory.ACTION);

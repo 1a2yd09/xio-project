@@ -70,7 +70,7 @@ class ActionServiceTest {
         Inventory inventory = inventoryService.getInventory(stock.getSpecification(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
-        machineActionService.processCompletedAction(order);
+        machineActionService.processCompletedAction(order, BoardCategory.STOCK);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 测试三，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
@@ -113,7 +113,7 @@ class ActionServiceTest {
         Inventory inventory = inventoryService.getInventory(semiProduct.getSpecification(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
-        machineActionService.processCompletedAction(order);
+        machineActionService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
@@ -131,10 +131,10 @@ class ActionServiceTest {
     void testCompletedAllActions() {
         WorkOrder order = workOrderService.getOrderById(3101165);
         mainService.processingBottomOrder(order, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue());
-        assertFalse(machineActionService.allActionsCompleted());
-        machineActionService.completedAllActions(1);
-        assertFalse(machineActionService.allActionsCompleted());
+        assertFalse(machineActionService.isAllActionsCompleted());
+        machineActionService.completedAction(1);
+        assertFalse(machineActionService.isAllActionsCompleted());
         machineActionService.completedAllActions();
-        assertTrue(machineActionService.allActionsCompleted());
+        assertTrue(machineActionService.isAllActionsCompleted());
     }
 }

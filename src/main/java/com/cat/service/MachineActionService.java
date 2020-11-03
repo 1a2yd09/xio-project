@@ -1,5 +1,6 @@
 package com.cat.service;
 
+import com.cat.dao.MachineActionDao;
 import com.cat.entity.AbstractBoard;
 import com.cat.entity.MachineAction;
 import com.cat.entity.NormalBoard;
@@ -7,9 +8,6 @@ import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -18,16 +16,13 @@ import java.util.List;
 @Component
 public class MachineActionService {
     @Autowired
-    JdbcTemplate jdbcTemplate;
-
+    MachineActionDao actionDao;
     @Autowired
     WorkOrderService orderService;
     @Autowired
     InventoryService inventoryService;
 
-    RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
-
-    public boolean allActionsCompleted() {
+    public boolean isAllActionsCompleted() {
         for (MachineAction action : this.getAllActions()) {
             if (Boolean.FALSE.equals(action.getCompleted())) {
                 return false;
@@ -36,81 +31,66 @@ public class MachineActionService {
         return true;
     }
 
-    public void processCompletedAction(WorkOrder order) {
+    public void processCompletedAction(WorkOrder order, BoardCategory inventoryCategory) {
         int productCount = 0;
-        NormalBoard semiProduct = null;
-        int semiCount = 0;
-        NormalBoard stock = null;
-        int stockCount = 0;
+        NormalBoard inventory = null;
+        int inventoryCount = 0;
 
         for (MachineAction action : this.getAllActions()) {
             String boardCategory = action.getBoardCategory();
-            // 记录数目，最后统一写入，理由是一次机器动作中，成品、非成品各自的规格和材质都是相同的:
+            // 记录数目，最后统一写入，理由是一次机器动作中，成品、存货各自的规格和材质都是相同的:
             if (BoardCategory.PRODUCT.value.equals(boardCategory)) {
                 productCount++;
-            } else if (BoardCategory.SEMI_PRODUCT.value.equals(boardCategory)) {
-                if (semiProduct == null) {
-                    semiProduct = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.SEMI_PRODUCT);
+            } else if (inventoryCategory.value.equals(boardCategory)) {
+                if (inventory == null) {
+                    inventory = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), inventoryCategory);
                 }
-                semiCount++;
-            } else if (BoardCategory.STOCK.value.equals(boardCategory)) {
-                if (stock == null) {
-                    stock = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), BoardCategory.STOCK);
-                }
-                stockCount++;
+                inventoryCount++;
             }
         }
 
         this.orderService.addOrderCompletedAmount(order, productCount);
-
-        if (semiProduct != null) {
-            this.inventoryService.addInventoryAmount(semiProduct, semiCount);
-        }
-        if (stock != null) {
-            this.inventoryService.addInventoryAmount(stock, stockCount);
+        if (inventory != null) {
+            this.inventoryService.addInventoryAmount(inventory, inventoryCount);
         }
 
         this.transferAllActions();
-        this.truncateAction();
+        this.clearActionTable();
     }
 
     public void addAction(ActionCategory category, BigDecimal dis, AbstractBoard board, Integer orderId, String orderModule) {
-        // 注意位置参数的类型是否与数据库类型可以相互转换:
-        this.jdbcTemplate.update("INSERT INTO tb_machine_action (action_category, cut_distance, board_category, board_specification, board_material, work_order_id, work_order_module) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)", category.value, dis, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
+        this.actionDao.addAction(category.value, dis, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
     }
 
-    public void truncateAction() {
-        this.jdbcTemplate.update("TRUNCATE TABLE tb_machine_action");
+    public void clearActionTable() {
+        this.actionDao.truncateActionTable();
     }
 
-    public void truncateCompletedAction() {
-        this.jdbcTemplate.update("TRUNCATE TABLE tb_completed_action");
+    public void clearCompletedActionTable() {
+        this.actionDao.truncateCompletedActionTable();
     }
 
     public Integer getActionCount() {
-        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_machine_action", Integer.class);
+        return this.actionDao.getActionCount();
     }
 
     public Integer getCompletedActionCount() {
-        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_completed_action", Integer.class);
+        return this.actionDao.getCompletedActionCount();
     }
 
     public List<MachineAction> getAllActions() {
-        return this.jdbcTemplate.query("SELECT * FROM tb_machine_action ORDER BY id", this.actionM);
+        return this.actionDao.getAllActions();
     }
 
     public void completedAllActions() {
-        this.jdbcTemplate.update("UPDATE tb_machine_action SET completed = 1 WHERE completed = 0");
+        this.actionDao.completedAllActions();
     }
 
-    public void completedAllActions(Integer id) {
-        this.jdbcTemplate.update("UPDATE tb_machine_action SET completed = 1 WHERE id = ?", id);
+    public void completedAction(Integer id) {
+        this.actionDao.completedAction(id);
     }
 
     public void transferAllActions() {
-        this.jdbcTemplate.update("INSERT INTO tb_completed_action " +
-                "SELECT id, action_category, cut_distance, board_category, board_specification, board_material, work_order_id, work_order_module " +
-                "FROM tb_machine_action");
+        this.actionDao.transferAllActions();
     }
 }

@@ -39,7 +39,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test1() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -57,7 +57,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test2() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
@@ -75,7 +75,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test3() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 该工单需求2个成品，但1次只能裁剪1个成品，因此不是最后一次:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue(), stockSpecificationService.getGroupSpecification());
@@ -89,7 +89,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test4() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单本身成品板作为下一工单的成品板:
         NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
@@ -109,7 +109,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test5() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单本身成品板作为下一工单的成品板:
         NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
@@ -132,7 +132,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test6() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单本身成品板作为下一工单的成品板:
         NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
@@ -158,7 +158,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test7() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单本身成品板作为下一工单的成品板:
         NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
@@ -182,7 +182,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test8() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -206,7 +206,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test9() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -232,7 +232,7 @@ class NotBottomOrderTest {
      */
     @Test
     void test10() {
-        machineActionService.truncateAction();
+        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());

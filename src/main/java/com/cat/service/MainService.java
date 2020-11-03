@@ -37,8 +37,8 @@ public class MainService {
 
     @PostConstruct
     public void init() {
-        this.actionService.truncateCompletedAction();
-        this.actionService.truncateAction();
+        this.actionService.clearCompletedActionTable();
+        this.actionService.clearActionTable();
         this.inventoryService.clearInventoryTable();
         this.signalService.clearSignalTable();
         this.orderService.clearOrderTable();
@@ -68,7 +68,7 @@ public class MainService {
                 while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                     Thread.sleep(3000);
                 }
-                this.actionService.processCompletedAction(order);
+                this.actionService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
         }
 
@@ -88,7 +88,7 @@ public class MainService {
                 while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
                     Thread.sleep(3000);
                 }
-                this.actionService.processCompletedAction(order);
+                this.actionService.processCompletedAction(order, BoardCategory.STOCK);
             }
         }
     }

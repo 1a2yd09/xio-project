@@ -15,4 +15,9 @@ public class NormalBoard extends BaseBoard {
     public NormalBoard(String specification, String material, BoardCategoryEnum category) {
         super(specification, material, category);
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

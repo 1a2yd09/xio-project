@@ -34,7 +34,7 @@ public abstract class BaseBoard implements Comparable<BaseBoard> {
         this.category = category;
     }
 
-    public String getSpecification() {
+    public String getSpecStr() {
         return BoardUtil.getStandardSpecStr(this.height, this.width, this.length);
     }
 

@@ -18,7 +18,7 @@ public class Inventory {
         this.id = id;
     }
 
-    public String getSpecification() {
+    public String getSpecStr() {
         return specification;
     }
 

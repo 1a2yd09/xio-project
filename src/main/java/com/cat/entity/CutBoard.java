@@ -28,4 +28,12 @@ public class CutBoard extends BaseBoard {
     public void setForwardEdge(EdgeType forwardEdge) {
         this.forwardEdge = forwardEdge;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() +
+                "CutBoard{" +
+                "forwardEdge=" + forwardEdge +
+                '}';
+    }
 }

@@ -59,7 +59,7 @@ public class MachineActionService {
     }
 
     public void addAction(ActionCategoryEnum category, BigDecimal dis, BaseBoard board, Integer orderId, String orderModule) {
-        this.actionDao.addAction(category.value, dis, board.getCategory().value, board.getSpecification(), board.getMaterial(), orderId, orderModule);
+        this.actionDao.addAction(category.value, dis, board.getCategory().value, board.getSpecStr(), board.getMaterial(), orderId, orderModule);
     }
 
     public void clearActionTable() {

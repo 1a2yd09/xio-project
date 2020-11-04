@@ -12,10 +12,6 @@ public class TrimmingValue {
     private BigDecimal trimRight;
     private LocalDateTime createdAt;
 
-    public List<BigDecimal> getTrimValues() {
-        return List.of(this.trimTop, this.trimLeft, this.trimBottom, this.trimRight);
-    }
-
     public TrimmingValue() {
     }
 
@@ -26,6 +22,10 @@ public class TrimmingValue {
         this.trimBottom = trimBottom;
         this.trimRight = trimRight;
         this.createdAt = createdAt;
+    }
+
+    public List<BigDecimal> getTrimValues() {
+        return List.of(this.trimTop, this.trimLeft, this.trimBottom, this.trimRight);
     }
 
     public Integer getId() {

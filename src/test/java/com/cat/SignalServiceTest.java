@@ -1,6 +1,6 @@
 package com.cat;
 
-import com.cat.entity.enums.SignalCategory;
+import com.cat.entity.enums.SignalCategoryEnum;
 import com.cat.service.SignalService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,10 +22,10 @@ class SignalServiceTest {
 
     @Test
     void testReceiveNewSignal() {
-        boolean flag = signalService.isReceivedNewSignal(SignalCategory.ACTION);
+        boolean flag = signalService.isReceivedNewSignal(SignalCategoryEnum.ACTION);
         assertFalse(flag);
-        signalService.addNewSignal(SignalCategory.ACTION);
-        flag = signalService.isReceivedNewSignal(SignalCategory.ACTION);
+        signalService.addNewSignal(SignalCategoryEnum.ACTION);
+        flag = signalService.isReceivedNewSignal(SignalCategoryEnum.ACTION);
         assertTrue(flag);
     }
 }

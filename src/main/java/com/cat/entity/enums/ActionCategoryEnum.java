@@ -1,6 +1,6 @@
 package com.cat.entity.enums;
 
-public enum ActionCategory {
+public enum ActionCategoryEnum {
     /**
      * 取板动作。
      */
@@ -20,7 +20,7 @@ public enum ActionCategory {
 
     public final String value;
 
-    ActionCategory(String value) {
+    ActionCategoryEnum(String value) {
         this.value = value;
     }
 }

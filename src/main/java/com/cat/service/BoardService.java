@@ -1,11 +1,11 @@
 package com.cat.service;
 
-import com.cat.entity.AbstractBoard;
+import com.cat.entity.BaseBoard;
 import com.cat.entity.CutBoard;
 import com.cat.entity.NormalBoard;
 import com.cat.entity.StockSpecification;
-import com.cat.entity.enums.ActionCategory;
-import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.enums.ActionCategoryEnum;
+import com.cat.entity.enums.BoardCategoryEnum;
 import com.cat.util.BoardUtil;
 import com.cat.util.StockSpecUtil;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ public class BoardService {
 
     public void rotatingCutBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < rotateTimes; i++) {
-            this.actionService.addAction(ActionCategory.ROTATE, BigDecimal.ZERO, cutBoard, orderId, orderModule);
+            this.actionService.addAction(ActionCategoryEnum.ROTATE, BigDecimal.ZERO, cutBoard, orderId, orderModule);
             if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
                 cutBoard.setForwardEdge(CutBoard.EdgeType.SHORT);
             } else {
@@ -36,7 +36,7 @@ public class BoardService {
 
     public void cuttingCutBoard(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < cutTimes; i++) {
-            this.actionService.addAction(ActionCategory.CUT, targetBoard.getWidth(), targetBoard, orderId, orderModule);
+            this.actionService.addAction(ActionCategoryEnum.CUT, targetBoard.getWidth(), targetBoard, orderId, orderModule);
             if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
                 cutBoard.setWidth(cutBoard.getWidth().subtract(targetBoard.getWidth()));
             } else {
@@ -46,7 +46,7 @@ public class BoardService {
     }
 
     public void pickingAndTrimmingCutBoard(CutBoard cutBoard, List<BigDecimal> trimValues, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
-        this.actionService.addAction(ActionCategory.PICK, BigDecimal.ZERO, cutBoard, orderId, orderModule);
+        this.actionService.addAction(ActionCategoryEnum.PICK, BigDecimal.ZERO, cutBoard, orderId, orderModule);
 
         logger.info("trimValues: {}", trimValues);
         logger.info("wasteThreshold: {}", wasteThreshold);
@@ -116,8 +116,8 @@ public class BoardService {
         }
     }
 
-    public void sendingTargetBoard(CutBoard cutBoard, AbstractBoard targetBoard, Integer orderId, String orderModule) {
-        this.actionService.addAction(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId, orderModule);
+    public void sendingTargetBoard(CutBoard cutBoard, BaseBoard targetBoard, Integer orderId, String orderModule) {
+        this.actionService.addAction(ActionCategoryEnum.SEND, BigDecimal.ZERO, targetBoard, orderId, orderModule);
         cutBoard.setWidth(BigDecimal.ZERO);
     }
 
@@ -155,11 +155,11 @@ public class BoardService {
 
     public NormalBoard getMatchStockBoard(List<StockSpecification> specs, BigDecimal height, String material) {
         StockSpecification ss = specs.stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(StockSpecUtil.getDefaultStockSpec());
-        return new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
+        return new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategoryEnum.STOCK);
     }
 
     public NormalBoard getCanCutProduct(String specification, String material, BigDecimal orderCutBoardWidth) {
-        NormalBoard product = new NormalBoard(specification, material, BoardCategory.PRODUCT);
+        NormalBoard product = new NormalBoard(specification, material, BoardCategoryEnum.PRODUCT);
         if (product.getWidth().compareTo(orderCutBoardWidth) > 0) {
             // 如果成品板宽度大于下料板宽度，则需要交换成品板的宽度和长度，不然会导致裁剪逻辑出错:
             BigDecimal tmp = product.getWidth();

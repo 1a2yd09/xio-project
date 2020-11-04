@@ -1,8 +1,8 @@
 package com.cat;
 
 import com.cat.entity.*;
-import com.cat.entity.enums.BoardCategory;
-import com.cat.entity.enums.OrderState;
+import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.OrderStateEnum;
 import com.cat.service.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ class ActionServiceTest {
 
         WorkOrder order = workOrderService.getOrderById(3098562);
         order.setCuttingSize("4.0×1000×3400");
-        NormalBoard stock = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
+        NormalBoard stock = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategoryEnum.STOCK);
         stock.setLength(new BigDecimal(3300));
         stockSpecificationService.addStockSpecification(stock.getHeight(), stock.getWidth(), stock.getLength());
 
@@ -70,13 +70,13 @@ class ActionServiceTest {
         Inventory inventory = inventoryService.getInventory(stock.getSpecification(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
-        machineActionService.processCompletedAction(order, BoardCategory.STOCK);
+        machineActionService.processCompletedAction(order, BoardCategoryEnum.STOCK);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 测试三，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
         // 测试四，达到了工单所需的数目，因此工单状态应为已完工:
-        assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
+        assertEquals(order.getOperationState(), OrderStateEnum.COMPLETED.value);
 
         inventory = inventoryService.getInventory(stock.getSpecification(), stock.getMaterial(), stock.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getAmount();
@@ -92,7 +92,7 @@ class ActionServiceTest {
         // 半成品 2.5×192×2504:
 
         WorkOrder order = workOrderService.getOrderById(3099510);
-        NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
+        NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategoryEnum.SEMI_PRODUCT);
 
         mainService.processingBottomOrder(order, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue());
         // 取板-修边(无)-旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
@@ -113,13 +113,13 @@ class ActionServiceTest {
         Inventory inventory = inventoryService.getInventory(semiProduct.getSpecification(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
-        machineActionService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
+        machineActionService.processCompletedAction(order, BoardCategoryEnum.SEMI_PRODUCT);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
         // 测试三，达到了工单所需的数目，因此工单状态应为已完工:
-        assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
+        assertEquals(order.getOperationState(), OrderStateEnum.COMPLETED.value);
 
         inventory = inventoryService.getInventory(semiProduct.getSpecification(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getAmount();

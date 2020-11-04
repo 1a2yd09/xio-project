@@ -1,6 +1,6 @@
 package com.cat.util;
 
-import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.enums.BoardCategoryEnum;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -56,7 +56,7 @@ public class BoardUtil {
     /**
      * 虽取名叫计算板材类型，但实际是计算板材的类型是属于余料还是废料。
      */
-    public static BoardCategory calBoardCategory(BigDecimal boardWidth, BigDecimal boardLength, BigDecimal wasteThreshold) {
-        return boardWidth.compareTo(wasteThreshold) >= 0 && boardLength.compareTo(wasteThreshold) >= 0 ? BoardCategory.REMAINING : BoardCategory.WASTED;
+    public static BoardCategoryEnum calBoardCategory(BigDecimal boardWidth, BigDecimal boardLength, BigDecimal wasteThreshold) {
+        return boardWidth.compareTo(wasteThreshold) >= 0 && boardLength.compareTo(wasteThreshold) >= 0 ? BoardCategoryEnum.REMAINING : BoardCategoryEnum.WASTED;
     }
 }

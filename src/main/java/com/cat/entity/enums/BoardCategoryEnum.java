@@ -1,6 +1,6 @@
 package com.cat.entity.enums;
 
-public enum BoardCategory {
+public enum BoardCategoryEnum {
     /**
      * 下料板。
      */
@@ -28,7 +28,7 @@ public enum BoardCategory {
 
     public final String value;
 
-    BoardCategory(String value) {
+    BoardCategoryEnum(String value) {
         this.value = value;
     }
 }

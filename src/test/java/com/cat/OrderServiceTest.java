@@ -4,8 +4,8 @@ import com.cat.entity.CutBoard;
 import com.cat.entity.NormalBoard;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.BoardCategory;
-import com.cat.entity.enums.BottomSortPattern;
+import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.BottomSortPatternEnum;
 import com.cat.service.InventoryService;
 import com.cat.service.ParameterService;
 import com.cat.service.WorkOrderService;
@@ -42,11 +42,11 @@ class OrderServiceTest {
     void testGetBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getWorkOrderDate();
-        List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPattern.SPEC.value, date);
+        List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPatternEnum.SPEC.value, date);
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) == 0) {
                 System.out.println(order);
             }
@@ -60,7 +60,7 @@ class OrderServiceTest {
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
                 System.out.println(order);
             }
@@ -74,8 +74,8 @@ class OrderServiceTest {
         List<WorkOrder> orders = workOrderService.getNotBottomOrders(date);
         // 获取未预处理的直梁工单，共82个:
         assertEquals(82, orders.size());
-        inventoryService.addNewInventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value);
-        inventoryService.addNewInventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value);
+        inventoryService.addNewInventory("4.00×245.00×3190.00", "热板", 7, BoardCategoryEnum.STOCK.value);
+        inventoryService.addNewInventory("4.00×245.00×3150.00", "热板", 7, BoardCategoryEnum.STOCK.value);
         orders = workOrderService.getPreprocessNotBottomOrders(date);
         // 获取预处理的直梁工单，其中有6个工单因为使用了已有的库存件作为成品，因此工单数量变为76个:
         assertEquals(76, orders.size());

@@ -1,9 +1,9 @@
 package com.cat.service;
 
 import com.cat.entity.*;
-import com.cat.entity.enums.BoardCategory;
-import com.cat.entity.enums.OrderState;
-import com.cat.entity.enums.SignalCategory;
+import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.OrderStateEnum;
+import com.cat.entity.enums.SignalCategoryEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +47,8 @@ public class MainService {
     }
 
     public void startService() throws InterruptedException {
-        this.signalService.addNewSignal(SignalCategory.START_WORK);
-        while (!this.signalService.isReceivedNewSignal(SignalCategory.START_WORK)) {
+        this.signalService.addNewSignal(SignalCategoryEnum.START_WORK);
+        while (!this.signalService.isReceivedNewSignal(SignalCategoryEnum.START_WORK)) {
             Thread.sleep(3000);
         }
 
@@ -61,14 +61,14 @@ public class MainService {
         CutBoard legacyCutBoard = null;
 
         for (WorkOrder order : orders) {
-            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
+            this.orderService.updateOrderState(order, OrderStateEnum.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
                 legacyCutBoard = this.processingBottomOrder(order, legacyCutBoard, op, tv);
-                this.signalService.addNewSignal(SignalCategory.ACTION);
-                while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
+                this.signalService.addNewSignal(SignalCategoryEnum.ACTION);
+                while (!this.signalService.isReceivedNewSignal(SignalCategoryEnum.ACTION)) {
                     Thread.sleep(3000);
                 }
-                this.actionService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
+                this.actionService.processCompletedAction(order, BoardCategoryEnum.SEMI_PRODUCT);
             }
         }
 
@@ -79,16 +79,16 @@ public class MainService {
             NormalBoard nextProduct = null;
             if (i < orders.size() - 1) {
                 WorkOrder nextOrder = orders.get(i + 1);
-                nextProduct = new NormalBoard(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
+                nextProduct = new NormalBoard(nextOrder.getSpecification(), nextOrder.getMaterial(), BoardCategoryEnum.PRODUCT);
             }
-            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
+            this.orderService.updateOrderState(order, OrderStateEnum.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
                 legacyCutBoard = this.processingNotBottomOrder(order, legacyCutBoard, nextProduct, op, tv, specs);
-                this.signalService.addNewSignal(SignalCategory.ACTION);
-                while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
+                this.signalService.addNewSignal(SignalCategoryEnum.ACTION);
+                while (!this.signalService.isReceivedNewSignal(SignalCategoryEnum.ACTION)) {
                     Thread.sleep(3000);
                 }
-                this.actionService.processCompletedAction(order, BoardCategory.STOCK);
+                this.actionService.processCompletedAction(order, BoardCategoryEnum.STOCK);
             }
         }
     }
@@ -115,7 +115,7 @@ public class MainService {
         int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
         logger.info("ProductCutTimes: {}", productCutTimes);
 
-        NormalBoard semiProductBoard = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
+        NormalBoard semiProductBoard = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategoryEnum.SEMI_PRODUCT);
         logger.info("SemiProductBoard: {}", semiProductBoard);
 
         int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, semiProductBoard);
@@ -154,7 +154,7 @@ public class MainService {
         if (productCutTimes == order.getUnfinishedAmount()) {
             logger.info("order last time processing");
             BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
-            NormalBoard remainingBoard = new NormalBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.REMAINING);
+            NormalBoard remainingBoard = new NormalBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategoryEnum.REMAINING);
             logger.info("remainingCutBoard: {}", remainingBoard);
             logger.info("nextOrderProductBoard: {}", nextOrderProductBoard);
 

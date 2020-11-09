@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SignalService {
+public class SignalService implements Clearable {
     @Autowired
     SignalDao signalDao;
 
@@ -26,5 +26,10 @@ public class SignalService {
 
     public void clearSignalTable() {
         this.signalDao.truncateTable();
+    }
+
+    @Override
+    public void clearTable() {
+        this.clearSignalTable();
     }
 }

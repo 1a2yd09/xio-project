@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class InventoryService {
+public class InventoryService implements Clearable {
     @Autowired
     InventoryDao inventoryDao;
 
@@ -50,5 +50,10 @@ public class InventoryService {
 
     public void clearInventoryTable() {
         this.inventoryDao.truncateTable();
+    }
+
+    @Override
+    public void clearTable() {
+        this.clearInventoryTable();
     }
 }

@@ -1,34 +1,21 @@
 package com.cat;
 
-import com.cat.service.InventoryService;
-import com.cat.service.MachineActionService;
-import com.cat.service.SignalService;
-import com.cat.service.StockSpecificationService;
+import com.cat.service.Clearable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
+import java.util.List;
 
 @Component
 public class DatabaseDestroyer {
     @Autowired
-    MachineActionService actionService;
-    @Autowired
-    InventoryService inventoryService;
-    @Autowired
-    SignalService signalService;
-    @Autowired
-    StockSpecificationService specificationService;
+    List<Clearable> services;
 
     @PreDestroy
     public void shutdown() {
-        this.actionService.clearActionTable();
-        this.actionService.clearCompletedActionTable();
-
-        this.inventoryService.clearInventoryTable();
-
-        this.signalService.clearSignalTable();
-
-        this.specificationService.clearSpecTable();
+        for (Clearable service : this.services) {
+            service.clearTable();
+        }
     }
 }

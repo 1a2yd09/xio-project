@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class StockSpecificationService {
+public class StockSpecificationService implements Clearable {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -30,5 +30,10 @@ public class StockSpecificationService {
 
     public void clearSpecTable() {
         this.jdbcTemplate.update("TRUNCATE TABLE tb_stock_specification");
+    }
+
+    @Override
+    public void clearTable() {
+        this.clearSpecTable();
     }
 }

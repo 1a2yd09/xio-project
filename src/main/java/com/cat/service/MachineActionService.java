@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class MachineActionService {
+public class MachineActionService implements Clearable {
     @Autowired
     MachineActionDao actionDao;
     @Autowired
@@ -92,5 +92,11 @@ public class MachineActionService {
 
     public void transferAllActions() {
         this.actionDao.transferAllActions();
+    }
+
+    @Override
+    public void clearTable() {
+        this.clearActionTable();
+        this.clearCompletedActionTable();
     }
 }

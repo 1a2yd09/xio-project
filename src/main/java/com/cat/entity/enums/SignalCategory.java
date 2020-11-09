@@ -1,6 +1,6 @@
 package com.cat.entity.enums;
 
-public enum SignalCategoryEnum {
+public enum SignalCategory {
     /**
      * 动作信号。
      */
@@ -12,7 +12,7 @@ public enum SignalCategoryEnum {
 
     public final String value;
 
-    SignalCategoryEnum(String value) {
+    SignalCategory(String value) {
         this.value = value;
     }
 }

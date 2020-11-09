@@ -3,7 +3,7 @@ package com.cat.service;
 import com.cat.dao.InventoryDao;
 import com.cat.entity.Inventory;
 import com.cat.entity.NormalBoard;
-import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ public class InventoryService {
     InventoryDao inventoryDao;
 
     public Map<String, Inventory> getStockMap() {
-        return this.inventoryDao.getInventories(BoardCategoryEnum.STOCK.value)
+        return this.inventoryDao.getInventories(BoardCategory.STOCK.value)
                 .stream()
                 .collect(Collectors.toMap(inventory -> BoardUtil.getStandardSpecStr(inventory.getSpecStr()), Function.identity()));
     }

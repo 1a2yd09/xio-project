@@ -5,8 +5,8 @@ import com.cat.entity.BaseBoard;
 import com.cat.entity.MachineAction;
 import com.cat.entity.NormalBoard;
 import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.ActionCategoryEnum;
-import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.ActionCategory;
+import com.cat.entity.enums.BoardCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ public class MachineActionService {
         return true;
     }
 
-    public void processCompletedAction(WorkOrder order, BoardCategoryEnum inventoryCategory) {
+    public void processCompletedAction(WorkOrder order, BoardCategory inventoryCategory) {
         int productCount = 0;
         NormalBoard inventory = null;
         int inventoryCount = 0;
@@ -39,7 +39,7 @@ public class MachineActionService {
         for (MachineAction action : this.getAllActions()) {
             String boardCategory = action.getBoardCategory();
             // 记录数目，最后统一写入，理由是一次机器动作中，成品、存货各自的规格和材质都是相同的:
-            if (BoardCategoryEnum.PRODUCT.value.equals(boardCategory)) {
+            if (BoardCategory.PRODUCT.value.equals(boardCategory)) {
                 productCount++;
             } else if (inventoryCategory.value.equals(boardCategory)) {
                 if (inventory == null) {
@@ -58,7 +58,7 @@ public class MachineActionService {
         this.clearActionTable();
     }
 
-    public void addAction(ActionCategoryEnum category, BigDecimal dis, BaseBoard board, Integer orderId, String orderModule) {
+    public void addAction(ActionCategory category, BigDecimal dis, BaseBoard board, Integer orderId, String orderModule) {
         this.actionDao.addAction(category.value, dis, board.getCategory().value, board.getSpecStr(), board.getMaterial(), orderId, orderModule);
     }
 

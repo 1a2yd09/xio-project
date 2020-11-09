@@ -1,6 +1,6 @@
 package com.cat.entity.enums;
 
-public enum OrderModuleEnum {
+public enum OrderModule {
     /**
      * 轿底吊顶工地模块。
      */
@@ -16,7 +16,7 @@ public enum OrderModuleEnum {
 
     public final String value;
 
-    OrderModuleEnum(String value) {
+    OrderModule(String value) {
         this.value = value;
     }
 }

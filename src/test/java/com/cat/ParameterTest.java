@@ -4,24 +4,16 @@ import com.cat.entity.OperatingParameter;
 import com.cat.entity.TrimmingValue;
 import com.cat.service.ParameterService;
 import com.cat.service.TrimmingValueService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class ParameterTest {
-    static ApplicationContext context;
-    static ParameterService parameterService;
-    static TrimmingValueService trimmingValueService;
-
-    @BeforeAll
-    static void init() {
-        context = new AnnotationConfigApplicationContext(AppConfig.class);
-        parameterService = context.getBean(ParameterService.class);
-        trimmingValueService = context.getBean(TrimmingValueService.class);
-    }
+class ParameterTest extends BaseTest {
+    @Autowired
+    ParameterService parameterService;
+    @Autowired
+    TrimmingValueService trimmingValueService;
 
     @Test
     void testGetParameter() {

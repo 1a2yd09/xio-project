@@ -2,38 +2,32 @@ package com.cat;
 
 import com.cat.entity.WorkOrder;
 import com.cat.service.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class BottomOrderTest {
-    static ApplicationContext context;
-    static MainService mainService;
-    static WorkOrderService workOrderService;
-    static MachineActionService machineActionService;
-    static ParameterService parameterService;
-    static TrimmingValueService trimmingValueService;
-
-    @BeforeAll
-    static void init() {
-        context = new AnnotationConfigApplicationContext(AppConfig.class);
-        mainService = context.getBean(MainService.class);
-        workOrderService = context.getBean(WorkOrderService.class);
-        machineActionService = context.getBean(MachineActionService.class);
-        parameterService = context.getBean(ParameterService.class);
-        trimmingValueService = context.getBean(TrimmingValueService.class);
-    }
+@Transactional
+@Rollback
+class BottomOrderTest extends BaseTest {
+    @Autowired
+    MainService mainService;
+    @Autowired
+    WorkOrderService workOrderService;
+    @Autowired
+    MachineActionService machineActionService;
+    @Autowired
+    ParameterService parameterService;
+    @Autowired
+    TrimmingValueService trimmingValueService;
 
     /**
      * 成品规格符合标准，即成品规格宽度是小于长度的。
      */
     @Test
     void test1() {
-        // 清空一下动作表:
-        machineActionService.clearActionTable();
         // 下料板:2.5×1250×2504，成品板:2.5×121×2185，需求2个成品板
         WorkOrder order = workOrderService.getOrderById(3099510);
         // 半成品固定宽度192，(1250-121*2)/192=5个半成品，1250-192*5=290，290-121*2=48
@@ -47,8 +41,6 @@ class BottomOrderTest {
      */
     @Test
     void test2() {
-        // 清空一下动作表:
-        machineActionService.clearActionTable();
         // 下料板:2.5×1250×1589，成品板:2.5×1345.5×1189，需求1个成品板
         WorkOrder order = workOrderService.getOrderById(3098575);
         // 半成品固定宽度192，(1250-1189)/192=0个半成品，1250-1189=61，1589-1345.5=243.5

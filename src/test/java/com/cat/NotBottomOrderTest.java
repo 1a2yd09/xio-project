@@ -3,43 +3,39 @@ package com.cat;
 import com.cat.entity.CutBoard;
 import com.cat.entity.NormalBoard;
 import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.BoardCategory;
 import com.cat.service.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class NotBottomOrderTest {
-    static ApplicationContext context;
-    static MainService mainService;
-    static WorkOrderService workOrderService;
-    static MachineActionService machineActionService;
-    static StockSpecificationService stockSpecificationService;
-    static ParameterService parameterService;
-    static TrimmingValueService trimmingValueService;
+@Transactional
+@Rollback
+class NotBottomOrderTest extends BaseTest {
+    @Autowired
+    MainService mainService;
+    @Autowired
+    WorkOrderService workOrderService;
+    @Autowired
+    MachineActionService machineActionService;
+    @Autowired
+    StockSpecificationService stockSpecificationService;
+    @Autowired
+    ParameterService parameterService;
+    @Autowired
+    TrimmingValueService trimmingValueService;
 
-    @BeforeAll
-    static void init() {
-        context = new AnnotationConfigApplicationContext(AppConfig.class);
-        mainService = context.getBean(MainService.class);
-        workOrderService = context.getBean(WorkOrderService.class);
-        machineActionService = context.getBean(MachineActionService.class);
-        stockSpecificationService = context.getBean(StockSpecificationService.class);
-        parameterService = context.getBean(ParameterService.class);
-        trimmingValueService = context.getBean(TrimmingValueService.class);
-    }
 
     /**
      * 有留板-能用-不是最后一次
      */
     @Test
     void test1() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -57,7 +53,6 @@ class NotBottomOrderTest {
      */
     @Test
     void test2() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
         legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
@@ -75,7 +70,6 @@ class NotBottomOrderTest {
      */
     @Test
     void test3() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 该工单需求2个成品，但1次只能裁剪1个成品，因此不是最后一次:
         CutBoard cutBoard = mainService.processingNotBottomOrder(order, null, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue(), stockSpecificationService.getGroupSpecification());
@@ -89,10 +83,9 @@ class NotBottomOrderTest {
      */
     @Test
     void test4() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单本身成品板作为下一工单的成品板:
-        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 将工单下料板的宽度改为原来的两倍多一点:
         order.setCuttingSize("4.0×500×3400");
         // 因为只需1个成品板，因此是最后一次，并且剩下的肯定能给后面的用:
@@ -109,15 +102,14 @@ class NotBottomOrderTest {
      */
     @Test
     void test5() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单本身成品板作为下一工单的成品板:
-        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 材质不同，剩的不能用:
         nextOrderProductBoard.setMaterial("冷板");
         // 将工单下料板的宽度改为原来的两倍多一点:
         order.setCuttingSize("4.0×500×3400");
-        NormalBoard product = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard product = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 向库存规格表中写入一个和成品规格相同的库存件:
         stockSpecificationService.addStockSpecification(product.getHeight(), product.getWidth(), product.getLength());
         // 该工单需求的是2个成品板，500裁掉2个245剩10，无法裁剪245的库存件:
@@ -132,17 +124,16 @@ class NotBottomOrderTest {
      */
     @Test
     void test6() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单本身成品板作为下一工单的成品板:
-        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 材质不同，剩的不能用:
         nextOrderProductBoard.setMaterial("冷板");
         // 将工单下料板的宽度改为原来的两倍多一点:
         order.setCuttingSize("4.0×500×3400");
         // 是最后一次
         order.setAmount("1");
-        NormalBoard product = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard product = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         product.setLength(new BigDecimal(3100));
         // 像库存规格数据表中写入一个厚度宽度和成品相同，但长度稍小的库存件规格:
         stockSpecificationService.addStockSpecification(product.getHeight(), product.getWidth(), product.getLength());
@@ -158,15 +149,14 @@ class NotBottomOrderTest {
      */
     @Test
     void test7() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单本身成品板作为下一工单的成品板:
-        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 材质不同，剩的不能用:
         nextOrderProductBoard.setMaterial("冷板");
         // 将工单下料板的宽度改为原来的四倍多一点:
         order.setCuttingSize("4.0×1000×3400");
-        NormalBoard product = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard product = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         product.setLength(new BigDecimal(3300));
         // 像库存规格数据表中写入一个厚度宽度和成品相同，但长度稍大的库存件规格:
         stockSpecificationService.addStockSpecification(product.getHeight(), product.getWidth(), product.getLength());
@@ -182,7 +172,6 @@ class NotBottomOrderTest {
      */
     @Test
     void test8() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -190,7 +179,7 @@ class NotBottomOrderTest {
         legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
         legacyBoard.setWidth(new BigDecimal("500"));
         // 直接用工单本身成品板作为下一工单的成品板:
-        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 该工单需求1个成品，因此是最后一次:
         order.setAmount("1");
         // 留板500的宽度裁掉一个245后剩255，还可以放得下一个成品板:
@@ -206,7 +195,6 @@ class NotBottomOrderTest {
      */
     @Test
     void test9() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -214,10 +202,10 @@ class NotBottomOrderTest {
         legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
         legacyBoard.setWidth(new BigDecimal("250"));
         // 直接用工单本身成品板作为下一工单的成品板:
-        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 该工单需求1个成品，因此是最后一次:
         order.setAmount("1");
-        NormalBoard board = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard board = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 像库存规格数据表中写入一个和成品规格相同的库存件规格:
         stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());
         // 留板250的宽度裁掉一个245后剩5，无法复用也无法用于库存件:
@@ -232,7 +220,6 @@ class NotBottomOrderTest {
      */
     @Test
     void test10() {
-        machineActionService.clearActionTable();
         WorkOrder order = workOrderService.getOrderById(3098562);
         // 直接用工单下料板作为留板，肯定能用:
         CutBoard legacyBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -240,12 +227,12 @@ class NotBottomOrderTest {
         legacyBoard.setForwardEdge(CutBoard.EdgeType.LONG);
         legacyBoard.setWidth(new BigDecimal("500"));
         // 直接用工单本身成品板作为下一工单的成品板:
-        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard nextOrderProductBoard = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 剩的不能用:
         nextOrderProductBoard.setMaterial("冷板");
         // 该工单需求1个成品，因此是最后一次:
         order.setAmount("1");
-        NormalBoard board = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.PRODUCT);
+        NormalBoard board = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
         // 像库存规格数据表中写入一个厚度宽度和成品相同，但长度稍大的库存件规格:
         board.setLength(new BigDecimal("3300"));
         stockSpecificationService.addStockSpecification(board.getHeight(), board.getWidth(), board.getLength());

@@ -1,7 +1,7 @@
 package com.cat.dao;
 
 import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.OrderModuleEnum;
+import com.cat.entity.enums.OrderModule;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -47,12 +47,12 @@ public class WorkOrderDao extends AbstractDao {
     public List<WorkOrder> getNotBottomOrders(LocalDate date) {
         return this.jdbcTemplate.query("SELECT * FROM vi_local_work_order " +
                 "WHERE site_module != ? AND CAST(completion_date AS DATE) = ? " +
-                "ORDER BY CAST(sequence_number AS INT), id", this.orderM, OrderModuleEnum.BOTTOM.value, date);
+                "ORDER BY CAST(sequence_number AS INT), id", this.orderM, OrderModule.BOTTOM.value, date);
     }
 
     public List<WorkOrder> getBottomOrders(LocalDate date) {
         return this.jdbcTemplate.query("SELECT * FROM vi_local_work_order " +
                 "WHERE site_module = ? AND CAST(completion_date AS DATE) = ? " +
-                "ORDER BY CAST(sequence_number AS INT), id", this.orderM, OrderModuleEnum.BOTTOM.value, date);
+                "ORDER BY CAST(sequence_number AS INT), id", this.orderM, OrderModule.BOTTOM.value, date);
     }
 }

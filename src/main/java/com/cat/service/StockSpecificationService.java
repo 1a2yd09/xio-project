@@ -27,4 +27,8 @@ public class StockSpecificationService {
     public void addStockSpecification(BigDecimal height, BigDecimal width, BigDecimal length) {
         this.jdbcTemplate.update("INSERT INTO tb_stock_specification(height, width, length) VALUES (?, ?, ?)", height, width, length);
     }
+
+    public void clearSpecTable() {
+        this.jdbcTemplate.update("TRUNCATE TABLE tb_stock_specification");
+    }
 }

@@ -1,6 +1,6 @@
 package com.cat.entity;
 
-import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
 
 import java.math.BigDecimal;
@@ -12,12 +12,12 @@ public abstract class BaseBoard implements Comparable<BaseBoard> {
     private BigDecimal width;
     private BigDecimal length;
     private String material;
-    private BoardCategoryEnum category;
+    private BoardCategory category;
 
     public BaseBoard() {
     }
 
-    public BaseBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategoryEnum category) {
+    public BaseBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category) {
         this.height = height;
         this.width = width;
         this.length = length;
@@ -25,7 +25,7 @@ public abstract class BaseBoard implements Comparable<BaseBoard> {
         this.category = category;
     }
 
-    public BaseBoard(String specification, String material, BoardCategoryEnum category) {
+    public BaseBoard(String specification, String material, BoardCategory category) {
         List<BigDecimal> list = BoardUtil.specStrToDecList(specification);
         this.height = list.get(0);
         this.width = list.get(1);
@@ -102,11 +102,11 @@ public abstract class BaseBoard implements Comparable<BaseBoard> {
         this.material = material;
     }
 
-    public BoardCategoryEnum getCategory() {
+    public BoardCategory getCategory() {
         return category;
     }
 
-    public void setCategory(BoardCategoryEnum category) {
+    public void setCategory(BoardCategory category) {
         this.category = category;
     }
 

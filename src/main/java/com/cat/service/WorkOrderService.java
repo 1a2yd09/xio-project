@@ -3,8 +3,8 @@ package com.cat.service;
 import com.cat.dao.WorkOrderDao;
 import com.cat.entity.Inventory;
 import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.BottomSortPatternEnum;
-import com.cat.entity.enums.OrderStateEnum;
+import com.cat.entity.enums.BottomSortPattern;
+import com.cat.entity.enums.OrderState;
 import com.cat.util.BoardUtil;
 import com.cat.util.OrderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class WorkOrderService {
         this.orderDao.updateOrderCompletedAmount(order.getCompletedAmount(), order.getId());
 
         if (order.getUnfinishedAmount() == 0) {
-            this.updateOrderState(order, OrderStateEnum.COMPLETED);
+            this.updateOrderState(order, OrderState.COMPLETED);
         }
     }
 
@@ -43,7 +43,7 @@ public class WorkOrderService {
                 // 此次用作成品的库存件数量是工单未完成数量和库存件数量当中的最小值:
                 int usedInventoryNum = Math.min(order.getUnfinishedAmount(), inventory.getAmount());
                 // 使用库存件作为成品属于工单开工的行为之一:
-                this.updateOrderState(order, OrderStateEnum.ALREADY_STARTED);
+                this.updateOrderState(order, OrderState.ALREADY_STARTED);
                 this.addOrderCompletedAmount(order, usedInventoryNum);
                 // 直接在这里就将库存件数目写回数据表的理由是，不是每批库存件都会被获取，另外获取之后全部被用作成品，数目归零后不会再进入该逻辑:
                 inventory.setAmount(inventory.getAmount() - usedInventoryNum);
@@ -56,7 +56,7 @@ public class WorkOrderService {
 
     public List<WorkOrder> getBottomOrders(String sortPattern, LocalDate date) {
         List<WorkOrder> orders = this.orderDao.getBottomOrders(date);
-        if (BottomSortPatternEnum.SPEC.value.equals(sortPattern)) {
+        if (BottomSortPattern.SPEC.value.equals(sortPattern)) {
             // 如果要求按照规格排序，指的是”依次“按照成品的厚度、宽度、长度降序排序，三者都相同则按工单ID升序排序:
             orders.sort((o1, o2) -> {
                 int retVal = BoardUtil.compareTwoSpecStr(o1.getSpecStr(), o2.getSpecStr());
@@ -74,7 +74,7 @@ public class WorkOrderService {
         return this.orderDao.getOrderById(id);
     }
 
-    public void updateOrderState(WorkOrder order, OrderStateEnum state) {
+    public void updateOrderState(WorkOrder order, OrderState state) {
         order.setOperationState(state.value);
         this.orderDao.updateOrderState(order.getOperationState(), order.getId());
     }

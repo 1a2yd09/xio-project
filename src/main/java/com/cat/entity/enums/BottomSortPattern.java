@@ -1,6 +1,6 @@
 package com.cat.entity.enums;
 
-public enum BottomSortPatternEnum {
+public enum BottomSortPattern {
     /**
      * 按顺序号排序。
      */
@@ -12,7 +12,7 @@ public enum BottomSortPatternEnum {
 
     public final String value;
 
-    BottomSortPatternEnum(String value) {
+    BottomSortPattern(String value) {
         this.value = value;
     }
 }

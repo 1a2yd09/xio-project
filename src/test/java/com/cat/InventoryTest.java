@@ -1,34 +1,30 @@
 package com.cat;
 
 import com.cat.entity.Inventory;
-import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.BoardCategory;
 import com.cat.service.InventoryService;
 import com.cat.util.BoardUtil;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class InventoryTest {
-    static ApplicationContext context;
-    static InventoryService inventoryService;
-
-    @BeforeAll
-    static void init() {
-        context = new AnnotationConfigApplicationContext(AppConfig.class);
-        inventoryService = context.getBean(InventoryService.class);
-    }
+@Transactional
+@Rollback
+class InventoryTest extends BaseTest {
+    @Autowired
+    InventoryService inventoryService;
 
     @Test
     void testGetStockMap() {
-        inventoryService.addNewInventory("3×192.00×2000.00", "热板", 3, BoardCategoryEnum.STOCK.value);
-        inventoryService.addNewInventory("4×245.00×3190.00", "热板", 4, BoardCategoryEnum.STOCK.value);
-        inventoryService.addNewInventory("5.00×192×3000.00", "热板", 5, BoardCategoryEnum.STOCK.value);
+        inventoryService.addNewInventory("3×192.00×2000.00", "热板", 3, BoardCategory.STOCK.value);
+        inventoryService.addNewInventory("4×245.00×3190.00", "热板", 4, BoardCategory.STOCK.value);
+        inventoryService.addNewInventory("5.00×192×3000.00", "热板", 5, BoardCategory.STOCK.value);
         Map<String, Inventory> stockMap = inventoryService.getStockMap();
         assertEquals(3, stockMap.size());
         for (String spec : stockMap.keySet()) {

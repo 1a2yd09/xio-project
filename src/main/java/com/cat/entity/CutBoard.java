@@ -1,6 +1,6 @@
 package com.cat.entity;
 
-import com.cat.entity.enums.BoardCategoryEnum;
+import com.cat.entity.enums.BoardCategory;
 
 public class CutBoard extends BaseBoard {
     public enum EdgeType {
@@ -17,7 +17,7 @@ public class CutBoard extends BaseBoard {
     private EdgeType forwardEdge;
 
     public CutBoard(String specification, String material) {
-        super(specification, material, BoardCategoryEnum.CUTTING);
+        super(specification, material, BoardCategory.CUTTING);
         this.forwardEdge = EdgeType.SHORT;
     }
 

@@ -1,6 +1,6 @@
 package com.cat.entity.enums;
 
-public enum OrderStateEnum {
+public enum OrderState {
     /**
      * 未开工。
      */
@@ -16,7 +16,7 @@ public enum OrderStateEnum {
 
     public final String value;
 
-    OrderStateEnum(String value) {
+    OrderState(String value) {
         this.value = value;
     }
 }

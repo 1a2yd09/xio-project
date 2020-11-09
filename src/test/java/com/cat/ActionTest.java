@@ -1,40 +1,36 @@
 package com.cat;
 
 import com.cat.entity.*;
-import com.cat.entity.enums.BoardCategoryEnum;
-import com.cat.entity.enums.OrderStateEnum;
+import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.enums.OrderState;
 import com.cat.service.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ActionServiceTest {
-    static ApplicationContext context;
-    static MachineActionService machineActionService;
-    static WorkOrderService workOrderService;
-    static MainService mainService;
-    static InventoryService inventoryService;
-    static StockSpecificationService stockSpecificationService;
-    static ParameterService parameterService;
-    static TrimmingValueService trimmingValueService;
-
-    @BeforeAll
-    public static void init() {
-        context = new AnnotationConfigApplicationContext(AppConfig.class);
-        machineActionService = context.getBean(MachineActionService.class);
-        workOrderService = context.getBean(WorkOrderService.class);
-        mainService = context.getBean(MainService.class);
-        inventoryService = context.getBean(InventoryService.class);
-        stockSpecificationService = context.getBean(StockSpecificationService.class);
-        parameterService = context.getBean(ParameterService.class);
-        trimmingValueService = context.getBean(TrimmingValueService.class);
-    }
+@Transactional
+@Rollback
+class ActionTest extends BaseTest {
+    @Autowired
+    MachineActionService machineActionService;
+    @Autowired
+    WorkOrderService workOrderService;
+    @Autowired
+    MainService mainService;
+    @Autowired
+    InventoryService inventoryService;
+    @Autowired
+    StockSpecificationService stockSpecificationService;
+    @Autowired
+    ParameterService parameterService;
+    @Autowired
+    TrimmingValueService trimmingValueService;
 
     @Test
     void testProcessingFinishedAction1() {
@@ -45,7 +41,7 @@ class ActionServiceTest {
 
         WorkOrder order = workOrderService.getOrderById(3098562);
         order.setCuttingSize("4.0×1000×3400");
-        NormalBoard stock = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategoryEnum.STOCK);
+        NormalBoard stock = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.STOCK);
         stock.setLength(new BigDecimal(3300));
         stockSpecificationService.addStockSpecification(stock.getHeight(), stock.getWidth(), stock.getLength());
 
@@ -70,13 +66,13 @@ class ActionServiceTest {
         Inventory inventory = inventoryService.getInventory(stock.getSpecStr(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
-        machineActionService.processCompletedAction(order, BoardCategoryEnum.STOCK);
+        machineActionService.processCompletedAction(order, BoardCategory.STOCK);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 测试三，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
         // 测试四，达到了工单所需的数目，因此工单状态应为已完工:
-        assertEquals(order.getOperationState(), OrderStateEnum.COMPLETED.value);
+        assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
 
         inventory = inventoryService.getInventory(stock.getSpecStr(), stock.getMaterial(), stock.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getAmount();
@@ -92,7 +88,7 @@ class ActionServiceTest {
         // 半成品 2.5×192×2504:
 
         WorkOrder order = workOrderService.getOrderById(3099510);
-        NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategoryEnum.SEMI_PRODUCT);
+        NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
 
         mainService.processingBottomOrder(order, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue());
         // 取板-修边(无)-旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
@@ -113,13 +109,13 @@ class ActionServiceTest {
         Inventory inventory = inventoryService.getInventory(semiProduct.getSpecStr(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
-        machineActionService.processCompletedAction(order, BoardCategoryEnum.SEMI_PRODUCT);
+        machineActionService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
         // 测试三，达到了工单所需的数目，因此工单状态应为已完工:
-        assertEquals(order.getOperationState(), OrderStateEnum.COMPLETED.value);
+        assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
 
         inventory = inventoryService.getInventory(semiProduct.getSpecStr(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getAmount();

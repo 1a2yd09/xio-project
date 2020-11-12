@@ -15,13 +15,13 @@ public class TrimmingValue {
     public TrimmingValue() {
     }
 
-    public TrimmingValue(Integer id, BigDecimal trimTop, BigDecimal trimLeft, BigDecimal trimBottom, BigDecimal trimRight, LocalDateTime createdAt) {
-        this.id = id;
+    public TrimmingValue(BigDecimal trimTop, BigDecimal trimLeft, BigDecimal trimBottom, BigDecimal trimRight) {
+        this.id = -1;
         this.trimTop = trimTop;
         this.trimLeft = trimLeft;
         this.trimBottom = trimBottom;
         this.trimRight = trimRight;
-        this.createdAt = createdAt;
+        this.createdAt = LocalDateTime.now();
     }
 
     public List<BigDecimal> getTrimValues() {

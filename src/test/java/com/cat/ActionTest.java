@@ -43,9 +43,9 @@ class ActionTest extends BaseTest {
         order.setCuttingSize("4.0×1000×3400");
         NormalBoard stock = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.STOCK);
         stock.setLength(new BigDecimal(3300));
-        stockSpecificationService.addStockSpecification(stock.getHeight(), stock.getWidth(), stock.getLength());
+        stockSpecificationService.addStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
 
-        CutBoard legacyCutBoard = mainService.processingNotBottomOrder(order, null, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue(), stockSpecificationService.getGroupSpecification());
+        CutBoard legacyCutBoard = mainService.processingNotBottomOrder(order, null, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue(), stockSpecificationService.getGroupSpecs());
         // 取板-修边(无)-修长度(3400->3300)-旋转-进刀2个库存(1000->510)-旋转-修长度(3300->3190)-旋转-修宽度(510->490)-进刀1个成品(490->245)-送1个成品(245->0):
         // 测试一，生成11个机器动作:
         assertEquals(11, machineActionService.getActionCount());

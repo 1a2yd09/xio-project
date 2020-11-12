@@ -1,29 +1,19 @@
 package com.cat.service;
 
+import com.cat.dao.TrimmingValueDao;
 import com.cat.entity.TrimmingValue;
-import com.cat.util.TrimUtil;
+import com.cat.util.ParamUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Objects;
 
 @Component
 public class TrimmingValueService {
     @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    RowMapper<TrimmingValue> trimM = new BeanPropertyRowMapper<>(TrimmingValue.class);
+    TrimmingValueDao trimmingValueDao;
 
     public TrimmingValue getLatestTrimmingValue() {
-        return Objects.requireNonNullElseGet(this.getTrimmingValue(), TrimUtil::getDefaultValue);
-    }
-
-    private TrimmingValue getTrimmingValue() {
-        List<TrimmingValue> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_trimming_value ORDER BY id DESC", this.trimM);
-        return list.isEmpty() ? null : list.get(0);
+        return Objects.requireNonNullElseGet(this.trimmingValueDao.getTrimmingValue(), ParamUtil::getDefaultValue);
     }
 }

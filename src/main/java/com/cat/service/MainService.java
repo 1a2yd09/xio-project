@@ -41,7 +41,7 @@ public class MainService {
 
         OperatingParameter op = this.parameterService.getLatestOperatingParameter();
         TrimmingValue tv = this.trimmingValueService.getLatestTrimmingValue();
-        List<StockSpecification> specs = this.stockSpecificationService.getGroupSpecification();
+        List<StockSpecification> specs = this.stockSpecificationService.getGroupSpecs();
 
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 

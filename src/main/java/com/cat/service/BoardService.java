@@ -7,7 +7,7 @@ import com.cat.entity.StockSpecification;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
-import com.cat.util.StockSpecUtil;
+import com.cat.util.ParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,7 +154,7 @@ public class BoardService {
     }
 
     public NormalBoard getMatchStockBoard(List<StockSpecification> specs, BigDecimal height, String material) {
-        StockSpecification ss = specs.stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(StockSpecUtil.getDefaultStockSpec());
+        StockSpecification ss = specs.stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(ParamUtil.getDefaultStockSpec());
         return new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);
     }
 

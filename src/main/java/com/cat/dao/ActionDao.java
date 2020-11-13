@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class MachineActionDao extends AbstractDao {
+public class ActionDao extends AbstractDao {
     RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
 
     public void addAction(String actionCategory, BigDecimal dis, String boardCategory, String boardSpec, String boardMaterial, Integer orderId, String orderModule) {

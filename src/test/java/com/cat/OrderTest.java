@@ -8,7 +8,7 @@ import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.BottomSortPattern;
 import com.cat.service.InventoryService;
 import com.cat.service.ParameterService;
-import com.cat.service.WorkOrderService;
+import com.cat.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrderTest extends BaseTest {
     @Autowired
-    WorkOrderService workOrderService;
+    OrderService orderService;
     @Autowired
     ParameterService parameterService;
     @Autowired
@@ -29,14 +29,14 @@ class OrderTest extends BaseTest {
 
     @Test
     void testSomething() {
-        assertEquals(996, workOrderService.getOrderCount());
+        assertEquals(996, orderService.getOrderCount());
     }
 
     @Test
     void testGetBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getWorkOrderDate();
-        List<WorkOrder> orders = workOrderService.getBottomOrders(BottomSortPattern.SPEC.value, date);
+        List<WorkOrder> orders = orderService.getBottomOrders(BottomSortPattern.SPEC.value, date);
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -50,7 +50,7 @@ class OrderTest extends BaseTest {
     @Test
     void testGetAllWidthBetterNotBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
-        List<WorkOrder> orders = workOrderService.getNotBottomOrders(op.getWorkOrderDate());
+        List<WorkOrder> orders = orderService.getNotBottomOrders(op.getWorkOrderDate());
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
@@ -67,12 +67,12 @@ class OrderTest extends BaseTest {
     void testGetNotBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getWorkOrderDate();
-        List<WorkOrder> orders = workOrderService.getNotBottomOrders(date);
+        List<WorkOrder> orders = orderService.getNotBottomOrders(date);
         // 获取未预处理的直梁工单，共82个:
         assertEquals(82, orders.size());
         inventoryService.addNewInventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value);
         inventoryService.addNewInventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value);
-        orders = workOrderService.getPreprocessNotBottomOrders(date);
+        orders = orderService.getPreprocessNotBottomOrders(date);
         // 获取预处理的直梁工单，其中有6个工单因为使用了已有的库存件作为成品，因此工单数量变为76个:
         assertEquals(76, orders.size());
     }

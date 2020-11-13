@@ -1,6 +1,6 @@
 package com.cat;
 
-import com.cat.service.MachineActionService;
+import com.cat.service.ActionService;
 import com.cat.service.MainService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ class MainTest extends BaseTest {
     @Autowired
     MainService mainService;
     @Autowired
-    MachineActionService actionService;
+    ActionService actionService;
 
     @Test
     void testSomething() throws InterruptedException {

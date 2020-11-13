@@ -1,6 +1,6 @@
 package com.cat.service;
 
-import com.cat.dao.WorkOrderDao;
+import com.cat.dao.OrderDao;
 import com.cat.entity.Inventory;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BottomSortPattern;
@@ -16,9 +16,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class WorkOrderService {
+public class OrderService {
     @Autowired
-    WorkOrderDao orderDao;
+    OrderDao orderDao;
     @Autowired
     InventoryService inventoryService;
 

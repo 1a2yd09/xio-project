@@ -21,7 +21,7 @@ public class BoardService {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    MachineActionService actionService;
+    ActionService actionService;
 
     public void rotatingCutBoard(CutBoard cutBoard, int rotateTimes, Integer orderId, String orderModule) {
         for (int i = 0; i < rotateTimes; i++) {

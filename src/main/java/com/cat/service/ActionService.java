@@ -1,6 +1,6 @@
 package com.cat.service;
 
-import com.cat.dao.MachineActionDao;
+import com.cat.dao.ActionDao;
 import com.cat.entity.BaseBoard;
 import com.cat.entity.MachineAction;
 import com.cat.entity.NormalBoard;
@@ -14,11 +14,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class MachineActionService implements Clearable {
+public class ActionService implements Clearable {
     @Autowired
-    MachineActionDao actionDao;
+    ActionDao actionDao;
     @Autowired
-    WorkOrderService orderService;
+    OrderService orderService;
     @Autowired
     InventoryService inventoryService;
 

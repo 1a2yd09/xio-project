@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class StockSpecificationService implements Clearable {
+public class StockSpecService implements Clearable {
     @Autowired
     StockSpecDao stockSpecDao;
 

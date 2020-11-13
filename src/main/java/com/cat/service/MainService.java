@@ -23,15 +23,15 @@ public class MainService {
     @Autowired
     SignalService signalService;
     @Autowired
-    WorkOrderService orderService;
+    OrderService orderService;
     @Autowired
-    MachineActionService actionService;
+    ActionService actionService;
     @Autowired
     InventoryService inventoryService;
     @Autowired
     TrimmingValueService trimmingValueService;
     @Autowired
-    StockSpecificationService stockSpecificationService;
+    StockSpecService stockSpecService;
 
     public void startService() throws InterruptedException {
         this.signalService.addNewSignal(SignalCategory.START_WORK);
@@ -41,7 +41,7 @@ public class MainService {
 
         OperatingParameter op = this.parameterService.getLatestOperatingParameter();
         TrimmingValue tv = this.trimmingValueService.getLatestTrimmingValue();
-        List<StockSpecification> specs = this.stockSpecificationService.getGroupSpecs();
+        List<StockSpecification> specs = this.stockSpecService.getGroupSpecs();
 
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 

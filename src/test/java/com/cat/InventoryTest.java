@@ -22,9 +22,9 @@ class InventoryTest extends BaseTest {
 
     @Test
     void testGetStockMap() {
-        inventoryService.addNewInventory("3×192.00×2000.00", "热板", 3, BoardCategory.STOCK.value);
-        inventoryService.addNewInventory("4×245.00×3190.00", "热板", 4, BoardCategory.STOCK.value);
-        inventoryService.addNewInventory("5.00×192×3000.00", "热板", 5, BoardCategory.STOCK.value);
+        inventoryService.addNewInventory("3.00×192.00×2000.00", "热板", 3, BoardCategory.STOCK.value);
+        inventoryService.addNewInventory("4.00×245.00×3190.00", "热板", 4, BoardCategory.STOCK.value);
+        inventoryService.addNewInventory("5.00×192.00×3000.00", "热板", 5, BoardCategory.STOCK.value);
         Map<String, Inventory> stockMap = inventoryService.getStockMap();
         assertEquals(3, stockMap.size());
         for (String spec : stockMap.keySet()) {

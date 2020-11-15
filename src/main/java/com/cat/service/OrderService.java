@@ -3,7 +3,7 @@ package com.cat.service;
 import com.cat.dao.OrderDao;
 import com.cat.entity.Inventory;
 import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.BottomSortPattern;
+import com.cat.entity.enums.OrderSortPattern;
 import com.cat.entity.enums.OrderState;
 import com.cat.util.BoardUtil;
 import com.cat.util.OrderUtil;
@@ -56,7 +56,7 @@ public class OrderService {
 
     public List<WorkOrder> getBottomOrders(String sortPattern, LocalDate date) {
         List<WorkOrder> orders = this.orderDao.getBottomOrders(date);
-        if (BottomSortPattern.SPEC.value.equals(sortPattern)) {
+        if (OrderSortPattern.BY_SPEC.value.equals(sortPattern)) {
             // 如果要求按照规格排序，指的是”依次“按照成品的厚度、宽度、长度降序排序，三者都相同则按工单ID升序排序:
             orders.sort((o1, o2) -> {
                 int retVal = BoardUtil.compareTwoSpecStr(o1.getSpecStr(), o2.getSpecStr());

@@ -5,7 +5,7 @@ import com.cat.entity.NormalBoard;
 import com.cat.entity.OperatingParameter;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
-import com.cat.entity.enums.BottomSortPattern;
+import com.cat.entity.enums.OrderSortPattern;
 import com.cat.service.InventoryService;
 import com.cat.service.ParameterService;
 import com.cat.service.OrderService;
@@ -36,7 +36,7 @@ class OrderTest extends BaseTest {
     void testGetBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getWorkOrderDate();
-        List<WorkOrder> orders = orderService.getBottomOrders(BottomSortPattern.SPEC.value, date);
+        List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());

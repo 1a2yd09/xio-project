@@ -20,7 +20,7 @@ public class InventoryService implements Clearable {
     public Map<String, Inventory> getStockMap() {
         return this.inventoryDao.getInventories(BoardCategory.STOCK.value)
                 .stream()
-                .collect(Collectors.toMap(inventory -> BoardUtil.getStandardSpecStr(inventory.getSpecStr()), Function.identity()));
+                .collect(Collectors.toMap(Inventory::getSpecStr, Function.identity()));
     }
 
     public Inventory getInventory(String specification, String material, String category) {

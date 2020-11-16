@@ -44,7 +44,7 @@ public class InventoryService implements Clearable {
         this.inventoryDao.insertInventory(specification, material, amount, category);
     }
 
-    public void updateInventoryAmount(Integer amount, Integer id) {
+    public void updateInventoryAmount(Integer amount, Long id) {
         this.inventoryDao.updateInventoryAmount(amount, id);
     }
 

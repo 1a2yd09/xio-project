@@ -16,7 +16,7 @@ public class SignalDao extends AbstractDao {
         return signals.isEmpty() ? null : signals.get(0);
     }
 
-    public void processedSignal(Integer id) {
+    public void processedSignal(Long id) {
         this.jdbcTemplate.update("UPDATE tb_signal SET processed = 1 WHERE id = ?", id);
     }
 

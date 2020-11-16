@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class OperatingParameter {
-    private Integer id;
+    private Long id;
     private LocalDate workOrderDate;
     private BigDecimal fixedWidth;
     private BigDecimal wasteThreshold;
@@ -16,7 +16,7 @@ public class OperatingParameter {
     }
 
     public OperatingParameter(LocalDate workOrderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String bottomOrderSort) {
-        this.id = -1;
+        this.id = -1L;
         this.workOrderDate = workOrderDate;
         this.fixedWidth = fixedWidth;
         this.wasteThreshold = wasteThreshold;
@@ -24,11 +24,11 @@ public class OperatingParameter {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

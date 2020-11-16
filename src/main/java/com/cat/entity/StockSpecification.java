@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class StockSpecification {
-    private Integer id;
+    private Long id;
     private BigDecimal height;
     private BigDecimal width;
     private BigDecimal length;
@@ -14,18 +14,18 @@ public class StockSpecification {
     }
 
     public StockSpecification(BigDecimal height, BigDecimal width, BigDecimal length) {
-        this.id = -1;
+        this.id = -1L;
         this.height = height;
         this.width = width;
         this.length = length;
         this.createdAt = LocalDateTime.now();
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

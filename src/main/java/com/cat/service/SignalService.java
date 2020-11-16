@@ -12,12 +12,16 @@ public class SignalService implements Clearable {
     SignalDao signalDao;
 
     public boolean isReceivedNewSignal(SignalCategory category) {
-        Signal signal = this.signalDao.getLatestSignal(category.value);
+        Signal signal = this.getLatestSignal(category);
         if (signal != null && !signal.getProcessed()) {
             this.signalDao.processedSignal(signal.getId());
             return true;
         }
         return false;
+    }
+
+    public Signal getLatestSignal(SignalCategory category) {
+        return this.signalDao.getLatestSignal(category.value);
     }
 
     public void addNewSignal(SignalCategory category) {

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class TrimmingValue {
-    private Integer id;
+    private Long id;
     private BigDecimal trimTop;
     private BigDecimal trimLeft;
     private BigDecimal trimBottom;
@@ -16,7 +16,7 @@ public class TrimmingValue {
     }
 
     public TrimmingValue(BigDecimal trimTop, BigDecimal trimLeft, BigDecimal trimBottom, BigDecimal trimRight) {
-        this.id = -1;
+        this.id = -1L;
         this.trimTop = trimTop;
         this.trimLeft = trimLeft;
         this.trimBottom = trimBottom;
@@ -28,11 +28,11 @@ public class TrimmingValue {
         return List.of(this.trimTop, this.trimLeft, this.trimBottom, this.trimRight);
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

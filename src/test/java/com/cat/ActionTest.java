@@ -53,6 +53,7 @@ class ActionTest extends BaseTest {
         assertNull(legacyCutBoard);
 
         List<MachineAction> actions = actionService.getAllActions();
+        actions.forEach(System.out::println);
         for (MachineAction action : actions) {
             assertFalse(action.getCompleted());
         }
@@ -96,6 +97,7 @@ class ActionTest extends BaseTest {
         assertEquals(13, actionService.getActionCount());
 
         List<MachineAction> actions = actionService.getAllActions();
+        actions.forEach(System.out::println);
         for (MachineAction action : actions) {
             assertFalse(action.getCompleted());
         }

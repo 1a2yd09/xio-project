@@ -24,7 +24,7 @@ public class InventoryDao extends AbstractDao {
                 "VALUES (?, ?, ?, ?)", specification, material, amount, category);
     }
 
-    public void updateInventoryAmount(Integer amount, Integer id) {
+    public void updateInventoryAmount(Integer amount, Long id) {
         this.jdbcTemplate.update("UPDATE tb_inventory SET amount = ? WHERE id = ?", amount, id);
     }
 

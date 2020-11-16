@@ -1,5 +1,6 @@
 package com.cat;
 
+import com.cat.entity.Signal;
 import com.cat.entity.enums.SignalCategory;
 import com.cat.service.SignalService;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,8 @@ class SignalTest extends BaseTest {
         boolean flag = signalService.isReceivedNewSignal(SignalCategory.ACTION);
         assertFalse(flag);
         signalService.addNewSignal(SignalCategory.ACTION);
+        Signal signal = signalService.getLatestSignal(SignalCategory.ACTION);
+        System.out.println(signal);
         flag = signalService.isReceivedNewSignal(SignalCategory.ACTION);
         assertTrue(flag);
     }

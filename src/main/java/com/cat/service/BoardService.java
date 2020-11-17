@@ -48,8 +48,8 @@ public class BoardService {
     public void pickingAndTrimmingCutBoard(CutBoard cutBoard, List<BigDecimal> trimValues, BigDecimal wasteThreshold, Integer orderId, String orderModule) {
         this.actionService.addAction(ActionCategory.PICK, BigDecimal.ZERO, cutBoard, orderId, orderModule);
 
-        logger.info("trimValues: {}", trimValues);
-        logger.info("wasteThreshold: {}", wasteThreshold);
+        logger.debug("trimValues: {}", trimValues);
+        logger.debug("wasteThreshold: {}", wasteThreshold);
         int currentForwardEdge = 0;
         for (int i = 0; i < trimValues.size(); i++) {
             BigDecimal trimValue = trimValues.get(i);
@@ -137,17 +137,17 @@ public class BoardService {
         // 然后创建一个新的方法用于处理板材，不然将阈值和修边值再传入进来，整个参数过于臃肿。
         if (legacyCutBoard == null) {
             this.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
-            logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
+            logger.debug("Picking and trimming orderCutBoard: {}", orderCutBoard);
             return orderCutBoard;
         } else {
             if (legacyCutBoard.compareTo(productBoard) >= 0) {
-                logger.info("Using legacyCutBoard: {}", legacyCutBoard);
+                logger.debug("Using legacyCutBoard: {}", legacyCutBoard);
                 return legacyCutBoard;
             } else {
                 this.sendingTargetBoard(legacyCutBoard, legacyCutBoard, orderId, orderModule);
-                logger.info("Sending legacyCutBoard");
+                logger.debug("Sending legacyCutBoard");
                 this.pickingAndTrimmingCutBoard(orderCutBoard, trimValues, wasteThreshold, orderId, orderModule);
-                logger.info("Picking and trimming orderCutBoard: {}", orderCutBoard);
+                logger.debug("Picking and trimming orderCutBoard: {}", orderCutBoard);
                 return orderCutBoard;
             }
         }

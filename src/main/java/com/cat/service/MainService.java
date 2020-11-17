@@ -88,25 +88,25 @@ public class MainService {
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
         List<BigDecimal> trimValues = trimmingValue.getTrimValues();
 
-        logger.info("Order: {}", order);
+        logger.debug("Order: {}", order);
 
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material);
-        logger.info("OrderCutBoard: {}", orderCutBoard);
+        logger.debug("OrderCutBoard: {}", orderCutBoard);
 
         NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecStr(), material, orderCutBoard.getWidth());
-        logger.info("ProductBoard: {}", productBoard);
+        logger.debug("ProductBoard: {}", productBoard);
 
         CutBoard cutBoard = this.boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, trimValues, wasteThreshold, orderId, orderModule);
-        logger.info("processingCutBoard: {}", cutBoard);
+        logger.debug("processingCutBoard: {}", cutBoard);
 
         int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
-        logger.info("ProductCutTimes: {}", productCutTimes);
+        logger.debug("ProductCutTimes: {}", productCutTimes);
 
         NormalBoard semiProductBoard = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
-        logger.info("SemiProductBoard: {}", semiProductBoard);
+        logger.debug("SemiProductBoard: {}", semiProductBoard);
 
         int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, semiProductBoard);
-        logger.info("SemiProductCutTimes: {}", semiProductCutTimes);
+        logger.debug("SemiProductCutTimes: {}", semiProductCutTimes);
 
         this.boardService.twoStep(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId, orderModule);
 
@@ -122,71 +122,71 @@ public class MainService {
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
         List<BigDecimal> trimValues = trimmingValue.getTrimValues();
 
-        logger.info("Order: {}", order);
+        logger.debug("Order: {}", order);
 
         CutBoard orderCutBoard = new CutBoard(order.getCuttingSize(), material);
-        logger.info("OrderCutBoard: {}", orderCutBoard);
+        logger.debug("OrderCutBoard: {}", orderCutBoard);
 
         NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecStr(), material, orderCutBoard.getWidth());
-        logger.info("ProductBoard: {}", productBoard);
+        logger.debug("ProductBoard: {}", productBoard);
 
-        logger.info("legacyCutBoard: {}", legacyCutBoard);
+        logger.debug("legacyCutBoard: {}", legacyCutBoard);
 
         CutBoard cutBoard = this.boardService.processingCutBoard(legacyCutBoard, orderCutBoard, productBoard, trimValues, wasteThreshold, orderId, orderModule);
-        logger.info("processingCutBoard: {}", cutBoard);
+        logger.debug("processingCutBoard: {}", cutBoard);
 
         int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
-        logger.info("ProductCutTimes: {}", productCutTimes);
+        logger.debug("ProductCutTimes: {}", productCutTimes);
 
         if (productCutTimes == order.getUnfinishedAmount()) {
-            logger.info("order last time processing");
+            logger.debug("order last time processing");
             BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
             NormalBoard remainingBoard = new NormalBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.REMAINING);
-            logger.info("remainingCutBoard: {}", remainingBoard);
-            logger.info("nextOrderProductBoard: {}", nextOrderProductBoard);
+            logger.debug("remainingCutBoard: {}", remainingBoard);
+            logger.debug("nextOrderProductBoard: {}", nextOrderProductBoard);
 
             if (remainingBoard.compareTo(nextOrderProductBoard) >= 0) {
-                logger.info("remainingCutBoard can reuse");
+                logger.debug("remainingCutBoard can reuse");
 
                 this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
             } else {
-                logger.info("remainingCutBoard can't reuse");
+                logger.debug("remainingCutBoard can't reuse");
 
                 NormalBoard stockBoard = this.boardService.getMatchStockBoard(specs, cutBoard.getHeight(), material);
-                logger.info("stockBoard: {}", stockBoard);
+                logger.debug("stockBoard: {}", stockBoard);
 
                 int stockBoardCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, stockBoard);
-                logger.info("stockBoardCutTimes: {}", stockBoardCutTimes);
+                logger.debug("stockBoardCutTimes: {}", stockBoardCutTimes);
 
                 if (stockBoardCutTimes > 0) {
-                    logger.info("can cutting stockBoard");
+                    logger.debug("can cutting stockBoard");
 
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
-                        logger.info("first cutting productBoard");
+                        logger.debug("first cutting productBoard");
 
                         this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
 
                         this.boardService.threeStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
                     } else {
-                        logger.info("first cutting stockBoard");
+                        logger.debug("first cutting stockBoard");
 
                         this.boardService.twoStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
 
                         this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
                     }
                 } else {
-                    logger.info("can't cutting stockBoard");
+                    logger.debug("can't cutting stockBoard");
 
                     this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
                 }
             }
         } else {
-            logger.info("order not last time processing");
+            logger.debug("order not last time processing");
 
             this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
         }
 
-        logger.info("CutBoard in the end: {}", cutBoard);
+        logger.debug("CutBoard in the end: {}", cutBoard);
 
         return cutBoard.getWidth().compareTo(BigDecimal.ZERO) == 0 ? null : cutBoard;
     }

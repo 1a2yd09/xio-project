@@ -1,4 +1,4 @@
 .idea/
 target/
 src/main/resources/jdbc.properties
-src/main/resources/logback.xml
+src/main/resources/logback-test.xml

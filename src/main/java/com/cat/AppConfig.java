@@ -24,9 +24,6 @@ public class AppConfig {
     DataSource createDataSource(@Value("${jdbc.url}") String jdbcUrl) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(jdbcUrl);
-        config.addDataSourceProperty("autoCommit", "false");
-        config.addDataSourceProperty("connectionTimeout", "5");
-        config.addDataSourceProperty("idleTimeout", "60");
         return new HikariDataSource(config);
     }
 

@@ -91,10 +91,10 @@ class ActionTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3099510);
         NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
 
-        mainService.processingBottomOrder(order, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue());
-        // 取板-修边(无)-旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
-        // 测试一，生成13个机器动作:
-        assertEquals(13, actionService.getActionCount());
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter());
+        // 旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
+        // 测试一，生成12个机器动作:
+        assertEquals(12, actionService.getActionCount());
 
         List<MachineAction> actions = actionService.getAllActions();
         actions.forEach(System.out::println);
@@ -128,7 +128,7 @@ class ActionTest extends BaseTest {
     @Test
     void testCompletedAllActions() {
         WorkOrder order = orderService.getOrderById(3101165);
-        mainService.processingBottomOrder(order, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue());
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter());
         assertFalse(actionService.isAllActionsCompleted());
         actionService.completedAction(1);
         assertFalse(actionService.isAllActionsCompleted());

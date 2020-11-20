@@ -1,7 +1,6 @@
 package com.cat;
 
-import com.cat.entity.Signal;
-import com.cat.entity.enums.SignalCategory;
+import com.cat.entity.StartSignal;
 import com.cat.service.SignalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +18,12 @@ class SignalTest extends BaseTest {
 
     @Test
     void testReceiveNewSignal() {
-        boolean flag = signalService.isReceivedNewSignal(SignalCategory.ACTION);
+        boolean flag = signalService.isReceivedNewStartSignal();
         assertFalse(flag);
-        signalService.addNewSignal(SignalCategory.ACTION);
-        Signal signal = signalService.getLatestSignal(SignalCategory.ACTION);
-        System.out.println(signal);
-        flag = signalService.isReceivedNewSignal(SignalCategory.ACTION);
+        signalService.addNewStartSignal();
+        StartSignal startSignal = signalService.getLatestStartSignal();
+        System.out.println(startSignal);
+        flag = signalService.isReceivedNewStartSignal();
         assertTrue(flag);
     }
 }

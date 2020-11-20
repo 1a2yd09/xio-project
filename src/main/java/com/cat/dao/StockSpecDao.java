@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class StockSpecDao extends AbstractDao {
+public class StockSpecDao extends BaseDao {
     public List<StockSpecification> getGroupSpecs() {
         return this.jdbcTemplate.query("SELECT id, height, width, length, created_at " +
                 "FROM (SELECT id, height, width, length, created_at, ROW_NUMBER() OVER (PARTITION BY height ORDER BY id DESC) AS row_number " +

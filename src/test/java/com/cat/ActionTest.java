@@ -47,7 +47,7 @@ class ActionTest extends BaseTest {
         stock.setLength(new BigDecimal(3300));
         stockSpecService.addStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
 
-        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupSpecs());
+        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupSpecs(), false);
         // 修长度(3400->3300)-旋转-进刀2个库存(1000->510)-旋转-修长度(3300->3190)-旋转-修宽度(510->490)-进刀1个成品(490->245)-送1个成品(245->0):
         // 测试一，生成10个机器动作:
         assertEquals(10, actionService.getActionCount());
@@ -91,7 +91,7 @@ class ActionTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3099510);
         NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
 
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter());
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), false);
         // 旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
         // 测试一，生成12个机器动作:
         assertEquals(12, actionService.getActionCount());
@@ -128,7 +128,7 @@ class ActionTest extends BaseTest {
     @Test
     void testCompletedAllActions() {
         WorkOrder order = orderService.getOrderById(3101165);
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter());
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), false);
         assertFalse(actionService.isAllActionsCompleted());
         actionService.completedAction(1);
         assertFalse(actionService.isAllActionsCompleted());

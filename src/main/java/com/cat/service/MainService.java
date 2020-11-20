@@ -3,7 +3,6 @@ package com.cat.service;
 import com.cat.entity.*;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
-import com.cat.entity.enums.SignalCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +31,8 @@ public class MainService {
     StockSpecService stockSpecService;
 
     public void startService() throws InterruptedException {
-        this.signalService.addNewSignal(SignalCategory.START_WORK);
-        while (!this.signalService.isReceivedNewSignal(SignalCategory.START_WORK)) {
+        this.signalService.addNewStartSignal();
+        while (!this.signalService.isReceivedNewStartSignal()) {
             Thread.sleep(3000);
         }
 
@@ -43,11 +42,22 @@ public class MainService {
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 
         for (WorkOrder order : orders) {
-            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
-                this.processingBottomOrder(order, op);
-                this.signalService.addNewSignal(SignalCategory.ACTION);
-                while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
+                this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
+                this.signalService.addNewTakeBoardSignal(order.getId());
+                Boolean cutBoardTowardEdge = false;
+                while (true) {
+                    CuttingSignal cuttingSignal = this.signalService.getLatestNotProcessedCuttingSignal();
+                    if (cuttingSignal != null) {
+                        order.setSpecification(cuttingSignal.getSpecification());
+                        cutBoardTowardEdge = cuttingSignal.getTowardEdge();
+                        break;
+                    }
+                    Thread.sleep(3000);
+                }
+                this.processingBottomOrder(order, op, cutBoardTowardEdge);
+                this.actionService.completedAllActions();
+                while (!this.actionService.isAllActionsCompleted()) {
                     Thread.sleep(3000);
                 }
                 this.actionService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
@@ -62,11 +72,22 @@ public class MainService {
             if (i < orders.size() - 1) {
                 nextOrder = orders.get(i + 1);
             }
-            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
-                this.processingNotBottomOrder(order, nextOrder, op, specs);
-                this.signalService.addNewSignal(SignalCategory.ACTION);
-                while (!this.signalService.isReceivedNewSignal(SignalCategory.ACTION)) {
+                this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
+                this.signalService.addNewTakeBoardSignal(order.getId());
+                Boolean cutBoardTowardEdge = false;
+                while (true) {
+                    CuttingSignal cuttingSignal = this.signalService.getLatestNotProcessedCuttingSignal();
+                    if (cuttingSignal != null) {
+                        order.setSpecification(cuttingSignal.getSpecification());
+                        cutBoardTowardEdge = cuttingSignal.getTowardEdge();
+                        break;
+                    }
+                    Thread.sleep(3000);
+                }
+                this.processingNotBottomOrder(order, nextOrder, op, specs, cutBoardTowardEdge);
+                this.actionService.completedAllActions();
+                while (!this.actionService.isAllActionsCompleted()) {
                     Thread.sleep(3000);
                 }
                 this.actionService.processCompletedAction(order, BoardCategory.STOCK);
@@ -74,7 +95,7 @@ public class MainService {
         }
     }
 
-    public void processingBottomOrder(WorkOrder order, OperatingParameter parameter) {
+    public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, Boolean cutBoardTowardEdge) {
         String material = order.getMaterial();
         int orderId = order.getId();
         BigDecimal fixedWidth = parameter.getFixedWidth();
@@ -82,7 +103,7 @@ public class MainService {
 
         logger.debug("Order: {}", order);
 
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), material);
+        CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardTowardEdge);
         logger.debug("OrderCutBoard: {}", cutBoard);
 
         NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, cutBoard.getWidth());
@@ -102,14 +123,14 @@ public class MainService {
         this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
     }
 
-    public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs) {
+    public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, Boolean cutBoardTowardEdge) {
         String material = order.getMaterial();
         int orderId = order.getId();
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
         logger.debug("Order: {}", order);
 
-        CutBoard cutBoard = new CutBoard(order.getCuttingSize(), material);
+        CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardTowardEdge);
         logger.debug("OrderCutBoard: {}", cutBoard);
 
         NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, cutBoard.getWidth());

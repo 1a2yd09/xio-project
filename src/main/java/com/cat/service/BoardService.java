@@ -97,6 +97,14 @@ public class BoardService {
         this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes - 1, orderId);
     }
 
+    public CutBoard getCutBoard(String cuttingSize, String material, Boolean cutBoardTowardEdge) {
+        if (Boolean.TRUE.equals(cutBoardTowardEdge)) {
+            return new CutBoard(cuttingSize, material, CutBoard.EdgeType.LONG);
+        } else {
+            return new CutBoard(cuttingSize, material, CutBoard.EdgeType.SHORT);
+        }
+    }
+
     public NormalBoard getMatchStockBoard(List<StockSpecification> specs, BigDecimal height, String material) {
         StockSpecification ss = specs.stream().filter(spec -> spec.getHeight().compareTo(height) == 0).findFirst().orElse(ParamUtil.getDefaultStockSpec());
         return new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), material, BoardCategory.STOCK);

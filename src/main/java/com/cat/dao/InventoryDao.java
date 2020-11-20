@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class InventoryDao extends AbstractDao {
+public class InventoryDao extends BaseDao {
     RowMapper<Inventory> inventoryM = new BeanPropertyRowMapper<>(Inventory.class);
 
     public List<Inventory> getInventories(String material, String category) {

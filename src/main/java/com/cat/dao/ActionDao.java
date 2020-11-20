@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class ActionDao extends AbstractDao {
+public class ActionDao extends BaseDao {
     RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
 
     public void addAction(String actionCategory, BigDecimal dis, String boardCategory, String boardSpec, String boardMaterial, Integer orderId) {
@@ -36,6 +36,11 @@ public class ActionDao extends AbstractDao {
 
     public List<MachineAction> getAllActions() {
         return this.jdbcTemplate.query("SELECT * FROM tb_machine_action ORDER BY id", this.actionM);
+    }
+
+    public MachineAction getFinalAction() {
+        List<MachineAction> list = this.jdbcTemplate.query("SELECT * FROM tb_machine_action ORDER BY id DESC", this.actionM);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     public void completedAllActions() {

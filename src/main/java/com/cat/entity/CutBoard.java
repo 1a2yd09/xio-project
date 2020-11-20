@@ -16,9 +16,9 @@ public class CutBoard extends BaseBoard {
 
     private EdgeType forwardEdge;
 
-    public CutBoard(String specification, String material) {
+    public CutBoard(String specification, String material, EdgeType forwardEdge) {
         super(specification, material, BoardCategory.CUTTING);
-        this.forwardEdge = EdgeType.SHORT;
+        this.forwardEdge = forwardEdge;
     }
 
     public EdgeType getForwardEdge() {

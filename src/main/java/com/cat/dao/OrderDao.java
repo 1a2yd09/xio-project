@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-public class OrderDao extends AbstractDao {
+public class OrderDao extends BaseDao {
     RowMapper<WorkOrder> orderM = new BeanPropertyRowMapper<>(WorkOrder.class);
 
     public Integer getAllOrderCount() {

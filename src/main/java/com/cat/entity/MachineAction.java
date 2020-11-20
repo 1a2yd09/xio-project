@@ -5,14 +5,13 @@ import java.time.LocalDateTime;
 
 public class MachineAction {
     private Long id;
-    private Boolean completed;
+    private String state;
     private String actionCategory;
     private BigDecimal cutDistance;
     private String boardCategory;
     private String boardSpecification;
     private String boardMaterial;
     private Integer workOrderId;
-    private String workOrderModule;
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -23,12 +22,12 @@ public class MachineAction {
         this.id = id;
     }
 
-    public Boolean getCompleted() {
-        return completed;
+    public String getState() {
+        return state;
     }
 
-    public void setCompleted(Boolean completed) {
-        this.completed = completed;
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getActionCategory() {
@@ -79,14 +78,6 @@ public class MachineAction {
         this.workOrderId = workOrderId;
     }
 
-    public String getWorkOrderModule() {
-        return workOrderModule;
-    }
-
-    public void setWorkOrderModule(String workOrderModule) {
-        this.workOrderModule = workOrderModule;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -99,14 +90,13 @@ public class MachineAction {
     public String toString() {
         return "MachineAction{" +
                 "id=" + id +
-                ", completed=" + completed +
+                ", state='" + state + '\'' +
                 ", actionCategory='" + actionCategory + '\'' +
                 ", cutDistance=" + cutDistance +
                 ", boardCategory='" + boardCategory + '\'' +
                 ", boardSpecification='" + boardSpecification + '\'' +
                 ", boardMaterial='" + boardMaterial + '\'' +
                 ", workOrderId=" + workOrderId +
-                ", workOrderModule='" + workOrderModule + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

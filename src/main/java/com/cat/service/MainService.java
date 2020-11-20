@@ -77,7 +77,6 @@ public class MainService {
     public void processingBottomOrder(WorkOrder order, OperatingParameter parameter) {
         String material = order.getMaterial();
         int orderId = order.getId();
-        String orderModule = order.getSiteModule();
         BigDecimal fixedWidth = parameter.getFixedWidth();
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
@@ -98,15 +97,14 @@ public class MainService {
         int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, semiProductBoard);
         logger.debug("SemiProductCutTimes: {}", semiProductCutTimes);
 
-        this.boardService.twoStep(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId, orderModule);
+        this.boardService.twoStep(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId);
 
-        this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+        this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
     }
 
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs) {
         String material = order.getMaterial();
         int orderId = order.getId();
-        String orderModule = order.getSiteModule();
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
         logger.debug("Order: {}", order);
@@ -135,8 +133,8 @@ public class MainService {
             if (nextProductCutTimes > 0) {
                 logger.debug("remainingCutBoard can reuse");
 
-                this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
-                this.boardService.threeStep(cutBoard, nextProduct, nextProductCutTimes, wasteThreshold, nextOrder.getId(), nextOrder.getSiteModule());
+                this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
+                this.boardService.threeStep(cutBoard, nextProduct, nextProductCutTimes, wasteThreshold, nextOrder.getId());
             } else {
                 logger.debug("remainingCutBoard can't reuse");
 
@@ -152,26 +150,26 @@ public class MainService {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
                         logger.debug("first cutting productBoard");
 
-                        this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+                        this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
 
-                        this.boardService.threeStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
+                        this.boardService.threeStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId);
                     } else {
                         logger.debug("first cutting stockBoard");
 
-                        this.boardService.twoStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId, orderModule);
+                        this.boardService.twoStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId);
 
-                        this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+                        this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
                     }
                 } else {
                     logger.debug("can't cutting stockBoard");
 
-                    this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+                    this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
                 }
             }
         } else {
             logger.debug("order not last time processing");
 
-            this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId, orderModule);
+            this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
         }
     }
 }

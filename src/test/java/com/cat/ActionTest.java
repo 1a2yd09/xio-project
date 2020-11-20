@@ -4,6 +4,7 @@ import com.cat.entity.Inventory;
 import com.cat.entity.MachineAction;
 import com.cat.entity.NormalBoard;
 import com.cat.entity.WorkOrder;
+import com.cat.entity.enums.ActionState;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
 import com.cat.service.*;
@@ -54,12 +55,12 @@ class ActionTest extends BaseTest {
         List<MachineAction> actions = actionService.getAllActions();
         actions.forEach(System.out::println);
         for (MachineAction action : actions) {
-            assertFalse(action.getCompleted());
+            assertEquals(ActionState.NOT_FINISHED.value, action.getState());
         }
         actionService.completedAllActions();
         actions = actionService.getAllActions();
         for (MachineAction action : actions) {
-            assertTrue(action.getCompleted());
+            assertEquals(ActionState.FINISHED.value, action.getState());
         }
 
         int oldUnfinishedCount = order.getUnfinishedAmount();
@@ -98,12 +99,12 @@ class ActionTest extends BaseTest {
         List<MachineAction> actions = actionService.getAllActions();
         actions.forEach(System.out::println);
         for (MachineAction action : actions) {
-            assertFalse(action.getCompleted());
+            assertEquals(ActionState.NOT_FINISHED.value, action.getState());
         }
         actionService.completedAllActions();
         actions = actionService.getAllActions();
         for (MachineAction action : actions) {
-            assertTrue(action.getCompleted());
+            assertEquals(ActionState.FINISHED.value, action.getState());
         }
 
         int oldUnfinishedCount = order.getUnfinishedAmount();

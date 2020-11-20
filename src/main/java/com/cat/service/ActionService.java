@@ -6,6 +6,7 @@ import com.cat.entity.MachineAction;
 import com.cat.entity.NormalBoard;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.ActionCategory;
+import com.cat.entity.enums.ActionState;
 import com.cat.entity.enums.BoardCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class ActionService implements Clearable {
 
     public boolean isAllActionsCompleted() {
         for (MachineAction action : this.getAllActions()) {
-            if (Boolean.FALSE.equals(action.getCompleted())) {
+            if (ActionState.NOT_FINISHED.value.equals(action.getState())) {
                 return false;
             }
         }
@@ -58,8 +59,8 @@ public class ActionService implements Clearable {
         this.clearActionTable();
     }
 
-    public void addAction(ActionCategory category, BigDecimal dis, BaseBoard board, Integer orderId, String orderModule) {
-        this.actionDao.addAction(category.value, dis, board.getCategory().value, board.getSpecStr(), board.getMaterial(), orderId, orderModule);
+    public void addAction(ActionCategory category, BigDecimal dis, BaseBoard board, Integer orderId) {
+        this.actionDao.addAction(category.value, dis, board.getCategory().value, board.getSpecStr(), board.getMaterial(), orderId);
     }
 
     public void clearActionTable() {

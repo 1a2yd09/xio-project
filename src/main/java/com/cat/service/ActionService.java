@@ -24,12 +24,7 @@ public class ActionService implements Clearable {
     InventoryService inventoryService;
 
     public boolean isAllActionsCompleted() {
-        for (MachineAction action : this.getAllActions()) {
-            if (ActionState.NOT_FINISHED.value.equals(action.getState())) {
-                return false;
-            }
-        }
-        return true;
+        return !ActionState.NOT_FINISHED.value.equals(this.actionDao.getFinalAction().getState());
     }
 
     public void processCompletedAction(WorkOrder order, BoardCategory inventoryCategory) {
@@ -38,15 +33,17 @@ public class ActionService implements Clearable {
         int inventoryCount = 0;
 
         for (MachineAction action : this.getAllActions()) {
-            String boardCategory = action.getBoardCategory();
-            // 记录数目，最后统一写入，理由是一次机器动作中，成品、存货各自的规格和材质都是相同的:
-            if (BoardCategory.PRODUCT.value.equals(boardCategory)) {
-                productCount++;
-            } else if (inventoryCategory.value.equals(boardCategory)) {
-                if (inventory == null) {
-                    inventory = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), inventoryCategory);
+            if (ActionState.FINISHED.value.equals(action.getState())) {
+                String boardCategory = action.getBoardCategory();
+                // 记录数目，最后统一写入，理由是一次机器动作中，成品、存货各自的规格和材质都是相同的:
+                if (BoardCategory.PRODUCT.value.equals(boardCategory)) {
+                    productCount++;
+                } else if (inventoryCategory.value.equals(boardCategory)) {
+                    if (inventory == null) {
+                        inventory = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), inventoryCategory);
+                    }
+                    inventoryCount++;
                 }
-                inventoryCount++;
             }
         }
 

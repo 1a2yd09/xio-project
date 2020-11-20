@@ -38,7 +38,7 @@ public class OrderService {
 
         for (WorkOrder order : orders) {
             // 使用标准规格格式来获取指定的存货对象:
-            Inventory inventory = inventoryMap.get(BoardUtil.getStandardSpecStr(order.getSpecStr()));
+            Inventory inventory = inventoryMap.get(BoardUtil.getStandardSpecStr(order.getSpecification()));
             if (inventory != null && inventory.getMaterial().equals(order.getMaterial()) && inventory.getAmount() > 0) {
                 // 此次用作成品的库存件数量是工单未完成数量和库存件数量当中的最小值:
                 int usedInventoryNum = Math.min(order.getUnfinishedAmount(), inventory.getAmount());
@@ -59,7 +59,7 @@ public class OrderService {
         if (OrderSortPattern.BY_SPEC.value.equals(sortPattern)) {
             // 如果要求按照规格排序，指的是”依次“按照成品的厚度、宽度、长度降序排序，三者都相同则按工单ID升序排序:
             orders.sort((o1, o2) -> {
-                int retVal = BoardUtil.compareTwoSpecStr(o1.getSpecStr(), o2.getSpecStr());
+                int retVal = BoardUtil.compareTwoSpecStr(o1.getSpecification(), o2.getSpecification());
                 return retVal != 0 ? retVal : o1.getId() - o2.getId();
             });
         }

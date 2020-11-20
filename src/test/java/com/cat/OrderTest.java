@@ -40,7 +40,7 @@ class OrderTest extends BaseTest {
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
+            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) == 0) {
                 System.out.println(order);
             }
@@ -54,7 +54,7 @@ class OrderTest extends BaseTest {
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.PRODUCT);
+            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
                 System.out.println(order);
             }

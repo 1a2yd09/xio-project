@@ -1,6 +1,9 @@
 package com.cat;
 
-import com.cat.entity.*;
+import com.cat.entity.Inventory;
+import com.cat.entity.MachineAction;
+import com.cat.entity.NormalBoard;
+import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
 import com.cat.service.*;
@@ -41,16 +44,14 @@ class ActionTest extends BaseTest {
 
         WorkOrder order = orderService.getOrderById(3098562);
         order.setCuttingSize("4.0×1000×3400");
-        NormalBoard stock = new NormalBoard(order.getSpecStr(), order.getMaterial(), BoardCategory.STOCK);
+        NormalBoard stock = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
         stock.setLength(new BigDecimal(3300));
         stockSpecService.addStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
 
-        CutBoard legacyCutBoard = mainService.processingNotBottomOrder(order, null, null, parameterService.getLatestOperatingParameter(), trimmingValueService.getLatestTrimmingValue(), stockSpecService.getGroupSpecs());
-        // 取板-修边(无)-修长度(3400->3300)-旋转-进刀2个库存(1000->510)-旋转-修长度(3300->3190)-旋转-修宽度(510->490)-进刀1个成品(490->245)-送1个成品(245->0):
-        // 测试一，生成11个机器动作:
-        assertEquals(11, actionService.getActionCount());
-        // 测试二，没有剩余板材:
-        assertNull(legacyCutBoard);
+        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupSpecs());
+        // 修长度(3400->3300)-旋转-进刀2个库存(1000->510)-旋转-修长度(3300->3190)-旋转-修宽度(510->490)-进刀1个成品(490->245)-送1个成品(245->0):
+        // 测试一，生成10个机器动作:
+        assertEquals(10, actionService.getActionCount());
 
         List<MachineAction> actions = actionService.getAllActions();
         actions.forEach(System.out::println);
@@ -70,14 +71,14 @@ class ActionTest extends BaseTest {
         actionService.processCompletedAction(order, BoardCategory.STOCK);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
-        // 测试三，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
+        // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
-        // 测试四，达到了工单所需的数目，因此工单状态应为已完工:
+        // 测试三，达到了工单所需的数目，因此工单状态应为已完工:
         assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
 
         inventory = inventoryService.getInventory(stock.getSpecStr(), stock.getMaterial(), stock.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getAmount();
-        // 测试五，该库存件的数目等于原来的数目加上上面生成的库存件数目:
+        // 测试四，该库存件的数目等于原来的数目加上上面生成的库存件数目:
         assertEquals(newFinishedCount, oldFinishedCount + 2);
     }
 

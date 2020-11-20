@@ -1,9 +1,6 @@
 package com.cat.service;
 
-import com.cat.entity.BaseBoard;
-import com.cat.entity.CutBoard;
-import com.cat.entity.NormalBoard;
-import com.cat.entity.StockSpecification;
+import com.cat.entity.*;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
@@ -167,6 +164,22 @@ public class BoardService {
             product.setLength(tmp);
         }
         return product;
+    }
+
+    public NormalBoard getNextProduct(WorkOrder order) {
+        if (order != null) {
+            return new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        }
+        return BoardUtil.getDefaultProduct();
+    }
+
+    public int calNextProductCutTimes(NormalBoard remainingBoard, NormalBoard nextProduct, Integer nextOrderUnfinishedTimes) {
+        if (nextProduct.getWidth().compareTo(BigDecimal.ZERO) > 0 && remainingBoard.getLength().compareTo(nextProduct.getLength()) >= 0 && remainingBoard.getMaterial().equals(nextProduct.getMaterial())) {
+            int maxCutTimes = remainingBoard.getWidth().divideToIntegralValue(nextProduct.getWidth()).intValue();
+            return Math.min(maxCutTimes, nextOrderUnfinishedTimes);
+        } else {
+            return 0;
+        }
     }
 
     public int calProductCutTimes(BigDecimal cutBoardWidth, BigDecimal productBoardWidth, Integer orderUnfinishedTimes) {

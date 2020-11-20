@@ -1,5 +1,6 @@
 package com.cat.util;
 
+import com.cat.entity.NormalBoard;
 import com.cat.entity.enums.BoardCategory;
 
 import java.math.BigDecimal;
@@ -58,5 +59,9 @@ public class BoardUtil {
      */
     public static BoardCategory calBoardCategory(BigDecimal boardWidth, BigDecimal boardLength, BigDecimal wasteThreshold) {
         return boardWidth.compareTo(wasteThreshold) >= 0 && boardLength.compareTo(wasteThreshold) >= 0 ? BoardCategory.REMAINING : BoardCategory.WASTED;
+    }
+
+    public static NormalBoard getDefaultProduct() {
+        return new NormalBoard(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, "", BoardCategory.PRODUCT);
     }
 }

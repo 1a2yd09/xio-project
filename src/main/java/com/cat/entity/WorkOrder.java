@@ -73,7 +73,7 @@ public class WorkOrder {
         this.processNumber = processNumber;
     }
 
-    public String getSpecStr() {
+    public String getSpecification() {
         return specification;
     }
 

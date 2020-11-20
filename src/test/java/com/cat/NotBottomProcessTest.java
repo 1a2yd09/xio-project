@@ -26,8 +26,6 @@ class NotBottomProcessTest extends BaseTest {
     StockSpecService stockSpecService;
     @Autowired
     ParameterService parameterService;
-    @Autowired
-    TrimmingValueService trimmingValueService;
 
 
     /**

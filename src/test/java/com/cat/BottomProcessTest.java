@@ -1,7 +1,10 @@
 package com.cat;
 
 import com.cat.entity.WorkOrder;
-import com.cat.service.*;
+import com.cat.service.ActionService;
+import com.cat.service.MainService;
+import com.cat.service.OrderService;
+import com.cat.service.ParameterService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -20,8 +23,6 @@ class BottomProcessTest extends BaseTest {
     ActionService actionService;
     @Autowired
     ParameterService parameterService;
-    @Autowired
-    TrimmingValueService trimmingValueService;
 
     /**
      * 成品规格符合标准，即成品规格宽度是小于长度的。

@@ -32,8 +32,6 @@ class ActionTest extends BaseTest {
     StockSpecService stockSpecService;
     @Autowired
     ParameterService parameterService;
-    @Autowired
-    TrimmingValueService trimmingValueService;
 
     @Test
     void testProcessingFinishedAction1() {

@@ -29,8 +29,6 @@ public class MainService {
     @Autowired
     InventoryService inventoryService;
     @Autowired
-    TrimmingValueService trimmingValueService;
-    @Autowired
     StockSpecService stockSpecService;
 
     public void startService() throws InterruptedException {
@@ -40,12 +38,9 @@ public class MainService {
         }
 
         OperatingParameter op = this.parameterService.getLatestOperatingParameter();
-        TrimmingValue tv = this.trimmingValueService.getLatestTrimmingValue();
         List<StockSpecification> specs = this.stockSpecService.getGroupSpecs();
 
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
-
-        CutBoard legacyCutBoard = null;
 
         for (WorkOrder order : orders) {
             this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);

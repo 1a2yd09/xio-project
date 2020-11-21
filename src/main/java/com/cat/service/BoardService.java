@@ -97,8 +97,8 @@ public class BoardService {
         this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes - 1, orderId);
     }
 
-    public CutBoard getCutBoard(String cuttingSize, String material, Boolean cutBoardTowardEdge) {
-        if (Boolean.TRUE.equals(cutBoardTowardEdge)) {
+    public CutBoard getCutBoard(String cuttingSize, String material, Boolean cutBoardLongToward) {
+        if (Boolean.TRUE.equals(cutBoardLongToward)) {
             return new CutBoard(cuttingSize, material, CutBoard.EdgeType.LONG);
         } else {
             return new CutBoard(cuttingSize, material, CutBoard.EdgeType.SHORT);

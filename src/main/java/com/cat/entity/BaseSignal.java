@@ -2,7 +2,7 @@ package com.cat.entity;
 
 import java.time.LocalDateTime;
 
-public class BaseSignal {
+public abstract class BaseSignal {
     private Long id;
     private Boolean processed;
     private LocalDateTime createdAt;

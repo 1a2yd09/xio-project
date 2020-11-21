@@ -31,6 +31,7 @@ public class MainService {
     StockSpecService stockSpecService;
 
     public void startService() throws InterruptedException {
+        // test:
         this.signalService.addNewStartSignal();
         while (!this.signalService.isReceivedNewStartSignal()) {
             Thread.sleep(3000);
@@ -45,17 +46,19 @@ public class MainService {
             while (order.getUnfinishedAmount() != 0) {
                 this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
                 this.signalService.addNewTakeBoardSignal(order.getId());
-                Boolean cutBoardTowardEdge = false;
+                this.signalService.insertCuttingSignal(order.getCuttingSize(), false, order.getId());
+                Boolean cutBoardLongToward;
                 while (true) {
                     CuttingSignal cuttingSignal = this.signalService.getLatestNotProcessedCuttingSignal();
                     if (cuttingSignal != null) {
-                        order.setSpecification(cuttingSignal.getSpecification());
-                        cutBoardTowardEdge = cuttingSignal.getTowardEdge();
+                        order.setCuttingSize(cuttingSignal.getSpecification());
+                        cutBoardLongToward = cuttingSignal.getTowardEdge();
                         break;
                     }
                     Thread.sleep(3000);
                 }
-                this.processingBottomOrder(order, op, cutBoardTowardEdge);
+                this.processingBottomOrder(order, op, cutBoardLongToward);
+                // test:
                 this.actionService.completedAllActions();
                 while (!this.actionService.isAllActionsCompleted()) {
                     Thread.sleep(3000);
@@ -75,17 +78,19 @@ public class MainService {
             while (order.getUnfinishedAmount() != 0) {
                 this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
                 this.signalService.addNewTakeBoardSignal(order.getId());
-                Boolean cutBoardTowardEdge = false;
+                this.signalService.insertCuttingSignal(order.getCuttingSize(), false, order.getId());
+                Boolean cutBoardLongToward;
                 while (true) {
                     CuttingSignal cuttingSignal = this.signalService.getLatestNotProcessedCuttingSignal();
                     if (cuttingSignal != null) {
-                        order.setSpecification(cuttingSignal.getSpecification());
-                        cutBoardTowardEdge = cuttingSignal.getTowardEdge();
+                        order.setCuttingSize(cuttingSignal.getSpecification());
+                        cutBoardLongToward = cuttingSignal.getTowardEdge();
                         break;
                     }
                     Thread.sleep(3000);
                 }
-                this.processingNotBottomOrder(order, nextOrder, op, specs, cutBoardTowardEdge);
+                this.processingNotBottomOrder(order, nextOrder, op, specs, cutBoardLongToward);
+                // test:
                 this.actionService.completedAllActions();
                 while (!this.actionService.isAllActionsCompleted()) {
                     Thread.sleep(3000);
@@ -95,7 +100,7 @@ public class MainService {
         }
     }
 
-    public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, Boolean cutBoardTowardEdge) {
+    public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, Boolean cutBoardLongToward) {
         String material = order.getMaterial();
         int orderId = order.getId();
         BigDecimal fixedWidth = parameter.getFixedWidth();
@@ -103,7 +108,7 @@ public class MainService {
 
         logger.debug("Order: {}", order);
 
-        CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardTowardEdge);
+        CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardLongToward);
         logger.debug("OrderCutBoard: {}", cutBoard);
 
         NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, cutBoard.getWidth());
@@ -123,14 +128,14 @@ public class MainService {
         this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
     }
 
-    public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, Boolean cutBoardTowardEdge) {
+    public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, Boolean cutBoardLongToward) {
         String material = order.getMaterial();
         int orderId = order.getId();
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
         logger.debug("Order: {}", order);
 
-        CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardTowardEdge);
+        CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardLongToward);
         logger.debug("OrderCutBoard: {}", cutBoard);
 
         NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, cutBoard.getWidth());

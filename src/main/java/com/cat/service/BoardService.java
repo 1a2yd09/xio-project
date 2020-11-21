@@ -77,6 +77,8 @@ public class BoardService {
             this.cuttingCutBoard(cutBoard, targetBoard, cutTimes, orderId);
         }
         if (cutBoard.getWidth().compareTo(targetBoard.getWidth()) == 0) {
+            int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 0 : 1;
+            this.rotatingCutBoard(cutBoard, rotateTimes, orderId);
             this.sendingTargetBoard(cutBoard, targetBoard, orderId);
         }
     }

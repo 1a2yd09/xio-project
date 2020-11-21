@@ -46,6 +46,7 @@ class BottomProcessTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3098575);
         // 半成品固定宽度192，(1250-1189)/192=0个半成品，1250-1189=61，1589-1345.5=243.5
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), false);
+        this.actionService.getAllActions().forEach(System.out::println);
         // 裁剪长度(1589->1345.5)-旋转-裁剪宽度(1250->1189)-送成品
         assertEquals(4, actionService.getActionCount());
     }

@@ -38,8 +38,8 @@ class NotBottomProcessTest extends BaseTest {
         // 下料板: 4.0×245×3400
         // 成品板: 4.0×245×3190
         mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupSpecs(), false);
-        // 裁剪长度(3400->3190)-送板:
-        assertEquals(2, actionService.getActionCount());
+        // 裁剪长度(3400->3190)-旋转-送板:
+        assertEquals(3, actionService.getActionCount());
         actionService.getAllActions().forEach(System.out::println);
     }
 
@@ -101,8 +101,8 @@ class NotBottomProcessTest extends BaseTest {
         // 因为只需1个成品板，因此是最后一次:
         order.setAmount("1");
         mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupSpecs(), false);
-        // 裁剪长度-送板:
-        assertEquals(2, actionService.getActionCount());
+        // 裁剪长度-旋转-送板:
+        assertEquals(3, actionService.getActionCount());
         actionService.getAllActions().forEach(System.out::println);
     }
 

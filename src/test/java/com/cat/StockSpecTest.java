@@ -24,12 +24,12 @@ class StockSpecTest extends BaseTest {
 
     @Test
     void testSpecification() {
-        stockSpecService.addStockSpec(BigDecimal.valueOf(3L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2000L));
-        stockSpecService.addStockSpec(BigDecimal.valueOf(3L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2100L));
-        stockSpecService.addStockSpec(BigDecimal.valueOf(4L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2200L));
-        stockSpecService.addStockSpec(BigDecimal.valueOf(5L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2500L));
-        stockSpecService.addStockSpec(BigDecimal.valueOf(5L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2400L));
-        List<StockSpecification> specs = stockSpecService.getGroupSpecs();
+        stockSpecService.insertStockSpec(BigDecimal.valueOf(3L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2000L));
+        stockSpecService.insertStockSpec(BigDecimal.valueOf(3L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2100L));
+        stockSpecService.insertStockSpec(BigDecimal.valueOf(4L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2200L));
+        stockSpecService.insertStockSpec(BigDecimal.valueOf(5L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2500L));
+        stockSpecService.insertStockSpec(BigDecimal.valueOf(5L), BigDecimal.valueOf(192L), BigDecimal.valueOf(2400L));
+        List<StockSpecification> specs = stockSpecService.getGroupStockSpecs();
         assertNotNull(specs);
         specs.forEach(System.out::println);
 
@@ -37,7 +37,7 @@ class StockSpecTest extends BaseTest {
         assertNotNull(board);
         System.out.println(board);
 
-        board = boardService.getMatchStockBoard(specs, BigDecimal.valueOf(6L), "热板");
+        board = boardService.getMatchStockBoard(specs, BigDecimal.valueOf(6L), "冷板");
         assertNotNull(board);
         System.out.println(board);
     }

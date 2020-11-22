@@ -3,6 +3,7 @@ package com.cat.service;
 import com.cat.dao.SignalDao;
 import com.cat.entity.CuttingSignal;
 import com.cat.entity.StartSignal;
+import com.cat.entity.TakeBoardSignal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,9 +20,10 @@ public class SignalService implements Clearable {
     }
 
     public boolean isReceivedNewStartSignal() {
-        StartSignal startSignal = this.signalDao.getLatestStartSignal();
+        StartSignal startSignal = this.getLatestStartSignal();
         if (startSignal != null && !startSignal.getProcessed()) {
-            this.signalDao.processedStartSignal(startSignal.getId());
+            startSignal.setProcessed(true);
+            this.signalDao.processedStartSignal(startSignal);
             return true;
         }
         return false;
@@ -31,11 +33,15 @@ public class SignalService implements Clearable {
         return this.signalDao.getLatestStartSignal();
     }
 
-    public void addNewStartSignal() {
+    public void insertStartSignal() {
         this.signalDao.insertStartSignal();
     }
 
-    public void addNewTakeBoardSignal(Integer orderId) {
+    public TakeBoardSignal getLatestTakeBoardSignal() {
+        return this.signalDao.getLatestTakeBoardSignal();
+    }
+
+    public void insertTakeBoardSignal(Integer orderId) {
         this.signalDao.insertTakeBoardSignal(orderId);
     }
 
@@ -48,7 +54,7 @@ public class SignalService implements Clearable {
         return null;
     }
 
-    public void insertCuttingSignal(String specification, Boolean longToward, int orderId) {
-        this.signalDao.insertCuttingSignal(specification, longToward, orderId);
+    public void insertCuttingSignal(String cuttingSize, Boolean isLongToward, Integer orderId) {
+        this.signalDao.insertCuttingSignal(cuttingSize, isLongToward, orderId);
     }
 }

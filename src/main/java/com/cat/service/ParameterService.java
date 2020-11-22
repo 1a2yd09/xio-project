@@ -14,6 +14,6 @@ public class ParameterService {
     ParameterDao parameterDao;
 
     public OperatingParameter getLatestOperatingParameter() {
-        return Objects.requireNonNullElseGet(this.parameterDao.getOperatingParameter(), ParamUtil::getDefaultParameter);
+        return Objects.requireNonNullElseGet(this.parameterDao.getLatestOperatingParameter(), ParamUtil::getDefaultParameter);
     }
 }

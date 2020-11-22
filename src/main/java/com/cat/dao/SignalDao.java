@@ -2,6 +2,7 @@ package com.cat.dao;
 
 import com.cat.entity.CuttingSignal;
 import com.cat.entity.StartSignal;
+import com.cat.entity.TakeBoardSignal;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +15,8 @@ public class SignalDao extends BaseDao {
         return list.isEmpty() ? null : list.get(0);
     }
 
-    public void processedStartSignal(Long id) {
-        this.jdbcTemplate.update("UPDATE tb_start_signal SET processed = 1 WHERE id = ?", id);
+    public void processedStartSignal(StartSignal startSignal) {
+        this.jdbcTemplate.update("UPDATE tb_start_signal SET processed = ? WHERE id = ?", startSignal.getProcessed(), startSignal.getId());
     }
 
     public void insertStartSignal() {
@@ -24,6 +25,11 @@ public class SignalDao extends BaseDao {
 
     public void truncateStartSignal() {
         this.jdbcTemplate.update("TRUNCATE TABLE tb_start_signal");
+    }
+
+    public TakeBoardSignal getLatestTakeBoardSignal() {
+        List<TakeBoardSignal> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_take_board_signal ORDER BY id DESC", new BeanPropertyRowMapper<>(TakeBoardSignal.class));
+        return list.isEmpty() ? null : list.get(0);
     }
 
     public void insertTakeBoardSignal(Integer orderId) {
@@ -43,8 +49,8 @@ public class SignalDao extends BaseDao {
         this.jdbcTemplate.update("UPDATE tb_cutting_signal SET processed = 1 WHERE id = ?", id);
     }
 
-    public void insertCuttingSignal(String specification, Boolean longToward, int orderId) {
-        this.jdbcTemplate.update("INSERT INTO tb_cutting_signal(specification, toward_edge, order_id) VALUES (?, ?, ?)", specification, longToward, orderId);
+    public void insertCuttingSignal(String cuttingSize, Boolean isLongToward, Integer orderId) {
+        this.jdbcTemplate.update("INSERT INTO tb_cutting_signal(specification, toward_edge, order_id) VALUES (?, ?, ?)", cuttingSize, isLongToward, orderId);
     }
 
     public void truncateCuttingSignal() {

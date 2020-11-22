@@ -1,5 +1,6 @@
 package com.cat.service;
 
+import com.cat.dao.ActionDao;
 import com.cat.entity.*;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
@@ -14,11 +15,11 @@ import java.util.List;
 @Component
 public class BoardService {
     @Autowired
-    ActionService actionService;
+    ActionDao actionDao;
 
     public void rotatingCutBoard(CutBoard cutBoard, int rotateTimes, Integer orderId) {
         for (int i = 0; i < rotateTimes; i++) {
-            this.actionService.addAction(ActionCategory.ROTATE, BigDecimal.ZERO, cutBoard, orderId);
+            this.actionDao.insertMachineAction(ActionCategory.ROTATE, BigDecimal.ZERO, cutBoard, orderId);
             if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
                 cutBoard.setForwardEdge(CutBoard.EdgeType.SHORT);
             } else {
@@ -29,7 +30,7 @@ public class BoardService {
 
     public void cuttingCutBoard(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, Integer orderId) {
         for (int i = 0; i < cutTimes; i++) {
-            this.actionService.addAction(ActionCategory.CUT, targetBoard.getWidth(), targetBoard, orderId);
+            this.actionDao.insertMachineAction(ActionCategory.CUT, targetBoard.getWidth(), targetBoard, orderId);
             if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
                 cutBoard.setWidth(cutBoard.getWidth().subtract(targetBoard.getWidth()));
             } else {
@@ -84,7 +85,7 @@ public class BoardService {
     }
 
     public void sendingTargetBoard(CutBoard cutBoard, BaseBoard targetBoard, Integer orderId) {
-        this.actionService.addAction(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId);
+        this.actionDao.insertMachineAction(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId);
         cutBoard.setWidth(BigDecimal.ZERO);
     }
 

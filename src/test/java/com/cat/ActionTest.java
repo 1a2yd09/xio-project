@@ -45,20 +45,20 @@ class ActionTest extends BaseTest {
         order.setCuttingSize("4.0×1000×3400");
         NormalBoard stock = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.STOCK);
         stock.setLength(new BigDecimal(3300));
-        stockSpecService.addStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
+        stockSpecService.insertStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
 
-        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupSpecs(), false);
+        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
         // 修长度(3400->3300)-旋转-进刀2个库存(1000->510)-旋转-修长度(3300->3190)-旋转-修宽度(510->490)-进刀1个成品(490->245)-送1个成品(245->0):
         // 测试一，生成10个机器动作:
-        assertEquals(10, actionService.getActionCount());
+        assertEquals(10, actionService.getMachineActionCount());
 
-        List<MachineAction> actions = actionService.getAllActions();
+        List<MachineAction> actions = actionService.getAllMachineActions();
         actions.forEach(System.out::println);
         for (MachineAction action : actions) {
             assertEquals(ActionState.NOT_FINISHED.value, action.getState());
         }
-        actionService.completedAllActions();
-        actions = actionService.getAllActions();
+        actionService.completedAllMachineActions();
+        actions = actionService.getAllMachineActions();
         for (MachineAction action : actions) {
             assertEquals(ActionState.FINISHED.value, action.getState());
         }
@@ -67,7 +67,7 @@ class ActionTest extends BaseTest {
         Inventory inventory = inventoryService.getInventory(stock.getSpecStr(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
-        actionService.processCompletedAction(order, BoardCategory.STOCK);
+        mainService.processCompletedAction(order, BoardCategory.STOCK);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
@@ -94,15 +94,15 @@ class ActionTest extends BaseTest {
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), false);
         // 旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
         // 测试一，生成12个机器动作:
-        assertEquals(12, actionService.getActionCount());
+        assertEquals(12, actionService.getMachineActionCount());
 
-        List<MachineAction> actions = actionService.getAllActions();
+        List<MachineAction> actions = actionService.getAllMachineActions();
         actions.forEach(System.out::println);
         for (MachineAction action : actions) {
             assertEquals(ActionState.NOT_FINISHED.value, action.getState());
         }
-        actionService.completedAllActions();
-        actions = actionService.getAllActions();
+        actionService.completedAllMachineActions();
+        actions = actionService.getAllMachineActions();
         for (MachineAction action : actions) {
             assertEquals(ActionState.FINISHED.value, action.getState());
         }
@@ -111,7 +111,7 @@ class ActionTest extends BaseTest {
         Inventory inventory = inventoryService.getInventory(semiProduct.getSpecStr(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getAmount();
 
-        actionService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
+        mainService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
 
         int newUnfinishedCount = order.getUnfinishedAmount();
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
@@ -129,10 +129,10 @@ class ActionTest extends BaseTest {
     void testCompletedAllActions() {
         WorkOrder order = orderService.getOrderById(3101165);
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), false);
-        assertFalse(actionService.isAllActionsCompleted());
-        actionService.completedAction(1);
-        assertFalse(actionService.isAllActionsCompleted());
-        actionService.completedAllActions();
-        assertTrue(actionService.isAllActionsCompleted());
+        assertFalse(actionService.isAllMachineActionsCompleted());
+        actionService.completedMachineActionById(1);
+        assertFalse(actionService.isAllMachineActionsCompleted());
+        actionService.completedAllMachineActions();
+        assertTrue(actionService.isAllMachineActionsCompleted());
     }
 }

@@ -1,10 +1,9 @@
 package com.cat.service;
 
 import com.cat.entity.*;
+import com.cat.entity.enums.ActionState;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +12,6 @@ import java.util.List;
 
 @Component
 public class MainService {
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     BoardService boardService;
     @Autowired
@@ -32,20 +29,20 @@ public class MainService {
 
     public void startService() throws InterruptedException {
         // test:
-        this.signalService.addNewStartSignal();
+        this.signalService.insertStartSignal();
         while (!this.signalService.isReceivedNewStartSignal()) {
             Thread.sleep(3000);
         }
 
         OperatingParameter op = this.parameterService.getLatestOperatingParameter();
-        List<StockSpecification> specs = this.stockSpecService.getGroupSpecs();
+        List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
 
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 
         for (WorkOrder order : orders) {
             while (order.getUnfinishedAmount() != 0) {
                 this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
-                this.signalService.addNewTakeBoardSignal(order.getId());
+                this.signalService.insertTakeBoardSignal(order.getId());
                 this.signalService.insertCuttingSignal(order.getCuttingSize(), false, order.getId());
                 Boolean cutBoardLongToward;
                 while (true) {
@@ -59,11 +56,11 @@ public class MainService {
                 }
                 this.processingBottomOrder(order, op, cutBoardLongToward);
                 // test:
-                this.actionService.completedAllActions();
-                while (!this.actionService.isAllActionsCompleted()) {
+                this.actionService.completedAllMachineActions();
+                while (!this.actionService.isAllMachineActionsCompleted()) {
                     Thread.sleep(3000);
                 }
-                this.actionService.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
+                this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
         }
 
@@ -77,7 +74,7 @@ public class MainService {
             }
             while (order.getUnfinishedAmount() != 0) {
                 this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
-                this.signalService.addNewTakeBoardSignal(order.getId());
+                this.signalService.insertTakeBoardSignal(order.getId());
                 this.signalService.insertCuttingSignal(order.getCuttingSize(), false, order.getId());
                 Boolean cutBoardLongToward;
                 while (true) {
@@ -91,11 +88,11 @@ public class MainService {
                 }
                 this.processingNotBottomOrder(order, nextOrder, op, specs, cutBoardLongToward);
                 // test:
-                this.actionService.completedAllActions();
-                while (!this.actionService.isAllActionsCompleted()) {
+                this.actionService.completedAllMachineActions();
+                while (!this.actionService.isAllMachineActionsCompleted()) {
                     Thread.sleep(3000);
                 }
-                this.actionService.processCompletedAction(order, BoardCategory.STOCK);
+                this.processCompletedAction(order, BoardCategory.STOCK);
             }
         }
     }
@@ -106,22 +103,16 @@ public class MainService {
         BigDecimal fixedWidth = parameter.getFixedWidth();
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
-        logger.debug("Order: {}", order);
 
         CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardLongToward);
-        logger.debug("OrderCutBoard: {}", cutBoard);
 
         NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, cutBoard.getWidth());
-        logger.debug("ProductBoard: {}", productBoard);
 
         int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
-        logger.debug("ProductCutTimes: {}", productCutTimes);
 
         NormalBoard semiProductBoard = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
-        logger.debug("SemiProductBoard: {}", semiProductBoard);
 
         int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, semiProductBoard);
-        logger.debug("SemiProductCutTimes: {}", semiProductCutTimes);
 
         this.boardService.twoStep(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId);
 
@@ -133,69 +124,82 @@ public class MainService {
         int orderId = order.getId();
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
-        logger.debug("Order: {}", order);
 
         CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardLongToward);
-        logger.debug("OrderCutBoard: {}", cutBoard);
 
         NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, cutBoard.getWidth());
-        logger.debug("ProductBoard: {}", productBoard);
 
         int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
-        logger.debug("ProductCutTimes: {}", productCutTimes);
 
         if (productCutTimes == order.getUnfinishedAmount()) {
-            logger.debug("order last time processing");
 
             BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
             NormalBoard remainingBoard = new NormalBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.REMAINING);
-            logger.debug("remainingCutBoard: {}", remainingBoard);
 
             NormalBoard nextProduct = this.boardService.getNextProduct(nextOrder);
             int nextOrderUnfinishedTimes = nextOrder == null ? 0 : nextOrder.getUnfinishedAmount();
             int nextProductCutTimes = this.boardService.calNextProductCutTimes(remainingBoard, nextProduct, nextOrderUnfinishedTimes);
-            logger.debug("nextOrderProductBoard: {}", nextProduct);
 
             if (nextProductCutTimes > 0) {
-                logger.debug("remainingCutBoard can reuse");
 
                 this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
                 this.boardService.threeStep(cutBoard, nextProduct, nextProductCutTimes, wasteThreshold, nextOrder.getId());
             } else {
-                logger.debug("remainingCutBoard can't reuse");
 
                 NormalBoard stockBoard = this.boardService.getMatchStockBoard(specs, cutBoard.getHeight(), material);
-                logger.debug("stockBoard: {}", stockBoard);
 
                 int stockBoardCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, stockBoard);
-                logger.debug("stockBoardCutTimes: {}", stockBoardCutTimes);
 
                 if (stockBoardCutTimes > 0) {
-                    logger.debug("can cutting stockBoard");
 
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
-                        logger.debug("first cutting productBoard");
 
                         this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
 
                         this.boardService.threeStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId);
                     } else {
-                        logger.debug("first cutting stockBoard");
 
                         this.boardService.twoStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId);
 
                         this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
                     }
                 } else {
-                    logger.debug("can't cutting stockBoard");
 
                     this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
                 }
             }
         } else {
-            logger.debug("order not last time processing");
 
             this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
         }
+    }
+
+    public void processCompletedAction(WorkOrder order, BoardCategory inventoryCategory) {
+        int productCount = 0;
+        NormalBoard inventory = null;
+        int inventoryCount = 0;
+
+        for (MachineAction action : this.actionService.getAllMachineActions()) {
+            if (ActionState.FINISHED.value.equals(action.getState())) {
+                String boardCategory = action.getBoardCategory();
+                // 记录数目，最后统一写入，理由是一次机器动作中，成品、存货各自的规格和材质都是相同的:
+                if (BoardCategory.PRODUCT.value.equals(boardCategory)) {
+                    productCount++;
+                } else if (inventoryCategory.value.equals(boardCategory)) {
+                    if (inventory == null) {
+                        inventory = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), inventoryCategory);
+                    }
+                    inventoryCount++;
+                }
+            }
+        }
+
+        this.orderService.addOrderCompletedAmount(order, productCount);
+        if (inventory != null) {
+            this.inventoryService.addInventoryAmount(inventory, inventoryCount);
+        }
+
+        this.actionService.transferAllMachineActions();
+        this.actionService.truncateMachineAction();
     }
 }

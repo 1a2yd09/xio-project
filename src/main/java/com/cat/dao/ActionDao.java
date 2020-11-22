@@ -1,6 +1,8 @@
 package com.cat.dao;
 
+import com.cat.entity.BaseBoard;
 import com.cat.entity.MachineAction;
+import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.ActionState;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,20 +15,20 @@ import java.util.List;
 public class ActionDao extends BaseDao {
     RowMapper<MachineAction> actionM = new BeanPropertyRowMapper<>(MachineAction.class);
 
-    public void addAction(String actionCategory, BigDecimal dis, String boardCategory, String boardSpec, String boardMaterial, Integer orderId) {
+    public void insertMachineAction(ActionCategory actionCategory, BigDecimal dis, BaseBoard baseBoard, Integer orderId) {
         this.jdbcTemplate.update("INSERT INTO tb_machine_action (action_category, cut_distance, board_category, board_specification, board_material, work_order_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?)", actionCategory, dis, boardCategory, boardSpec, boardMaterial, orderId);
+                "VALUES (?, ?, ?, ?, ?, ?)", actionCategory.value, dis, baseBoard.getCategory().value, baseBoard.getSpecStr(), baseBoard.getMaterial(), orderId);
     }
 
-    public void truncateActionTable() {
+    public void truncateMachineAction() {
         this.jdbcTemplate.update("TRUNCATE TABLE tb_machine_action");
     }
 
-    public void truncateCompletedActionTable() {
+    public void truncateCompletedAction() {
         this.jdbcTemplate.update("TRUNCATE TABLE tb_completed_action");
     }
 
-    public Integer getActionCount() {
+    public Integer getMachineActionCount() {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_machine_action", Integer.class);
     }
 
@@ -34,24 +36,24 @@ public class ActionDao extends BaseDao {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_completed_action", Integer.class);
     }
 
-    public List<MachineAction> getAllActions() {
+    public List<MachineAction> getAllMachineActions() {
         return this.jdbcTemplate.query("SELECT * FROM tb_machine_action ORDER BY id", this.actionM);
     }
 
-    public MachineAction getFinalAction() {
+    public MachineAction getFinalMachineAction() {
         List<MachineAction> list = this.jdbcTemplate.query("SELECT * FROM tb_machine_action ORDER BY id DESC", this.actionM);
         return list.isEmpty() ? null : list.get(0);
     }
 
-    public void completedAllActions() {
+    public void completedAllMachineActions() {
         this.jdbcTemplate.update("UPDATE tb_machine_action SET state = ? WHERE state = ?", ActionState.FINISHED.value, ActionState.NOT_FINISHED.value);
     }
 
-    public void completedAction(Integer id) {
+    public void completedMachineActionById(Integer id) {
         this.jdbcTemplate.update("UPDATE tb_machine_action SET state = ? WHERE id = ?", ActionState.FINISHED.value, id);
     }
 
-    public void transferAllActions() {
+    public void transferAllMachineActions() {
         this.jdbcTemplate.update("INSERT INTO tb_completed_action " +
                 "SELECT id, state, action_category, cut_distance, board_category, board_specification, board_material, work_order_id " +
                 "FROM tb_machine_action");

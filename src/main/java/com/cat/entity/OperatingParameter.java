@@ -15,13 +15,13 @@ public class OperatingParameter {
     public OperatingParameter() {
     }
 
-    public OperatingParameter(LocalDate workOrderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String bottomOrderSort) {
-        this.id = -1L;
+    public OperatingParameter(Long id, LocalDate workOrderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String bottomOrderSort, LocalDateTime createdAt) {
+        this.id = id;
         this.workOrderDate = workOrderDate;
         this.fixedWidth = fixedWidth;
         this.wasteThreshold = wasteThreshold;
         this.bottomOrderSort = bottomOrderSort;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt;
     }
 
     public Long getId() {

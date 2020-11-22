@@ -24,11 +24,15 @@ public class InventoryDao extends BaseDao {
                 "VALUES (?, ?, ?, ?)", specification, material, amount, category);
     }
 
-    public void updateInventoryAmount(Integer amount, Long id) {
-        this.jdbcTemplate.update("UPDATE tb_inventory SET amount = ? WHERE id = ?", amount, id);
+    public void updateInventoryAmount(Inventory inventory) {
+        this.jdbcTemplate.update("UPDATE tb_inventory SET amount = ? WHERE id = ?", inventory.getAmount(), inventory.getId());
     }
 
-    public void truncateTable() {
+    public Integer getInventoryCount() {
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_inventory", Integer.class);
+    }
+
+    public void truncateInventory() {
         this.jdbcTemplate.update("TRUNCATE TABLE tb_inventory");
     }
 }

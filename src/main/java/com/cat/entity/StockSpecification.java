@@ -13,12 +13,12 @@ public class StockSpecification {
     public StockSpecification() {
     }
 
-    public StockSpecification(BigDecimal height, BigDecimal width, BigDecimal length) {
-        this.id = -1L;
+    public StockSpecification(Long id, BigDecimal height, BigDecimal width, BigDecimal length, LocalDateTime createdAt) {
+        this.id = id;
         this.height = height;
         this.width = width;
         this.length = length;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt;
     }
 
     public Long getId() {

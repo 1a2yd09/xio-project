@@ -112,7 +112,7 @@ public abstract class BaseBoard implements Comparable<BaseBoard> {
 
     @Override
     public String toString() {
-        return "AbstractBoard{" +
+        return "BaseBoard{" +
                 "height=" + height +
                 ", width=" + width +
                 ", length=" + length +

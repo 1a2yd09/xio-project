@@ -9,7 +9,7 @@ import java.util.List;
 
 @Component
 public class StockSpecDao extends BaseDao {
-    public List<StockSpecification> getGroupSpecs() {
+    public List<StockSpecification> getGroupStockSpecs() {
         return this.jdbcTemplate.query("SELECT id, height, width, length, created_at " +
                 "FROM (SELECT id, height, width, length, created_at, ROW_NUMBER() OVER (PARTITION BY height ORDER BY id DESC) AS row_number " +
                 "FROM tb_stock_specification) AS S " +
@@ -20,7 +20,7 @@ public class StockSpecDao extends BaseDao {
         this.jdbcTemplate.update("INSERT INTO tb_stock_specification(height, width, length) VALUES (?, ?, ?)", height, width, length);
     }
 
-    public void truncateTable() {
+    public void truncateStockSpec() {
         this.jdbcTemplate.update("TRUNCATE TABLE tb_stock_specification");
     }
 }

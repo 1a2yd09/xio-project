@@ -13,30 +13,20 @@ import java.util.List;
 public class OrderDao extends BaseDao {
     RowMapper<WorkOrder> orderM = new BeanPropertyRowMapper<>(WorkOrder.class);
 
-    public Integer getAllOrderCount() {
+    public Integer getOrderCount() {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_local_work_order", Integer.class);
     }
 
-    public void copyRemoteOrderToLocal(LocalDate date) {
-        this.jdbcTemplate.update("INSERT INTO tb_local_work_order " +
-                "SELECT * FROM tb_remote_work_order " +
-                "WHERE CAST(jhwgrq AS DATE) = ?", date);
+    public void updateOrderState(WorkOrder order) {
+        this.jdbcTemplate.update("UPDATE tb_local_work_order SET ZT = ? WHERE bid = ?", order.getOperationState(), order.getId());
     }
 
-    public void truncateTable() {
-        this.jdbcTemplate.update("TRUNCATE TABLE tb_local_work_order");
-    }
-
-    public void updateOrderState(String state, Integer id) {
-        this.jdbcTemplate.update("UPDATE tb_local_work_order SET ZT = ? WHERE bid = ?", state, id);
-    }
-
-    public void updateOrderCompletedAmount(String amount, Integer id) {
-        if (amount == null) {
+    public void updateOrderCompletedAmount(WorkOrder order) {
+        if (order.getCompletedAmount() == null) {
             // 注意 update() 方法后续的参数数组不支持非空对象，其方法签名上可以看到 @Nullable 注解:
-            this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = null WHERE bid = ?", id);
+            this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = null WHERE bid = ?", order.getId());
         } else {
-            this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = ? WHERE bid = ?", amount, id);
+            this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = ? WHERE bid = ?", order.getCompletedAmount(), order.getId());
         }
     }
 

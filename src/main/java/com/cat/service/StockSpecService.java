@@ -13,20 +13,16 @@ public class StockSpecService implements Clearable {
     @Autowired
     StockSpecDao stockSpecDao;
 
-    public List<StockSpecification> getGroupSpecs() {
-        return this.stockSpecDao.getGroupSpecs();
+    public List<StockSpecification> getGroupStockSpecs() {
+        return this.stockSpecDao.getGroupStockSpecs();
     }
 
-    public void addStockSpec(BigDecimal height, BigDecimal width, BigDecimal length) {
+    public void insertStockSpec(BigDecimal height, BigDecimal width, BigDecimal length) {
         this.stockSpecDao.insertStockSpec(height, width, length);
-    }
-
-    public void clearStockSpecTable() {
-        this.stockSpecDao.truncateTable();
     }
 
     @Override
     public void clearTable() {
-        this.clearStockSpecTable();
+        this.stockSpecDao.truncateStockSpec();
     }
 }

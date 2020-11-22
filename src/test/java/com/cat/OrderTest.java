@@ -70,8 +70,8 @@ class OrderTest extends BaseTest {
         List<WorkOrder> orders = orderService.getNotBottomOrders(date);
         // 获取未预处理的直梁工单，共82个:
         assertEquals(82, orders.size());
-        inventoryService.addNewInventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value);
-        inventoryService.addNewInventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value);
+        inventoryService.insertInventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value);
+        inventoryService.insertInventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value);
         orders = orderService.getPreprocessNotBottomOrders(date);
         // 获取预处理的直梁工单，其中有6个工单因为使用了已有的库存件作为成品，因此工单数量变为76个:
         assertEquals(76, orders.size());

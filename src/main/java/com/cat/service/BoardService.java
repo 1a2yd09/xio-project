@@ -1,7 +1,10 @@
 package com.cat.service;
 
 import com.cat.dao.ActionDao;
-import com.cat.entity.*;
+import com.cat.entity.CutBoard;
+import com.cat.entity.NormalBoard;
+import com.cat.entity.StockSpecification;
+import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.util.BoardUtil;
@@ -17,87 +20,67 @@ public class BoardService {
     @Autowired
     ActionDao actionDao;
 
-    public void rotatingCutBoard(CutBoard cutBoard, int rotateTimes, Integer orderId) {
-        for (int i = 0; i < rotateTimes; i++) {
+    public void rotatingCutBoard(CutBoard cutBoard, CutBoard.EdgeType forwardEdge, Integer orderId) {
+        if (cutBoard.getForwardEdge() != forwardEdge) {
             this.actionDao.insertMachineAction(ActionCategory.ROTATE, BigDecimal.ZERO, cutBoard, orderId);
-            if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
-                cutBoard.setForwardEdge(CutBoard.EdgeType.SHORT);
-            } else {
-                cutBoard.setForwardEdge(CutBoard.EdgeType.LONG);
-            }
+            cutBoard.setForwardEdge(forwardEdge);
         }
     }
 
     public void cuttingCutBoard(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, Integer orderId) {
         for (int i = 0; i < cutTimes; i++) {
-            this.actionDao.insertMachineAction(ActionCategory.CUT, targetBoard.getWidth(), targetBoard, orderId);
+            BigDecimal dis = targetBoard.getWidth();
             if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
-                cutBoard.setWidth(cutBoard.getWidth().subtract(targetBoard.getWidth()));
+                cutBoard.setWidth(cutBoard.getWidth().subtract(dis));
             } else {
-                cutBoard.setLength(cutBoard.getLength().subtract(targetBoard.getWidth()));
+                cutBoard.setLength(cutBoard.getLength().subtract(dis));
+            }
+            if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
+                this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
+            } else if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) == 0) {
+                this.actionDao.insertMachineAction(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId);
             }
         }
     }
 
-    public void cuttingExtraLength(CutBoard cutBoard, BigDecimal targetLength, BigDecimal wasteThreshold, Integer orderId) {
-        BigDecimal extraLength = cutBoard.getLength().subtract(targetLength);
-        if (extraLength.compareTo(BigDecimal.ZERO) > 0) {
-            NormalBoard extraBoard = new NormalBoard();
-            extraBoard.setHeight(cutBoard.getHeight());
-            extraBoard.setWidth(extraLength);
-            extraBoard.setLength(cutBoard.getWidth());
-            extraBoard.setMaterial(cutBoard.getMaterial());
-            extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
-
-            int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 1 : 0;
-            this.rotatingCutBoard(cutBoard, rotateTimes, orderId);
-            this.cuttingCutBoard(cutBoard, extraBoard, 1, orderId);
-        }
+    public void cuttingTargetBoard(CutBoard cutBoard, CutBoard.EdgeType forwardEdge, NormalBoard targetBoard, int cutTimes, Integer orderId) {
+        this.rotatingCutBoard(cutBoard, forwardEdge, orderId);
+        this.cuttingCutBoard(cutBoard, targetBoard, cutTimes, orderId);
     }
 
-    public void cuttingExtraWidth(CutBoard cutBoard, BigDecimal targetWidth, BigDecimal wasteThreshold, Integer orderId) {
-        BigDecimal extraWidth = cutBoard.getWidth().subtract(targetWidth);
-        if (extraWidth.compareTo(BigDecimal.ZERO) > 0) {
-            NormalBoard extraBoard = new NormalBoard();
-            extraBoard.setHeight(cutBoard.getHeight());
-            extraBoard.setWidth(extraWidth);
-            extraBoard.setLength(cutBoard.getLength());
-            extraBoard.setMaterial(cutBoard.getMaterial());
-            extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
-
-            int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 0 : 1;
-            this.rotatingCutBoard(cutBoard, rotateTimes, orderId);
-            this.cuttingCutBoard(cutBoard, extraBoard, 1, orderId);
+    public void cuttingExtraBoard(CutBoard cutBoard, CutBoard.EdgeType forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold, Integer orderId) {
+        NormalBoard extraBoard = this.getExtraBoard(cutBoard, forwardEdge, targetMeasure, wasteThreshold);
+        // 如果下料板的边长已经等于目标边长，那就不需要旋转以及裁剪:
+        if (extraBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
+            this.cuttingTargetBoard(cutBoard, forwardEdge, extraBoard, 1, orderId);
         }
-    }
-
-    public void cuttingTargetBoard(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, Integer orderId) {
-        if (cutTimes > 0) {
-            int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 0 : 1;
-            this.rotatingCutBoard(cutBoard, rotateTimes, orderId);
-            this.cuttingCutBoard(cutBoard, targetBoard, cutTimes, orderId);
-        }
-        if (cutBoard.getWidth().compareTo(targetBoard.getWidth()) == 0) {
-            int rotateTimes = cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG ? 0 : 1;
-            this.rotatingCutBoard(cutBoard, rotateTimes, orderId);
-            this.sendingTargetBoard(cutBoard, targetBoard, orderId);
-        }
-    }
-
-    public void sendingTargetBoard(CutBoard cutBoard, BaseBoard targetBoard, Integer orderId) {
-        this.actionDao.insertMachineAction(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId);
-        cutBoard.setWidth(BigDecimal.ZERO);
     }
 
     public void twoStep(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId) {
-        this.cuttingExtraLength(cutBoard, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes, orderId);
+        this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
+        this.cuttingTargetBoard(cutBoard, CutBoard.EdgeType.LONG, targetBoard, cutTimes, orderId);
     }
 
     public void threeStep(CutBoard cutBoard, NormalBoard targetBoard, int cutTimes, BigDecimal wasteThreshold, Integer orderId) {
-        this.cuttingExtraLength(cutBoard, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingExtraWidth(cutBoard, targetBoard.getWidth().multiply(new BigDecimal(cutTimes)), wasteThreshold, orderId);
-        this.cuttingTargetBoard(cutBoard, targetBoard, cutTimes - 1, orderId);
+        this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
+        this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.LONG, targetBoard.getWidth().multiply(new BigDecimal(cutTimes)), wasteThreshold, orderId);
+        this.cuttingTargetBoard(cutBoard, CutBoard.EdgeType.LONG, targetBoard, cutTimes, orderId);
+    }
+
+    public NormalBoard getExtraBoard(CutBoard cutBoard, CutBoard.EdgeType forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold) {
+        NormalBoard extraBoard = new NormalBoard();
+        extraBoard.setHeight(cutBoard.getHeight());
+        // 每次以出去的边作为较长边:
+        if (forwardEdge == CutBoard.EdgeType.LONG) {
+            extraBoard.setLength(cutBoard.getLength());
+            extraBoard.setWidth(cutBoard.getWidth().subtract(targetMeasure));
+        } else {
+            extraBoard.setLength(cutBoard.getWidth());
+            extraBoard.setWidth(cutBoard.getLength().subtract(targetMeasure));
+        }
+        extraBoard.setMaterial(cutBoard.getMaterial());
+        extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
+        return extraBoard;
     }
 
     public CutBoard getCutBoard(String cuttingSize, String material, Boolean cutBoardLongToward) {

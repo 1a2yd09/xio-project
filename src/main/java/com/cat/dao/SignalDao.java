@@ -50,7 +50,7 @@ public class SignalDao extends BaseDao {
     }
 
     public void insertCuttingSignal(String cuttingSize, Boolean isLongToward, Integer orderId) {
-        this.jdbcTemplate.update("INSERT INTO tb_cutting_signal(specification, toward_edge, order_id) VALUES (?, ?, ?)", cuttingSize, isLongToward, orderId);
+        this.jdbcTemplate.update("INSERT INTO tb_cutting_signal(cutting_size, toward_edge, order_id) VALUES (?, ?, ?)", cuttingSize, isLongToward, orderId);
     }
 
     public void truncateCuttingSignal() {

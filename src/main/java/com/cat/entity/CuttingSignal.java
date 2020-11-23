@@ -1,16 +1,16 @@
 package com.cat.entity;
 
 public class CuttingSignal extends BaseSignal {
-    private String specification;
+    private String cuttingSize;
     private Boolean towardEdge;
     private Integer orderId;
 
-    public String getSpecification() {
-        return specification;
+    public String getCuttingSize() {
+        return cuttingSize;
     }
 
-    public void setSpecification(String specification) {
-        this.specification = specification;
+    public void setCuttingSize(String cuttingSize) {
+        this.cuttingSize = cuttingSize;
     }
 
     public Boolean getTowardEdge() {
@@ -31,9 +31,8 @@ public class CuttingSignal extends BaseSignal {
 
     @Override
     public String toString() {
-        return super.toString() +
-                "CuttingSignal{" +
-                "specification='" + specification + '\'' +
+        return "CuttingSignal{" +
+                "cuttingSize='" + cuttingSize + '\'' +
                 ", towardEdge=" + towardEdge +
                 ", orderId=" + orderId +
                 '}';

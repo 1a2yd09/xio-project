@@ -4,6 +4,7 @@ import com.cat.entity.*;
 import com.cat.entity.enums.ActionState;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
+import com.cat.util.OrderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -59,7 +60,7 @@ public class MainService {
 
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder order = orders.get(i);
-            WorkOrder nextOrder = null;
+            WorkOrder nextOrder = OrderUtil.getFakeOrder();
             if (i < orders.size() - 1) {
                 nextOrder = orders.get(i + 1);
             }
@@ -97,17 +98,13 @@ public class MainService {
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
         CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardLongToward);
+        NormalBoard productBoard = this.boardService.getStandardProduct(order.getSpecification(), material, cutBoard.getWidth(), order.getUnfinishedAmount());
+        NormalBoard semiProductBoard = this.boardService.getSemiProduct(cutBoard, fixedWidth, productBoard);
 
-        NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, cutBoard.getWidth());
-        int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
-
-        NormalBoard semiProductBoard = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), material, BoardCategory.SEMI_PRODUCT);
-        int semiProductCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, semiProductBoard);
-
-        if (semiProductCutTimes > 0) {
-            this.boardService.twoStep(cutBoard, semiProductBoard, semiProductCutTimes, wasteThreshold, orderId);
+        if (semiProductBoard.getCutTimes() > 0) {
+            this.boardService.twoStep(cutBoard, semiProductBoard, wasteThreshold, orderId);
         }
-        this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
+        this.boardService.threeStep(cutBoard, productBoard, wasteThreshold, orderId);
     }
 
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, Boolean cutBoardLongToward) {
@@ -116,39 +113,31 @@ public class MainService {
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
         CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, cutBoardLongToward);
+        NormalBoard productBoard = this.boardService.getStandardProduct(order.getSpecification(), material, cutBoard.getWidth(), order.getUnfinishedAmount());
 
-        NormalBoard productBoard = this.boardService.getCanCutProduct(order.getSpecification(), material, cutBoard.getWidth());
-        int productCutTimes = this.boardService.calProductCutTimes(cutBoard.getWidth(), productBoard.getWidth(), order.getUnfinishedAmount());
+        if (productBoard.getCutTimes() == order.getUnfinishedAmount()) {
+            NormalBoard nextProduct = this.boardService.getNextProduct(nextOrder, cutBoard, productBoard);
 
-        if (productCutTimes == order.getUnfinishedAmount()) {
-            BigDecimal remainingWidth = cutBoard.getWidth().subtract(productBoard.getWidth().multiply(new BigDecimal(productCutTimes)));
-            NormalBoard remainingBoard = new NormalBoard(cutBoard.getHeight(), remainingWidth, productBoard.getLength(), material, BoardCategory.REMAINING);
-
-            NormalBoard nextProduct = this.boardService.getNextProduct(nextOrder);
-            int nextOrderUnfinishedTimes = nextOrder == null ? 0 : nextOrder.getUnfinishedAmount();
-            int nextProductCutTimes = this.boardService.calNextProductCutTimes(remainingBoard, nextProduct, nextOrderUnfinishedTimes);
-
-            if (nextProductCutTimes > 0) {
-                this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
-                this.boardService.threeStep(cutBoard, nextProduct, nextProductCutTimes, wasteThreshold, nextOrder.getId());
+            if (nextProduct.getCutTimes() > 0) {
+                this.boardService.twoStep(cutBoard, productBoard, wasteThreshold, orderId);
+                this.boardService.threeStep(cutBoard, nextProduct, wasteThreshold, nextOrder.getId());
             } else {
-                NormalBoard stockBoard = this.boardService.getMatchStockBoard(specs, cutBoard.getHeight(), material);
-                int stockBoardCutTimes = this.boardService.calNotProductCutTimes(cutBoard, productBoard.getWidth(), productCutTimes, stockBoard);
+                NormalBoard stockBoard = this.boardService.getMatchStock(specs, cutBoard, productBoard);
 
-                if (stockBoardCutTimes > 0) {
+                if (stockBoard.getCutTimes() > 0) {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
-                        this.boardService.twoStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
-                        this.boardService.threeStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId);
+                        this.boardService.twoStep(cutBoard, productBoard, wasteThreshold, orderId);
+                        this.boardService.threeStep(cutBoard, stockBoard, wasteThreshold, orderId);
                     } else {
-                        this.boardService.twoStep(cutBoard, stockBoard, stockBoardCutTimes, wasteThreshold, orderId);
-                        this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
+                        this.boardService.twoStep(cutBoard, stockBoard, wasteThreshold, orderId);
+                        this.boardService.threeStep(cutBoard, productBoard, wasteThreshold, orderId);
                     }
                 } else {
-                    this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
+                    this.boardService.threeStep(cutBoard, productBoard, wasteThreshold, orderId);
                 }
             }
         } else {
-            this.boardService.threeStep(cutBoard, productBoard, productCutTimes, wasteThreshold, orderId);
+            this.boardService.threeStep(cutBoard, productBoard, wasteThreshold, orderId);
         }
     }
 

@@ -32,13 +32,5 @@ class StockSpecTest extends BaseTest {
         List<StockSpecification> specs = stockSpecService.getGroupStockSpecs();
         assertNotNull(specs);
         specs.forEach(System.out::println);
-
-        NormalBoard board = boardService.getMatchStockBoard(specs, BigDecimal.valueOf(3L), "热板");
-        assertNotNull(board);
-        System.out.println(board);
-
-        board = boardService.getMatchStockBoard(specs, BigDecimal.valueOf(6L), "冷板");
-        assertNotNull(board);
-        System.out.println(board);
     }
 }

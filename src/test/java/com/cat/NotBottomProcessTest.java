@@ -4,6 +4,8 @@ import com.cat.entity.NormalBoard;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.service.*;
+import com.cat.util.OrderUtil;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -37,7 +39,7 @@ class NotBottomProcessTest extends BaseTest {
         // 该工单需求2个成品，但1次只能裁剪1个成品，因此不是最后一次:
         // 下料板: 4.0×245×3400
         // 成品板: 4.0×245×3190
-        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
         // 裁剪长度(3400->3190)-旋转-送板:
         assertEquals(3, actionService.getMachineActionCount());
         actionService.getAllMachineActions().forEach(System.out::println);
@@ -100,7 +102,7 @@ class NotBottomProcessTest extends BaseTest {
         // 成品板: 4.0×245×3190
         // 因为只需1个成品板，因此是最后一次:
         order.setAmount("1");
-        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
         // 裁剪长度-旋转-送板:
         assertEquals(3, actionService.getMachineActionCount());
         actionService.getAllMachineActions().forEach(System.out::println);
@@ -144,7 +146,7 @@ class NotBottomProcessTest extends BaseTest {
         product.setLength(new BigDecimal("3200"));
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
         // 该工单需求的是2个成品板，1000裁掉2个245剩510，可以裁剪2个245的库存件:
-        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁库存件(2个)-旋转-裁剪长度-旋转-裁剪宽度-裁剪成品(1个)-送成品(1个):
         assertEquals(10, actionService.getMachineActionCount());
@@ -164,7 +166,7 @@ class NotBottomProcessTest extends BaseTest {
         // 向规格表中写入一个和成品规格一致的库存件:
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
         // 该工单需求的是1个成品板，500裁掉1个245剩255，可以裁剪1个245的库存件:
-        mainService.processingNotBottomOrder(order, null, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度(3400->3190)-旋转-裁剪成品(1个)-裁剪宽度(10)-送库存件(1个):
         assertEquals(5, actionService.getMachineActionCount());

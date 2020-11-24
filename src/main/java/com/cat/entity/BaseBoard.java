@@ -5,9 +5,8 @@ import com.cat.util.BoardUtil;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 
-public abstract class BaseBoard implements Comparable<BaseBoard> {
+public abstract class BaseBoard {
     private BigDecimal height;
     private BigDecimal width;
     private BigDecimal length;
@@ -36,38 +35,6 @@ public abstract class BaseBoard implements Comparable<BaseBoard> {
 
     public String getSpecStr() {
         return BoardUtil.getStandardSpecStr(this.height, this.width, this.length);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.material, this.height, this.width, this.length);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof BaseBoard) {
-            BaseBoard ab = (BaseBoard) obj;
-            return Objects.equals(this.material, ab.material) && this.height.compareTo(ab.height) == 0 && this.width.compareTo(ab.width) == 0 && this.length.compareTo(ab.length) == 0;
-        }
-        return false;
-    }
-
-    @Override
-    public int compareTo(BaseBoard o) {
-        if (o == null) {
-            return -1;
-        }
-        if (this.material.equals(o.material) && this.height.compareTo(o.height) == 0) {
-            if (this.width.compareTo(o.width) < 0 || this.length.compareTo(o.length) < 0) {
-                return -1;
-            } else if (this.width.compareTo(o.width) == 0 && this.length.compareTo(o.length) == 0) {
-                return 0;
-            } else {
-                return 1;
-            }
-        } else {
-            return -1;
-        }
     }
 
     public BigDecimal getHeight() {

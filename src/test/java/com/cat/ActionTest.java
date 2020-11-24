@@ -8,7 +8,7 @@ import com.cat.entity.enums.ActionState;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
 import com.cat.service.*;
-import com.cat.util.OrderUtil;
+import com.cat.util.OrderUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -48,7 +48,7 @@ class ActionTest extends BaseTest {
         stock.setLength(new BigDecimal(3300));
         stockSpecService.insertStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
 
-        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
+        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), false);
         // 修长度(3400->3300)-旋转-进刀2个库存(1000->510)-旋转-修长度(3300->3190)-旋转-修宽度(510->490)-进刀1个成品(490->245)-送1个成品(245->0):
         // 测试一，生成10个机器动作:
         assertEquals(10, actionService.getMachineActionCount());

@@ -2,8 +2,8 @@ package com.cat.util;
 
 import com.cat.entity.WorkOrder;
 
-public class OrderUtil {
-    private OrderUtil() {
+public class OrderUtils {
+    private OrderUtils() {
     }
 
     public static int amountPropStrToInt(String property) {
@@ -15,12 +15,6 @@ public class OrderUtil {
     }
 
     public static WorkOrder getFakeOrder() {
-        WorkOrder order = new WorkOrder();
-        order.setSpecification("0.00×0.00×0.00");
-        order.setMaterial("无");
-        order.setAmount("0");
-        order.setCompletedAmount("0");
-        order.setId(-1);
-        return order;
+        return new WorkOrder("0.00×0.00×0.00", "0", "无", -1, "0");
     }
 }

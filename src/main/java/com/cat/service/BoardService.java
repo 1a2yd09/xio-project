@@ -7,8 +7,9 @@ import com.cat.entity.StockSpecification;
 import com.cat.entity.WorkOrder;
 import com.cat.entity.enums.ActionCategory;
 import com.cat.entity.enums.BoardCategory;
-import com.cat.util.BoardUtil;
-import com.cat.util.ParamUtil;
+import com.cat.util.Arith;
+import com.cat.util.BoardUtils;
+import com.cat.util.ParamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,9 +32,9 @@ public class BoardService {
         for (int i = 0; i < targetBoard.getCutTimes(); i++) {
             BigDecimal dis = targetBoard.getWidth();
             if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
-                cutBoard.setWidth(cutBoard.getWidth().subtract(dis));
+                cutBoard.setWidth(Arith.sub(cutBoard.getWidth(), dis));
             } else {
-                cutBoard.setLength(cutBoard.getLength().subtract(dis));
+                cutBoard.setLength(Arith.sub(cutBoard.getLength(), dis));
             }
             if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
                 this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
@@ -62,7 +63,7 @@ public class BoardService {
 
     public void threeStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
         this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.LONG, targetBoard.getWidth().multiply(new BigDecimal(targetBoard.getCutTimes())), wasteThreshold, orderId);
+        this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.LONG, Arith.mul(targetBoard.getWidth(), targetBoard.getCutTimes()), wasteThreshold, orderId);
         this.cuttingTargetBoard(cutBoard, CutBoard.EdgeType.LONG, targetBoard, orderId);
     }
 
@@ -82,25 +83,28 @@ public class BoardService {
             product.setWidth(product.getLength());
             product.setLength(tmp);
         }
-        product.setCutTimes(Math.min(cutBoardWidth.divideToIntegralValue(product.getWidth()).intValue(), orderUnfinishedAmount));
+        product.setCutTimes(Math.min(Arith.div(cutBoardWidth, product.getWidth()), orderUnfinishedAmount));
         return product;
     }
 
     public NormalBoard getSemiProduct(CutBoard cutBoard, BigDecimal fixedWidth, NormalBoard product) {
         NormalBoard semiProduct = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), cutBoard.getMaterial(), BoardCategory.SEMI_PRODUCT);
         if (semiProduct.getWidth().compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal remainingWidth = cutBoard.getWidth().subtract(product.getWidth().multiply(new BigDecimal(product.getCutTimes())));
-            semiProduct.setCutTimes(remainingWidth.divideToIntegralValue(semiProduct.getWidth()).intValue());
+            BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), Arith.mul(product.getWidth(), product.getCutTimes()));
+            semiProduct.setCutTimes(Arith.div(remainingWidth, semiProduct.getWidth()));
         }
         return semiProduct;
     }
 
     public NormalBoard getMatchStock(List<StockSpecification> specs, CutBoard cutBoard, NormalBoard product) {
-        StockSpecification ss = specs.stream().filter(spec -> spec.getHeight().compareTo(cutBoard.getHeight()) == 0).findFirst().orElse(ParamUtil.getDefaultStockSpec());
+        StockSpecification ss = specs.stream()
+                .filter(spec -> spec.getHeight().compareTo(cutBoard.getHeight()) == 0)
+                .findFirst()
+                .orElse(ParamUtils.getDefaultStockSpec());
         NormalBoard stock = new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), cutBoard.getMaterial(), BoardCategory.STOCK);
         if (stock.getWidth().compareTo(BigDecimal.ZERO) > 0 && cutBoard.getLength().compareTo(stock.getLength()) > 0) {
-            BigDecimal remainingWidth = cutBoard.getWidth().subtract(product.getWidth().multiply(new BigDecimal(product.getCutTimes())));
-            stock.setCutTimes(remainingWidth.divideToIntegralValue(stock.getWidth()).intValue());
+            BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), Arith.mul(product.getWidth(), product.getCutTimes()));
+            stock.setCutTimes(Arith.div(remainingWidth, stock.getWidth()));
         }
         return stock;
     }
@@ -111,13 +115,13 @@ public class BoardService {
         // 每次以出去的边作为较长边:
         if (forwardEdge == CutBoard.EdgeType.LONG) {
             extraBoard.setLength(cutBoard.getLength());
-            extraBoard.setWidth(cutBoard.getWidth().subtract(targetMeasure));
+            extraBoard.setWidth(Arith.sub(cutBoard.getWidth(), targetMeasure));
         } else {
             extraBoard.setLength(cutBoard.getWidth());
-            extraBoard.setWidth(cutBoard.getLength().subtract(targetMeasure));
+            extraBoard.setWidth(Arith.sub(cutBoard.getLength(), targetMeasure));
         }
         extraBoard.setMaterial(cutBoard.getMaterial());
-        extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
+        extraBoard.setCategory(BoardUtils.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
         extraBoard.setCutTimes(extraBoard.getWidth().compareTo(BigDecimal.ZERO) > 0 ? 1 : 0);
         return extraBoard;
     }
@@ -125,8 +129,8 @@ public class BoardService {
     public NormalBoard getNextProduct(WorkOrder order, CutBoard cutBoard, NormalBoard currProduct) {
         NormalBoard nextProduct = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         if (cutBoard.getMaterial().equals(nextProduct.getMaterial()) && currProduct.getLength().compareTo(nextProduct.getLength()) > 0) {
-            BigDecimal remainingWidth = cutBoard.getWidth().subtract(currProduct.getWidth().multiply(new BigDecimal(currProduct.getCutTimes())));
-            nextProduct.setCutTimes(Math.min(remainingWidth.divideToIntegralValue(nextProduct.getWidth()).intValue(), order.getUnfinishedAmount()));
+            BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), Arith.mul(currProduct.getWidth(), currProduct.getCutTimes()));
+            nextProduct.setCutTimes(Math.min(Arith.div(remainingWidth, nextProduct.getWidth()), order.getUnfinishedAmount()));
         }
         return nextProduct;
     }

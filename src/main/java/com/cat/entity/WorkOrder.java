@@ -1,6 +1,6 @@
 package com.cat.entity;
 
-import com.cat.util.OrderUtil;
+import com.cat.util.OrderUtils;
 
 import java.time.LocalDateTime;
 
@@ -29,8 +29,19 @@ public class WorkOrder {
     private String siteModule;
     private LocalDateTime completionDate;
 
+    public WorkOrder() {
+    }
+
+    public WorkOrder(String specification, String amount, String material, Integer id, String completedAmount) {
+        this.specification = specification;
+        this.amount = amount;
+        this.material = material;
+        this.id = id;
+        this.completedAmount = completedAmount;
+    }
+
     public int getUnfinishedAmount() {
-        return OrderUtil.amountPropStrToInt(this.amount) - OrderUtil.amountPropStrToInt(this.completedAmount);
+        return OrderUtils.amountPropStrToInt(this.amount) - OrderUtils.amountPropStrToInt(this.completedAmount);
     }
 
     public String getBatchNumber() {

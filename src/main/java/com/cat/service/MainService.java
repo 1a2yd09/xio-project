@@ -4,7 +4,7 @@ import com.cat.entity.*;
 import com.cat.entity.enums.ActionState;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.entity.enums.OrderState;
-import com.cat.util.OrderUtil;
+import com.cat.util.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -67,7 +67,7 @@ public class MainService {
 
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder order = orders.get(i);
-            WorkOrder nextOrder = OrderUtil.getFakeOrder();
+            WorkOrder nextOrder = OrderUtils.getFakeOrder();
             if (i < orders.size() - 1) {
                 nextOrder = orders.get(i + 1);
             }

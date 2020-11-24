@@ -1,7 +1,7 @@
 package com.cat.entity;
 
 import com.cat.entity.enums.BoardCategory;
-import com.cat.util.BoardUtil;
+import com.cat.util.BoardUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,7 +25,7 @@ public abstract class BaseBoard {
     }
 
     public BaseBoard(String specification, String material, BoardCategory category) {
-        List<BigDecimal> list = BoardUtil.specStrToDecList(specification);
+        List<BigDecimal> list = BoardUtils.specStrToDecList(specification);
         this.height = list.get(0);
         this.width = list.get(1);
         this.length = list.get(2);
@@ -34,7 +34,7 @@ public abstract class BaseBoard {
     }
 
     public String getSpecStr() {
-        return BoardUtil.getStandardSpecStr(this.height, this.width, this.length);
+        return BoardUtils.getStandardSpecStr(this.height, this.width, this.length);
     }
 
     public BigDecimal getHeight() {

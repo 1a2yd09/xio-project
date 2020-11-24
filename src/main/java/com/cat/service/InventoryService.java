@@ -2,7 +2,7 @@ package com.cat.service;
 
 import com.cat.dao.InventoryDao;
 import com.cat.entity.Inventory;
-import com.cat.util.BoardUtil;
+import com.cat.util.BoardUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class InventoryService implements Clearable {
     public Inventory getInventory(String specification, String material, String category) {
         return this.inventoryDao.getInventories(material, category)
                 .stream()
-                .filter(inventory -> BoardUtil.isTwoSpecStrEqual(inventory.getSpecStr(), specification))
+                .filter(inventory -> BoardUtils.compareTwoSpecStr(inventory.getSpecStr(), specification) == 0)
                 .findFirst()
                 .orElse(null);
     }

@@ -13,6 +13,9 @@ import java.util.List;
 
 @Component
 public class MainService {
+    private static final Object LOCK = new Object();
+    private static final long WAIT_TIME = 3_000L;
+
     @Autowired
     BoardService boardService;
     @Autowired
@@ -31,8 +34,10 @@ public class MainService {
     public void startService() throws InterruptedException {
         // test:
         this.signalService.insertStartSignal();
-        while (!this.signalService.isReceivedNewStartSignal()) {
-            Thread.sleep(3000);
+        synchronized (LOCK) {
+            while (!this.signalService.isReceivedNewStartSignal()) {
+                LOCK.wait(WAIT_TIME);
+            }
         }
 
         OperatingParameter op = this.parameterService.getLatestOperatingParameter();
@@ -41,16 +46,18 @@ public class MainService {
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
 
         for (WorkOrder order : orders) {
+            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
-                this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
                 this.signalService.insertTakeBoardSignal(order.getId());
                 CuttingSignal cs = this.receiveCuttingSignal(order);
                 order.setCuttingSize(cs.getCuttingSize());
                 this.processingBottomOrder(order, op, cs.getTowardEdge());
                 // test:
                 this.actionService.completedAllMachineActions();
-                while (!this.actionService.isAllMachineActionsCompleted()) {
-                    Thread.sleep(3000);
+                synchronized (LOCK) {
+                    while (!this.actionService.isAllMachineActionsCompleted()) {
+                        LOCK.wait(WAIT_TIME);
+                    }
                 }
                 this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
@@ -64,16 +71,18 @@ public class MainService {
             if (i < orders.size() - 1) {
                 nextOrder = orders.get(i + 1);
             }
+            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
-                this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
                 this.signalService.insertTakeBoardSignal(order.getId());
                 CuttingSignal cs = this.receiveCuttingSignal(order);
                 order.setCuttingSize(cs.getCuttingSize());
                 this.processingNotBottomOrder(order, nextOrder, op, specs, cs.getTowardEdge());
                 // test:
                 this.actionService.completedAllMachineActions();
-                while (!this.actionService.isAllMachineActionsCompleted()) {
-                    Thread.sleep(3000);
+                synchronized (LOCK) {
+                    while (!this.actionService.isAllMachineActionsCompleted()) {
+                        LOCK.wait(WAIT_TIME);
+                    }
                 }
                 this.processCompletedAction(order, BoardCategory.STOCK);
             }
@@ -81,13 +90,16 @@ public class MainService {
     }
 
     public CuttingSignal receiveCuttingSignal(WorkOrder order) throws InterruptedException {
+        // test:
         this.signalService.insertCuttingSignal(order.getCuttingSize(), false, order.getId());
-        while (true) {
-            CuttingSignal cuttingSignal = this.signalService.getLatestNotProcessedCuttingSignal();
-            if (cuttingSignal != null) {
-                return cuttingSignal;
+        synchronized (LOCK) {
+            while (true) {
+                CuttingSignal cuttingSignal = this.signalService.getLatestNotProcessedCuttingSignal();
+                if (cuttingSignal != null) {
+                    return cuttingSignal;
+                }
+                LOCK.wait(WAIT_TIME);
             }
-            Thread.sleep(3000);
         }
     }
 

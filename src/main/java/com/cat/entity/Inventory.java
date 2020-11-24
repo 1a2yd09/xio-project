@@ -10,6 +10,15 @@ public class Inventory {
     private String category;
     private LocalDateTime createdAt;
 
+    public Inventory() {
+    }
+
+    public Inventory(String specification, String material, String category) {
+        this.specification = specification;
+        this.material = material;
+        this.category = category;
+    }
+
     public Long getId() {
         return id;
     }

@@ -1,6 +1,6 @@
 package com.cat;
 
-import com.cat.entity.NormalBoard;
+import com.cat.entity.Inventory;
 import com.cat.entity.enums.BoardCategory;
 import com.cat.service.InventoryService;
 import org.junit.jupiter.api.Test;
@@ -17,21 +17,24 @@ class InventoryTest extends BaseTest {
     InventoryService inventoryService;
 
     @Test
-    void testAddInventoryAmount() {
+    void testUpdateInventoryAmount() {
         int retVal = inventoryService.getInventoryCount();
         assertEquals(0, retVal);
 
-        NormalBoard inventory = new NormalBoard("2.5×309×1016", "镀锌板", BoardCategory.STOCK);
-        inventoryService.addInventoryAmount(inventory, 1);
+        Inventory inventory = new Inventory("2.5×309×1016", "镀锌板", BoardCategory.STOCK.value);
+        inventory.setAmount(1);
+        inventoryService.updateInventoryAmount(inventory);
         retVal = inventoryService.getInventoryCount();
         assertEquals(1, retVal);
 
-        inventoryService.addInventoryAmount(inventory, 5);
+        inventory.setAmount(5);
+        inventoryService.updateInventoryAmount(inventory);
         retVal = inventoryService.getInventoryCount();
         assertEquals(1, retVal);
 
-        inventory = new NormalBoard("2.5×309×1016", "镀锌板", BoardCategory.SEMI_PRODUCT);
-        inventoryService.addInventoryAmount(inventory, 1);
+        inventory = new Inventory("2.5×309×1016", "镀锌板", BoardCategory.SEMI_PRODUCT.value);
+        inventory.setAmount(1);
+        inventoryService.updateInventoryAmount(inventory);
         retVal = inventoryService.getInventoryCount();
         assertEquals(2, retVal);
     }

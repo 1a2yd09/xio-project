@@ -143,7 +143,7 @@ public class MainService {
 
     public void processCompletedAction(WorkOrder order, BoardCategory inventoryCategory) {
         int productCount = 0;
-        NormalBoard inventory = null;
+        Inventory inventory = null;
         int inventoryCount = 0;
 
         for (MachineAction action : this.actionService.getAllMachineActions()) {
@@ -153,7 +153,7 @@ public class MainService {
                     productCount++;
                 } else if (inventoryCategory.value.equals(boardCategory)) {
                     if (inventory == null) {
-                        inventory = new NormalBoard(action.getBoardSpecification(), action.getBoardMaterial(), inventoryCategory);
+                        inventory = new Inventory(action.getBoardSpecification(), action.getBoardMaterial(), inventoryCategory.value);
                     }
                     inventoryCount++;
                 }
@@ -162,7 +162,8 @@ public class MainService {
 
         this.orderService.addOrderCompletedAmount(order, productCount);
         if (inventory != null) {
-            this.inventoryService.addInventoryAmount(inventory, inventoryCount);
+            inventory.setAmount(inventoryCount);
+            this.inventoryService.updateInventoryAmount(inventory);
         }
 
         this.actionService.transferAllMachineActions();

@@ -2,7 +2,6 @@ package com.cat.service;
 
 import com.cat.dao.InventoryDao;
 import com.cat.entity.Inventory;
-import com.cat.entity.NormalBoard;
 import com.cat.util.BoardUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,13 +19,13 @@ public class InventoryService implements Clearable {
                 .orElse(null);
     }
 
-    public void addInventoryAmount(NormalBoard board, int amount) {
-        Inventory inventory = this.getInventory(board.getSpecStr(), board.getMaterial(), board.getCategory().value);
-        if (inventory != null) {
-            inventory.setAmount(inventory.getAmount() + amount);
-            this.inventoryDao.updateInventoryAmount(inventory);
+    public void updateInventoryAmount(Inventory inventory) {
+        Inventory existedInventory = this.getInventory(inventory.getSpecStr(), inventory.getMaterial(), inventory.getCategory());
+        if (existedInventory != null) {
+            existedInventory.setAmount(existedInventory.getAmount() + inventory.getAmount());
+            this.inventoryDao.updateInventoryAmount(existedInventory);
         } else {
-            this.insertInventory(board.getSpecStr(), board.getMaterial(), amount, board.getCategory().value);
+            this.insertInventory(inventory.getSpecStr(), inventory.getMaterial(), inventory.getAmount(), inventory.getCategory());
         }
     }
 

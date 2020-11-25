@@ -1,11 +1,11 @@
 package com.cat;
 
-import com.cat.entity.CutBoard;
-import com.cat.entity.NormalBoard;
-import com.cat.entity.OperatingParameter;
-import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.BoardCategory;
-import com.cat.entity.enums.OrderSortPattern;
+import com.cat.entity.board.CutBoard;
+import com.cat.entity.board.NormalBoard;
+import com.cat.entity.param.OperatingParameter;
+import com.cat.entity.bean.WorkOrder;
+import com.cat.enums.BoardCategory;
+import com.cat.enums.OrderSortPattern;
 import com.cat.service.InventoryService;
 import com.cat.service.ParameterService;
 import com.cat.service.OrderService;

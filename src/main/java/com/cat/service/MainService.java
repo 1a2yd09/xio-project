@@ -1,10 +1,17 @@
 package com.cat.service;
 
-import com.cat.entity.*;
-import com.cat.entity.enums.ActionState;
-import com.cat.entity.enums.BoardCategory;
-import com.cat.entity.enums.OrderState;
-import com.cat.util.OrderUtils;
+import com.cat.entity.bean.Inventory;
+import com.cat.entity.bean.MachineAction;
+import com.cat.entity.bean.WorkOrder;
+import com.cat.entity.board.CutBoard;
+import com.cat.entity.board.NormalBoard;
+import com.cat.entity.param.OperatingParameter;
+import com.cat.entity.param.StockSpecification;
+import com.cat.entity.signal.CuttingSignal;
+import com.cat.enums.ActionState;
+import com.cat.enums.BoardCategory;
+import com.cat.enums.OrderState;
+import com.cat.utils.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

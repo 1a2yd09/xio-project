@@ -1,8 +1,8 @@
 package com.cat.service;
 
 import com.cat.dao.ParameterDao;
-import com.cat.entity.OperatingParameter;
-import com.cat.util.ParamUtils;
+import com.cat.entity.param.OperatingParameter;
+import com.cat.utils.ParamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

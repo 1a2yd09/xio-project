@@ -2,13 +2,13 @@ package com.cat.service;
 
 import com.cat.dao.InventoryDao;
 import com.cat.dao.OrderDao;
-import com.cat.entity.Inventory;
-import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.BoardCategory;
-import com.cat.entity.enums.OrderSortPattern;
-import com.cat.entity.enums.OrderState;
-import com.cat.util.BoardUtils;
-import com.cat.util.OrderUtils;
+import com.cat.entity.bean.Inventory;
+import com.cat.entity.bean.WorkOrder;
+import com.cat.enums.BoardCategory;
+import com.cat.enums.OrderSortPattern;
+import com.cat.enums.OrderState;
+import com.cat.utils.BoardUtils;
+import com.cat.utils.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package com.cat.dao;
 
-import com.cat.entity.OperatingParameter;
+import com.cat.entity.param.OperatingParameter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
 

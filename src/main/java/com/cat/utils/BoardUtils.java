@@ -1,6 +1,6 @@
-package com.cat.util;
+package com.cat.utils;
 
-import com.cat.entity.enums.BoardCategory;
+import com.cat.enums.BoardCategory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,4 +1,4 @@
-package com.cat.entity;
+package com.cat.entity.param;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

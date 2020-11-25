@@ -1,8 +1,8 @@
 package com.cat;
 
-import com.cat.entity.CuttingSignal;
-import com.cat.entity.StartSignal;
-import com.cat.entity.TakeBoardSignal;
+import com.cat.entity.signal.CuttingSignal;
+import com.cat.entity.signal.StartSignal;
+import com.cat.entity.signal.TakeBoardSignal;
 import com.cat.service.SignalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

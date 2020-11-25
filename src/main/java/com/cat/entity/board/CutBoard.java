@@ -1,6 +1,6 @@
-package com.cat.entity;
+package com.cat.entity.board;
 
-import com.cat.entity.enums.BoardCategory;
+import com.cat.enums.BoardCategory;
 
 public class CutBoard extends BaseBoard {
     public enum EdgeType {

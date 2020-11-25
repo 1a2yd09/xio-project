@@ -1,8 +1,8 @@
-package com.cat.util;
+package com.cat.utils;
 
-import com.cat.entity.OperatingParameter;
-import com.cat.entity.StockSpecification;
-import com.cat.entity.enums.OrderSortPattern;
+import com.cat.entity.param.OperatingParameter;
+import com.cat.entity.param.StockSpecification;
+import com.cat.enums.OrderSortPattern;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

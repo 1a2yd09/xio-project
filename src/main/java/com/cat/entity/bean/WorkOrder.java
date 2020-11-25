@@ -1,6 +1,6 @@
-package com.cat.entity;
+package com.cat.entity.bean;
 
-import com.cat.util.OrderUtils;
+import com.cat.utils.OrderUtils;
 
 import java.time.LocalDateTime;
 

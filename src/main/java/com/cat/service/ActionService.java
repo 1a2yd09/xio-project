@@ -1,15 +1,15 @@
 package com.cat.service;
 
 import com.cat.dao.ActionDao;
-import com.cat.entity.MachineAction;
-import com.cat.entity.enums.ActionState;
+import com.cat.entity.bean.MachineAction;
+import com.cat.enums.ActionState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class ActionService implements Clearable {
+public class ActionService {
     @Autowired
     ActionDao actionDao;
 
@@ -43,11 +43,5 @@ public class ActionService implements Clearable {
 
     public void truncateMachineAction() {
         this.actionDao.truncateMachineAction();
-    }
-
-    @Override
-    public void clearTable() {
-        this.actionDao.truncateMachineAction();
-        this.actionDao.truncateCompletedAction();
     }
 }

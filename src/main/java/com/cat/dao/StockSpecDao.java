@@ -1,6 +1,6 @@
 package com.cat.dao;
 
-import com.cat.entity.StockSpecification;
+import com.cat.entity.param.StockSpecification;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +18,5 @@ public class StockSpecDao extends BaseDao {
 
     public void insertStockSpec(BigDecimal height, BigDecimal width, BigDecimal length) {
         this.jdbcTemplate.update("INSERT INTO tb_stock_specification(height, width, length) VALUES (?, ?, ?)", height, width, length);
-    }
-
-    public void truncateStockSpec() {
-        this.jdbcTemplate.update("TRUNCATE TABLE tb_stock_specification");
     }
 }

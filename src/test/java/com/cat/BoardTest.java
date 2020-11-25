@@ -1,8 +1,8 @@
 package com.cat;
 
-import com.cat.entity.enums.BoardCategory;
+import com.cat.enums.BoardCategory;
 import com.cat.service.BoardService;
-import com.cat.util.BoardUtils;
+import com.cat.utils.BoardUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

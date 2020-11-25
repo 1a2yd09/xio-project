@@ -1,4 +1,4 @@
-package com.cat.entity.enums;
+package com.cat.enums;
 
 public enum OrderSortPattern {
     /**

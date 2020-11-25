@@ -1,15 +1,15 @@
 package com.cat.service;
 
 import com.cat.dao.ActionDao;
-import com.cat.entity.CutBoard;
-import com.cat.entity.NormalBoard;
-import com.cat.entity.StockSpecification;
-import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.ActionCategory;
-import com.cat.entity.enums.BoardCategory;
-import com.cat.util.Arith;
-import com.cat.util.BoardUtils;
-import com.cat.util.ParamUtils;
+import com.cat.entity.board.CutBoard;
+import com.cat.entity.board.NormalBoard;
+import com.cat.entity.param.StockSpecification;
+import com.cat.entity.bean.WorkOrder;
+import com.cat.enums.ActionCategory;
+import com.cat.enums.BoardCategory;
+import com.cat.utils.Arith;
+import com.cat.utils.BoardUtils;
+import com.cat.utils.ParamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

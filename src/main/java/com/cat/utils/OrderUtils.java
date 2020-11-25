@@ -1,6 +1,6 @@
-package com.cat.util;
+package com.cat.utils;
 
-import com.cat.entity.WorkOrder;
+import com.cat.entity.bean.WorkOrder;
 
 public class OrderUtils {
     private OrderUtils() {

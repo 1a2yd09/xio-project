@@ -1,23 +1,16 @@
 package com.cat.service;
 
 import com.cat.dao.SignalDao;
-import com.cat.entity.CuttingSignal;
-import com.cat.entity.StartSignal;
-import com.cat.entity.TakeBoardSignal;
+import com.cat.entity.signal.CuttingSignal;
+import com.cat.entity.signal.StartSignal;
+import com.cat.entity.signal.TakeBoardSignal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SignalService implements Clearable {
+public class SignalService {
     @Autowired
     SignalDao signalDao;
-
-    @Override
-    public void clearTable() {
-        this.signalDao.truncateStartSignal();
-        this.signalDao.truncateTakeBoardSignal();
-        this.signalDao.truncateCuttingSignal();
-    }
 
     public boolean isReceivedNewStartSignal() {
         StartSignal startSignal = this.getLatestStartSignal();

@@ -1,7 +1,7 @@
-package com.cat.entity;
+package com.cat.entity.board;
 
-import com.cat.entity.enums.BoardCategory;
-import com.cat.util.BoardUtils;
+import com.cat.enums.BoardCategory;
+import com.cat.utils.BoardUtils;
 
 import java.math.BigDecimal;
 import java.util.List;

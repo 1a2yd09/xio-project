@@ -1,10 +1,10 @@
 package com.cat;
 
-import com.cat.entity.NormalBoard;
-import com.cat.entity.WorkOrder;
-import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.board.NormalBoard;
+import com.cat.entity.bean.WorkOrder;
+import com.cat.enums.BoardCategory;
 import com.cat.service.*;
-import com.cat.util.OrderUtils;
+import com.cat.utils.OrderUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;

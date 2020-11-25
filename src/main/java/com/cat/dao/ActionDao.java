@@ -1,9 +1,9 @@
 package com.cat.dao;
 
-import com.cat.entity.BaseBoard;
-import com.cat.entity.MachineAction;
-import com.cat.entity.enums.ActionCategory;
-import com.cat.entity.enums.ActionState;
+import com.cat.entity.board.BaseBoard;
+import com.cat.entity.bean.MachineAction;
+import com.cat.enums.ActionCategory;
+import com.cat.enums.ActionState;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -22,10 +22,6 @@ public class ActionDao extends BaseDao {
 
     public void truncateMachineAction() {
         this.jdbcTemplate.update("TRUNCATE TABLE tb_machine_action");
-    }
-
-    public void truncateCompletedAction() {
-        this.jdbcTemplate.update("TRUNCATE TABLE tb_completed_action");
     }
 
     public Integer getMachineActionCount() {

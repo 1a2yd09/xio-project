@@ -1,7 +1,7 @@
 package com.cat;
 
-import com.cat.entity.Inventory;
-import com.cat.entity.enums.BoardCategory;
+import com.cat.entity.bean.Inventory;
+import com.cat.enums.BoardCategory;
 import com.cat.service.InventoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

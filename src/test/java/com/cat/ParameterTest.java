@@ -1,6 +1,6 @@
 package com.cat;
 
-import com.cat.entity.OperatingParameter;
+import com.cat.entity.param.OperatingParameter;
 import com.cat.service.ParameterService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

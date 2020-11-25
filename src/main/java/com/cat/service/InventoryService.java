@@ -1,13 +1,13 @@
 package com.cat.service;
 
 import com.cat.dao.InventoryDao;
-import com.cat.entity.Inventory;
-import com.cat.util.BoardUtils;
+import com.cat.entity.bean.Inventory;
+import com.cat.utils.BoardUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InventoryService implements Clearable {
+public class InventoryService {
     @Autowired
     InventoryDao inventoryDao;
 
@@ -35,10 +35,5 @@ public class InventoryService implements Clearable {
 
     public Integer getInventoryCount() {
         return this.inventoryDao.getInventoryCount();
-    }
-
-    @Override
-    public void clearTable() {
-        this.inventoryDao.truncateInventory();
     }
 }

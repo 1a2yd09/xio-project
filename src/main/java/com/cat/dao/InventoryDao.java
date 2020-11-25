@@ -1,6 +1,6 @@
 package com.cat.dao;
 
-import com.cat.entity.Inventory;
+import com.cat.entity.bean.Inventory;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -30,9 +30,5 @@ public class InventoryDao extends BaseDao {
 
     public Integer getInventoryCount() {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_inventory", Integer.class);
-    }
-
-    public void truncateInventory() {
-        this.jdbcTemplate.update("TRUNCATE TABLE tb_inventory");
     }
 }

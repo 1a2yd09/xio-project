@@ -1,4 +1,4 @@
-package com.cat.entity;
+package com.cat.entity.signal;
 
 public class CuttingSignal extends BaseSignal {
     private String cuttingSize;

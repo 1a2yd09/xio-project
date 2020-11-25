@@ -22,7 +22,7 @@ class SignalTest extends BaseTest {
         boolean flag = signalService.isReceivedNewStartSignal();
         assertFalse(flag);
         signalService.insertStartSignal();
-        StartSignal startSignal = signalService.getLatestStartSignal();
+        StartSignal startSignal = signalService.getLatestNotProcessedStartSignal();
         System.out.println(startSignal);
         flag = signalService.isReceivedNewStartSignal();
         assertTrue(flag);

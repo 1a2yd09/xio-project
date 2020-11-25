@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * @author CAT
+ */
 @Component
 public class BoardService {
     @Autowired

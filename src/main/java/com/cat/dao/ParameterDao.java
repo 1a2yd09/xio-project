@@ -1,10 +1,9 @@
 package com.cat.dao;
 
 import com.cat.entity.param.OperatingParameter;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @author CAT
@@ -17,7 +16,10 @@ public class ParameterDao extends BaseDao {
      * @return 运行参数
      */
     public OperatingParameter getLatestOperatingParameter() {
-        List<OperatingParameter> list = jdbcTemplate.query("SELECT TOP 1 * FROM tb_operating_parameter ORDER BY id DESC", new BeanPropertyRowMapper<>(OperatingParameter.class));
-        return list.isEmpty() ? null : list.get(0);
+        try {
+            return this.jdbcTemplate.queryForObject("SELECT TOP 1 * FROM tb_operating_parameter ORDER BY id DESC", new BeanPropertyRowMapper<>(OperatingParameter.class));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 }

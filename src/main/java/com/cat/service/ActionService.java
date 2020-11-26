@@ -23,7 +23,7 @@ public class ActionService {
      */
     public boolean isAllMachineActionsCompleted() {
         // 如果机器动作表中的最后一个动作状态不为“未完成”，则表示全部机器动作都被处理完毕
-        return !ActionState.NOT_FINISHED.value.equals(this.actionDao.getFinalMachineAction().getState());
+        return !ActionState.NOT_FINISHED.value.equals(this.actionDao.getFinalMachineActionState());
     }
 
     /**

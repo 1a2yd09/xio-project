@@ -3,10 +3,9 @@ package com.cat.dao;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @author CAT
@@ -19,8 +18,11 @@ public class SignalDao extends BaseDao {
      * @return 开工信号
      */
     public StartSignal getLatestNotProcessedStartSignal() {
-        List<StartSignal> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_start_signal WHERE processed = 0 ORDER BY id DESC", new BeanPropertyRowMapper<>(StartSignal.class));
-        return list.isEmpty() ? null : list.get(0);
+        try {
+            return this.jdbcTemplate.queryForObject("SELECT TOP 1 * FROM tb_start_signal WHERE processed = 0 ORDER BY id DESC", new BeanPropertyRowMapper<>(StartSignal.class));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     /**
@@ -45,8 +47,11 @@ public class SignalDao extends BaseDao {
      * @return 取板信号
      */
     public TakeBoardSignal getLatestTakeBoardSignal() {
-        List<TakeBoardSignal> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_take_board_signal ORDER BY id DESC", new BeanPropertyRowMapper<>(TakeBoardSignal.class));
-        return list.isEmpty() ? null : list.get(0);
+        try {
+            return this.jdbcTemplate.queryForObject("SELECT TOP 1 * FROM tb_take_board_signal ORDER BY id DESC", new BeanPropertyRowMapper<>(TakeBoardSignal.class));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     /**
@@ -64,8 +69,11 @@ public class SignalDao extends BaseDao {
      * @return 下料信号
      */
     public CuttingSignal getLatestNotProcessedCuttingSignal() {
-        List<CuttingSignal> list = this.jdbcTemplate.query("SELECT TOP 1 * FROM tb_cutting_signal WHERE processed = 0 ORDER BY id DESC", new BeanPropertyRowMapper<>(CuttingSignal.class));
-        return list.isEmpty() ? null : list.get(0);
+        try {
+            return this.jdbcTemplate.queryForObject("SELECT TOP 1 * FROM tb_cutting_signal WHERE processed = 0 ORDER BY id DESC", new BeanPropertyRowMapper<>(CuttingSignal.class));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     /**

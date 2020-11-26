@@ -4,6 +4,7 @@ import com.cat.entity.bean.MachineAction;
 import com.cat.entity.board.BaseBoard;
 import com.cat.enums.ActionCategory;
 import com.cat.enums.ActionState;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -66,13 +67,16 @@ public class ActionDao extends BaseDao {
     }
 
     /**
-     * 查询机器动作表中的最后一个机器动作，不存在机器动作时将返回 null
+     * 查询机器动作表中的最后一个机器动作状态，不存在机器动作时将返回”未完成“
      *
-     * @return 机器动作
+     * @return 状态
      */
-    public MachineAction getFinalMachineAction() {
-        List<MachineAction> list = this.jdbcTemplate.query("SELECT * FROM tb_machine_action ORDER BY id DESC", this.actionM);
-        return list.isEmpty() ? null : list.get(0);
+    public String getFinalMachineActionState() {
+        try {
+            return this.jdbcTemplate.queryForObject("SELECT TOP 1 state FROM tb_machine_action ORDER BY id DESC", String.class);
+        } catch (EmptyResultDataAccessException e) {
+            return ActionState.NOT_FINISHED.value;
+        }
     }
 
     /**

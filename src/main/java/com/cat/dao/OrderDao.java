@@ -2,6 +2,7 @@ package com.cat.dao;
 
 import com.cat.entity.bean.WorkOrder;
 import com.cat.enums.OrderModule;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -46,7 +47,11 @@ public class OrderDao extends BaseDao {
      * @return 工单
      */
     public WorkOrder getOrderById(Integer id) {
-        return this.jdbcTemplate.queryForObject("SELECT * FROM vi_local_work_order WHERE id = ?", this.orderM, id);
+        try {
+            return this.jdbcTemplate.queryForObject("SELECT * FROM vi_local_work_order WHERE id = ?", this.orderM, id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     /**

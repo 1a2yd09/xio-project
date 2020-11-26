@@ -1,5 +1,9 @@
 package com.cat.enums;
 
+/**
+ * @author CAT
+ */
+
 public enum OrderState {
     /**
      * 未开工

@@ -2,6 +2,9 @@ package com.cat.entity.signal;
 
 import java.time.LocalDateTime;
 
+/**
+ * @author CAT
+ */
 public abstract class BaseSignal {
     private Long id;
     private Boolean processed;

@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * @author CAT
+ */
 public class OperatingParameter {
     private Long id;
     private LocalDate workOrderDate;

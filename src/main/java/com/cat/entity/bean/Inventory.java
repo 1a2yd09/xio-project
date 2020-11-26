@@ -2,6 +2,9 @@ package com.cat.entity.bean;
 
 import java.time.LocalDateTime;
 
+/**
+ * @author CAT
+ */
 public class Inventory {
     private Long id;
     private String specification;

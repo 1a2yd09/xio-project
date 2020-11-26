@@ -3,6 +3,9 @@ package com.cat.entity.bean;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * @author CAT
+ */
 public class MachineAction {
     private Long id;
     private String state;

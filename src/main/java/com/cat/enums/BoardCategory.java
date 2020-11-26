@@ -1,5 +1,9 @@
 package com.cat.enums;
 
+/**
+ * @author CAT
+ */
+
 public enum BoardCategory {
     /**
      * 下料板

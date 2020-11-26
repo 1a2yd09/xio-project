@@ -1,5 +1,9 @@
 package com.cat.enums;
 
+/**
+ * @author CAT
+ */
+
 public enum ActionCategory {
     /**
      * 旋转

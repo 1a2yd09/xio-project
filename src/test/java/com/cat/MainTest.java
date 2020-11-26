@@ -19,7 +19,7 @@ class MainTest extends BaseTest {
 
     @Test
     void testSomething() throws InterruptedException {
-        mainService.startService();
+        mainService.start();
         assertEquals(10014, actionService.getCompletedActionCount());
     }
 }

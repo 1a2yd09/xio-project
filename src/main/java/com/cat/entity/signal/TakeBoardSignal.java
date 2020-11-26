@@ -1,5 +1,8 @@
 package com.cat.entity.signal;
 
+/**
+ * @author CAT
+ */
 public class TakeBoardSignal extends BaseSignal {
     private Integer orderId;
 

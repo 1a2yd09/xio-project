@@ -4,6 +4,9 @@ import com.cat.enums.BoardCategory;
 
 import java.math.BigDecimal;
 
+/**
+ * @author CAT
+ */
 public class NormalBoard extends BaseBoard {
     private Integer cutTimes;
 

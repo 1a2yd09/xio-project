@@ -6,6 +6,9 @@ import com.cat.utils.BoardUtils;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * @author CAT
+ */
 public abstract class BaseBoard {
     private BigDecimal height;
     private BigDecimal width;
@@ -33,6 +36,11 @@ public abstract class BaseBoard {
         this.category = category;
     }
 
+    /**
+     * 获取标准格式的规格字符串
+     *
+     * @return 规格字符串
+     */
     public String getSpecStr() {
         return BoardUtils.getStandardSpecStr(this.height, this.width, this.length);
     }

@@ -3,6 +3,9 @@ package com.cat.entity.param;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * @author CAT
+ */
 public class StockSpecification {
     private Long id;
     private BigDecimal height;

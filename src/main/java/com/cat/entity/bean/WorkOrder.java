@@ -4,6 +4,9 @@ import com.cat.utils.OrderUtils;
 
 import java.time.LocalDateTime;
 
+/**
+ * @author CAT
+ */
 public class WorkOrder {
     private String batchNumber;
     private String contractNumber;
@@ -40,6 +43,11 @@ public class WorkOrder {
         this.completedAmount = completedAmount;
     }
 
+    /**
+     * 查询工单的成品未完成数目
+     *
+     * @return 成品未完成数目
+     */
     public int getUnfinishedAmount() {
         return OrderUtils.amountPropStrToInt(this.amount) - OrderUtils.amountPropStrToInt(this.completedAmount);
     }

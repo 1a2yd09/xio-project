@@ -2,6 +2,9 @@ package com.cat.utils;
 
 import java.math.BigDecimal;
 
+/**
+ * @author CAT
+ */
 public class Arith {
     private Arith() {
 

@@ -1,5 +1,9 @@
 package com.cat.enums;
 
+/**
+ * @author CAT
+ */
+
 public enum OrderSortPattern {
     /**
      * 按顺序号排序

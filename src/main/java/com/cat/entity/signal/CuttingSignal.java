@@ -1,5 +1,8 @@
 package com.cat.entity.signal;
 
+/**
+ * @author CAT
+ */
 public class CuttingSignal extends BaseSignal {
     private String cuttingSize;
     private Boolean towardEdge;

@@ -1,5 +1,9 @@
 package com.cat.enums;
 
+/**
+ * @author CAT
+ */
+
 public enum OrderModule {
     /**
      * 轿底吊顶工地模块

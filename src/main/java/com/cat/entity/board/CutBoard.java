@@ -2,6 +2,9 @@ package com.cat.entity.board;
 
 import com.cat.enums.BoardCategory;
 
+/**
+ * @author CAT
+ */
 public class CutBoard extends BaseBoard {
     public enum EdgeType {
         /**

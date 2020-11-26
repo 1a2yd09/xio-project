@@ -50,22 +50,15 @@ public class MainService {
     /**
      * 主流程
      *
-     * @throws InterruptedException 同步过程被中断
+     * @throws InterruptedException 等待过程被中断
      */
-    public void startService() throws InterruptedException {
-        // test:
-        this.signalService.insertStartSignal();
-        synchronized (LOCK) {
-            while (!this.signalService.isReceivedNewStartSignal()) {
-                LOCK.wait(WAIT_TIME);
-            }
-        }
+    public void start() throws InterruptedException {
+        this.receiveStartSignal();
 
         OperatingParameter op = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-
+        // 轿底工单
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getBottomOrderSort(), op.getWorkOrderDate());
-
         for (WorkOrder order : orders) {
             this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
             while (order.getUnfinishedAmount() != 0) {
@@ -73,39 +66,41 @@ public class MainService {
                 CuttingSignal cs = this.receiveCuttingSignal(order);
                 order.setCuttingSize(cs.getCuttingSize());
                 this.processingBottomOrder(order, op, cs.getTowardEdge());
-                // test:
-                this.actionService.completedAllMachineActions();
-                synchronized (LOCK) {
-                    while (!this.actionService.isAllMachineActionsCompleted()) {
-                        LOCK.wait(WAIT_TIME);
-                    }
-                }
+                this.waitForAllMachineActionsCompleted();
                 this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
         }
-
+        // 对重直梁工单
         orders = orderService.getPreprocessNotBottomOrders(op.getWorkOrderDate());
-
         for (int i = 0; i < orders.size(); i++) {
-            WorkOrder order = orders.get(i);
+            WorkOrder currOrder = orders.get(i);
             WorkOrder nextOrder = OrderUtils.getFakeOrder();
             if (i < orders.size() - 1) {
                 nextOrder = orders.get(i + 1);
             }
-            this.orderService.updateOrderState(order, OrderState.ALREADY_STARTED);
-            while (order.getUnfinishedAmount() != 0) {
-                this.signalService.insertTakeBoardSignal(order.getId());
-                CuttingSignal cs = this.receiveCuttingSignal(order);
-                order.setCuttingSize(cs.getCuttingSize());
-                this.processingNotBottomOrder(order, nextOrder, op, specs, cs.getTowardEdge());
-                // test:
-                this.actionService.completedAllMachineActions();
-                synchronized (LOCK) {
-                    while (!this.actionService.isAllMachineActionsCompleted()) {
-                        LOCK.wait(WAIT_TIME);
-                    }
-                }
-                this.processCompletedAction(order, BoardCategory.STOCK);
+            this.orderService.updateOrderState(currOrder, OrderState.ALREADY_STARTED);
+            while (currOrder.getUnfinishedAmount() != 0) {
+                this.signalService.insertTakeBoardSignal(currOrder.getId());
+                CuttingSignal cs = this.receiveCuttingSignal(currOrder);
+                currOrder.setCuttingSize(cs.getCuttingSize());
+                this.processingNotBottomOrder(currOrder, nextOrder, op, specs, cs.getTowardEdge());
+                this.waitForAllMachineActionsCompleted();
+                this.processCompletedAction(currOrder, BoardCategory.STOCK);
+            }
+        }
+    }
+
+    /**
+     * 接收开工信号
+     *
+     * @throws InterruptedException 等待过程被中断
+     */
+    public void receiveStartSignal() throws InterruptedException {
+        // test:
+        this.signalService.insertStartSignal();
+        synchronized (LOCK) {
+            while (!this.signalService.isReceivedNewStartSignal()) {
+                LOCK.wait(WAIT_TIME);
             }
         }
     }
@@ -126,6 +121,21 @@ public class MainService {
                 if (cuttingSignal != null) {
                     return cuttingSignal;
                 }
+                LOCK.wait(WAIT_TIME);
+            }
+        }
+    }
+
+    /**
+     * 等待所有机器动作都被处理完毕
+     *
+     * @throws InterruptedException 等待过程被中断
+     */
+    public void waitForAllMachineActionsCompleted() throws InterruptedException {
+        // test:
+        this.actionService.completedAllMachineActions();
+        synchronized (LOCK) {
+            while (!this.actionService.isAllMachineActionsCompleted()) {
                 LOCK.wait(WAIT_TIME);
             }
         }

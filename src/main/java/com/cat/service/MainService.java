@@ -23,7 +23,13 @@ import java.util.List;
  */
 @Component
 public class MainService {
+    /**
+     * 同步锁对象
+     */
     private static final Object LOCK = new Object();
+    /**
+     * 同步等待时间
+     */
     private static final long WAIT_TIME = 3_000L;
 
     @Autowired
@@ -41,6 +47,11 @@ public class MainService {
     @Autowired
     StockSpecService stockSpecService;
 
+    /**
+     * 主流程
+     *
+     * @throws InterruptedException 同步过程被中断
+     */
     public void startService() throws InterruptedException {
         // test:
         this.signalService.insertStartSignal();
@@ -99,6 +110,13 @@ public class MainService {
         }
     }
 
+    /**
+     * 接收下料信号
+     *
+     * @param order 工单
+     * @return 下料信号
+     * @throws InterruptedException 等待过程被中断
+     */
     public CuttingSignal receiveCuttingSignal(WorkOrder order) throws InterruptedException {
         // test:
         this.signalService.insertCuttingSignal(order.getCuttingSize(), false, order.getId());
@@ -113,6 +131,13 @@ public class MainService {
         }
     }
 
+    /**
+     * 轿底流程
+     *
+     * @param order              轿底工单
+     * @param parameter          运行参数
+     * @param cutBoardLongToward 下料板朝向
+     */
     public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, Boolean cutBoardLongToward) {
         String material = order.getMaterial();
         int orderId = order.getId();
@@ -129,6 +154,15 @@ public class MainService {
         this.boardService.threeStep(cutBoard, productBoard, wasteThreshold, orderId);
     }
 
+    /**
+     * 对重直梁流程
+     *
+     * @param order              对重直梁工单
+     * @param nextOrder          后续对重直梁工单
+     * @param parameter          运行参数
+     * @param specs              库存件规格集合
+     * @param cutBoardLongToward 下料板朝向
+     */
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, Boolean cutBoardLongToward) {
         String material = order.getMaterial();
         int orderId = order.getId();
@@ -163,12 +197,19 @@ public class MainService {
         }
     }
 
+    /**
+     * 处理一组被机器处理完毕的动作
+     *
+     * @param order             工单
+     * @param inventoryCategory 存货类型
+     */
     public void processCompletedAction(WorkOrder order, BoardCategory inventoryCategory) {
         int productCount = 0;
         Inventory inventory = null;
         int inventoryCount = 0;
 
         for (MachineAction action : this.actionService.getAllMachineActions()) {
+            // 只处理动作状态为已完成的动作
             if (ActionState.FINISHED.value.equals(action.getState())) {
                 String boardCategory = action.getBoardCategory();
                 if (BoardCategory.PRODUCT.value.equals(boardCategory)) {

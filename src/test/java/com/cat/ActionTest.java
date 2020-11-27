@@ -6,6 +6,7 @@ import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.board.NormalBoard;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
+import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderState;
 import com.cat.service.*;
 import com.cat.utils.OrderUtils;
@@ -48,7 +49,7 @@ class ActionTest extends BaseTest {
         stock.setLength(new BigDecimal(3300));
         stockSpecService.insertStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
 
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), 0);
+        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), ForwardEdge.SHORT.code);
         // 修长度(3400->3300)-旋转-进刀2个库存(1000->510)-旋转-修长度(3300->3190)-旋转-修宽度(510->490)-进刀1个成品(490->245)-送1个成品(245->0):
         // 测试一，生成10个机器动作:
         assertEquals(10, actionService.getMachineActionCount());
@@ -92,7 +93,7 @@ class ActionTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3099510);
         NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
 
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), 0);
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), ForwardEdge.SHORT.code);
         // 旋转-进刀5个半成品(1250->290)-旋转-修长度(2504->2185)-旋转-修宽度(290->242)-进刀1个成品(242->121)-送1个成品(121->0):
         // 测试一，生成12个机器动作:
         assertEquals(12, actionService.getMachineActionCount());
@@ -129,7 +130,7 @@ class ActionTest extends BaseTest {
     @Test
     void testCompletedAllActions() {
         WorkOrder order = orderService.getOrderById(3101165);
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), 0);
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), ForwardEdge.SHORT.code);
         assertFalse(actionService.isAllMachineActionsProcessed());
         actionService.completedMachineActionById(1);
         assertFalse(actionService.isAllMachineActionsProcessed());

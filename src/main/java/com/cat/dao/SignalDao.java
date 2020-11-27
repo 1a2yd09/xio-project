@@ -3,6 +3,7 @@ package com.cat.dao;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
+import com.cat.enums.ForwardEdge;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
@@ -92,7 +93,7 @@ public class SignalDao extends BaseDao {
      * @param forwardEdge 下料板朝向
      * @param orderId     工单 ID
      */
-    public void insertCuttingSignal(String cuttingSize, Integer forwardEdge, Integer orderId) {
-        this.jdbcTemplate.update("INSERT INTO tb_cutting_signal(cutting_size, forward_edge, order_id) VALUES (?, ?, ?)", cuttingSize, forwardEdge, orderId);
+    public void insertCuttingSignal(String cuttingSize, ForwardEdge forwardEdge, Integer orderId) {
+        this.jdbcTemplate.update("INSERT INTO tb_cutting_signal(cutting_size, forward_edge, order_id) VALUES (?, ?, ?)", cuttingSize, forwardEdge.code, orderId);
     }
 }

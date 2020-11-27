@@ -10,6 +10,7 @@ import com.cat.entity.param.StockSpecification;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
+import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderState;
 import com.cat.utils.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class MainService {
     StockSpecService stockSpecService;
 
     /**
-     * 主流程
+     * 主流程。
      *
      * @throws InterruptedException 等待过程被中断
      */
@@ -57,7 +58,7 @@ public class MainService {
 
         OperatingParameter op = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-        // 轿底工单
+        // 轿底工单:
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getSortPattern(), op.getOrderDate());
         for (WorkOrder order : orders) {
             this.orderService.updateOrderState(order, OrderState.STARTED);
@@ -70,7 +71,7 @@ public class MainService {
                 this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
         }
-        // 对重直梁工单
+        // 对重直梁工单:
         orders = orderService.getPreprocessNotBottomOrders(op.getOrderDate());
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder currOrder = orders.get(i);
@@ -91,7 +92,7 @@ public class MainService {
     }
 
     /**
-     * 接收开工信号
+     * 接收开工信号。
      *
      * @throws InterruptedException 等待过程被中断
      */
@@ -106,7 +107,7 @@ public class MainService {
     }
 
     /**
-     * 接收下料信号
+     * 接收下料信号。
      *
      * @param order 工单
      * @return 下料信号
@@ -114,7 +115,7 @@ public class MainService {
      */
     public CuttingSignal receiveCuttingSignal(WorkOrder order) throws InterruptedException {
         // test:
-        this.signalService.insertCuttingSignal(order.getCuttingSize(), 0, order.getId());
+        this.signalService.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
         synchronized (LOCK) {
             while (true) {
                 CuttingSignal cuttingSignal = this.signalService.getLatestNotProcessedCuttingSignal();
@@ -127,7 +128,7 @@ public class MainService {
     }
 
     /**
-     * 等待所有机器动作都被处理完毕
+     * 等待所有机器动作都被处理完毕。
      *
      * @throws InterruptedException 等待过程被中断
      */
@@ -142,7 +143,7 @@ public class MainService {
     }
 
     /**
-     * 轿底流程
+     * 轿底流程。
      *
      * @param order       轿底工单
      * @param parameter   运行参数
@@ -165,7 +166,7 @@ public class MainService {
     }
 
     /**
-     * 对重直梁流程
+     * 对重直梁流程。
      *
      * @param order       对重直梁工单
      * @param nextOrder   后续对重直梁工单
@@ -208,7 +209,7 @@ public class MainService {
     }
 
     /**
-     * 处理一组被机器处理完毕的动作
+     * 处理一组被机器处理完毕的动作。
      *
      * @param order             工单
      * @param inventoryCategory 存货类型
@@ -219,7 +220,7 @@ public class MainService {
         int inventoryCount = 0;
 
         for (MachineAction action : this.actionService.getAllMachineActions()) {
-            // 只处理动作状态为已完成的动作
+            // 只处理动作状态为已完成的动作:
             if (ActionState.COMPLETED.value.equals(action.getState())) {
                 String boardCategory = action.getBoardCategory();
                 if (BoardCategory.PRODUCT.value.equals(boardCategory)) {

@@ -3,6 +3,7 @@ package com.cat;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
+import com.cat.enums.ForwardEdge;
 import com.cat.service.SignalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ class SignalTest extends BaseTest {
         CuttingSignal cs = signalService.getLatestNotProcessedCuttingSignal();
         assertNull(cs);
 
-        signalService.insertCuttingSignal("2.5×1250×1589", 0, 3098528);
+        signalService.insertCuttingSignal("2.5×1250×1589", ForwardEdge.SHORT, 3098528);
         cs = signalService.getLatestNotProcessedCuttingSignal();
         assertNotNull(cs);
         System.out.println(cs);

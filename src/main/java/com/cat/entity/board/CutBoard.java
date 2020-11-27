@@ -1,46 +1,35 @@
 package com.cat.entity.board;
 
 import com.cat.enums.BoardCategory;
+import com.cat.enums.ForwardEdge;
 
 /**
  * @author CAT
  */
 public class CutBoard extends BaseBoard {
-    public enum EdgeType {
-        /**
-         * 短边。
-         */
-        SHORT,
-        /**
-         * 长边。
-         */
-        LONG
-    }
-
-    private EdgeType forwardEdge;
+    private ForwardEdge forwardEdge;
 
     public CutBoard(String specification, String material) {
         super(specification, material, BoardCategory.CUTTING);
-        this.forwardEdge = EdgeType.SHORT;
+        this.forwardEdge = ForwardEdge.SHORT;
     }
 
-    public CutBoard(String specification, String material, EdgeType forwardEdge) {
+    public CutBoard(String specification, String material, ForwardEdge forwardEdge) {
         super(specification, material, BoardCategory.CUTTING);
         this.forwardEdge = forwardEdge;
     }
 
-    public EdgeType getForwardEdge() {
+    public ForwardEdge getForwardEdge() {
         return forwardEdge;
     }
 
-    public void setForwardEdge(EdgeType forwardEdge) {
+    public void setForwardEdge(ForwardEdge forwardEdge) {
         this.forwardEdge = forwardEdge;
     }
 
     @Override
     public String toString() {
-        return super.toString() +
-                "CutBoard{" +
+        return "CutBoard{" +
                 "forwardEdge=" + forwardEdge +
                 '}';
     }

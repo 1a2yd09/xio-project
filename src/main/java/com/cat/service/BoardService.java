@@ -7,6 +7,7 @@ import com.cat.entity.board.NormalBoard;
 import com.cat.entity.param.StockSpecification;
 import com.cat.enums.ActionCategory;
 import com.cat.enums.BoardCategory;
+import com.cat.enums.ForwardEdge;
 import com.cat.utils.Arith;
 import com.cat.utils.BoardUtils;
 import com.cat.utils.ParamUtils;
@@ -31,7 +32,7 @@ public class BoardService {
      * @param forwardEdge 下料板旋转后的朝向
      * @param orderId     工单 ID
      */
-    public void rotatingCutBoard(CutBoard cutBoard, CutBoard.EdgeType forwardEdge, Integer orderId) {
+    public void rotatingCutBoard(CutBoard cutBoard, ForwardEdge forwardEdge, Integer orderId) {
         // 如果下料板此时朝向和指定朝向不同，则旋转下料板:
         if (cutBoard.getForwardEdge() != forwardEdge) {
             this.actionDao.insertMachineAction(ActionCategory.ROTATE, cutBoard, orderId);
@@ -50,7 +51,7 @@ public class BoardService {
         for (int i = 0; i < targetBoard.getCutTimes(); i++) {
             BigDecimal dis = targetBoard.getWidth();
             // 下料板根据自身朝向从宽度或长度当中扣除进刀距离:
-            if (cutBoard.getForwardEdge() == CutBoard.EdgeType.LONG) {
+            if (cutBoard.getForwardEdge() == ForwardEdge.LONG) {
                 cutBoard.setWidth(Arith.sub(cutBoard.getWidth(), dis));
             } else {
                 cutBoard.setLength(Arith.sub(cutBoard.getLength(), dis));
@@ -72,7 +73,7 @@ public class BoardService {
      * @param targetBoard 指定板材
      * @param orderId     工单 ID
      */
-    public void cuttingTargetBoard(CutBoard cutBoard, CutBoard.EdgeType forwardEdge, NormalBoard targetBoard, Integer orderId) {
+    public void cuttingTargetBoard(CutBoard cutBoard, ForwardEdge forwardEdge, NormalBoard targetBoard, Integer orderId) {
         this.rotatingCutBoard(cutBoard, forwardEdge, orderId);
         this.cuttingCutBoard(cutBoard, targetBoard, orderId);
     }
@@ -86,7 +87,7 @@ public class BoardService {
      * @param wasteThreshold 废料阈值
      * @param orderId        工单 ID
      */
-    public void cuttingExtraBoard(CutBoard cutBoard, CutBoard.EdgeType forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold, Integer orderId) {
+    public void cuttingExtraBoard(CutBoard cutBoard, ForwardEdge forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold, Integer orderId) {
         NormalBoard extraBoard = this.getExtraBoard(cutBoard, forwardEdge, targetMeasure, wasteThreshold);
         if (extraBoard.getCutTimes() > 0) {
             this.cuttingTargetBoard(cutBoard, forwardEdge, extraBoard, orderId);
@@ -102,8 +103,8 @@ public class BoardService {
      * @param orderId        工单 ID
      */
     public void twoStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
-        this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingTargetBoard(cutBoard, CutBoard.EdgeType.LONG, targetBoard, orderId);
+        this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
+        this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
     }
 
     /**
@@ -115,9 +116,9 @@ public class BoardService {
      * @param orderId        工单 ID
      */
     public void threeStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
-        this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingExtraBoard(cutBoard, CutBoard.EdgeType.LONG, Arith.mul(targetBoard.getWidth(), targetBoard.getCutTimes()), wasteThreshold, orderId);
-        this.cuttingTargetBoard(cutBoard, CutBoard.EdgeType.LONG, targetBoard, orderId);
+        this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
+        this.cuttingExtraBoard(cutBoard, ForwardEdge.LONG, Arith.mul(targetBoard.getWidth(), targetBoard.getCutTimes()), wasteThreshold, orderId);
+        this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
     }
 
     /**
@@ -130,9 +131,9 @@ public class BoardService {
      */
     public CutBoard getCutBoard(String cuttingSize, String material, Integer forwardEdge) {
         if (forwardEdge == 1) {
-            return new CutBoard(cuttingSize, material, CutBoard.EdgeType.LONG);
+            return new CutBoard(cuttingSize, material, ForwardEdge.LONG);
         } else {
-            return new CutBoard(cuttingSize, material, CutBoard.EdgeType.SHORT);
+            return new CutBoard(cuttingSize, material, ForwardEdge.SHORT);
         }
     }
 
@@ -207,11 +208,11 @@ public class BoardService {
      * @param wasteThreshold 废料阈值
      * @return 额外板材
      */
-    public NormalBoard getExtraBoard(CutBoard cutBoard, CutBoard.EdgeType forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold) {
+    public NormalBoard getExtraBoard(CutBoard cutBoard, ForwardEdge forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold) {
         NormalBoard extraBoard = new NormalBoard();
         extraBoard.setHeight(cutBoard.getHeight());
         // 以进刀出去的边作为较长边:
-        if (forwardEdge == CutBoard.EdgeType.LONG) {
+        if (forwardEdge == ForwardEdge.LONG) {
             extraBoard.setLength(cutBoard.getLength());
             extraBoard.setWidth(Arith.sub(cutBoard.getWidth(), targetMeasure));
         } else {

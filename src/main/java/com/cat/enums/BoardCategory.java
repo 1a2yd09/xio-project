@@ -28,7 +28,7 @@ public enum BoardCategory {
     /**
      * 废料
      */
-    WASTED("废料板");
+    WASTE("废料板");
 
     public final String value;
 

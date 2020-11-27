@@ -8,15 +8,15 @@ public enum ActionState {
     /**
      * 未完成
      */
-    NOT_FINISHED("未完成"),
+    INCOMPLETE("未完成"),
     /**
      * 已完成
      */
-    FINISHED("已完成"),
+    COMPLETED("已完成"),
     /**
      * 已报废
      */
-    FAILED("已报废");
+    SCRAPPED("已报废");
 
     public final String value;
 

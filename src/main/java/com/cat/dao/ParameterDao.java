@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ParameterDao extends BaseDao {
     /**
-     * 查询最新的运行参数，数据表为空时将返回 null
+     * 查询最新的运行参数，数据表为空时将返回 null。
      *
      * @return 运行参数
      */

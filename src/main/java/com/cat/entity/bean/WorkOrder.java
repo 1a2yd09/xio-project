@@ -11,23 +11,23 @@ public class WorkOrder {
     private String batchNumber;
     private String contractNumber;
     private String itemNumber;
-    private String name;
+    private String productName;
     private String processNumber;
-    private String specification;
-    private String amount;
+    private String productSpecification;
+    private String productQuantity;
     private String material;
     private String implementationDate;
     private String cuttingSize;
-    private String cuttingAmount;
+    private String cuttingQuantity;
     private String programNumber;
     private String sequenceNumber;
-    private String workOrderNumber;
+    private String orderNumber;
     private String oid;
     private Integer id;
     private String workCentre;
-    private String completedAmount;
-    private String reportingAmount;
-    private String rejectionAmount;
+    private String completedQuantity;
+    private String reportQuantity;
+    private String scrapQuantity;
     private String operationState;
     private String siteModule;
     private LocalDateTime completionDate;
@@ -35,21 +35,21 @@ public class WorkOrder {
     public WorkOrder() {
     }
 
-    public WorkOrder(String specification, String amount, String material, Integer id, String completedAmount) {
-        this.specification = specification;
-        this.amount = amount;
+    public WorkOrder(String productSpecification, String productQuantity, String material, Integer id, String completedQuantity) {
+        this.productSpecification = productSpecification;
+        this.productQuantity = productQuantity;
         this.material = material;
         this.id = id;
-        this.completedAmount = completedAmount;
+        this.completedQuantity = completedQuantity;
     }
 
     /**
-     * 查询工单的成品未完成数目
+     * 查询工单成品的未完成数目。
      *
-     * @return 成品未完成数目
+     * @return 未完成数目
      */
-    public int getUnfinishedAmount() {
-        return OrderUtils.amountPropStrToInt(this.amount) - OrderUtils.amountPropStrToInt(this.completedAmount);
+    public int getIncompleteQuantity() {
+        return OrderUtils.quantityPropStrToInt(this.productQuantity) - OrderUtils.quantityPropStrToInt(this.completedQuantity);
     }
 
     public String getBatchNumber() {
@@ -76,12 +76,12 @@ public class WorkOrder {
         this.itemNumber = itemNumber;
     }
 
-    public String getName() {
-        return name;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
     public String getProcessNumber() {
@@ -92,20 +92,20 @@ public class WorkOrder {
         this.processNumber = processNumber;
     }
 
-    public String getSpecification() {
-        return specification;
+    public String getProductSpecification() {
+        return productSpecification;
     }
 
-    public void setSpecification(String specification) {
-        this.specification = specification;
+    public void setProductSpecification(String productSpecification) {
+        this.productSpecification = productSpecification;
     }
 
-    public String getAmount() {
-        return amount;
+    public String getProductQuantity() {
+        return productQuantity;
     }
 
-    public void setAmount(String amount) {
-        this.amount = amount;
+    public void setProductQuantity(String productQuantity) {
+        this.productQuantity = productQuantity;
     }
 
     public String getMaterial() {
@@ -132,12 +132,12 @@ public class WorkOrder {
         this.cuttingSize = cuttingSize;
     }
 
-    public String getCuttingAmount() {
-        return cuttingAmount;
+    public String getCuttingQuantity() {
+        return cuttingQuantity;
     }
 
-    public void setCuttingAmount(String cuttingAmount) {
-        this.cuttingAmount = cuttingAmount;
+    public void setCuttingQuantity(String cuttingQuantity) {
+        this.cuttingQuantity = cuttingQuantity;
     }
 
     public String getProgramNumber() {
@@ -156,12 +156,12 @@ public class WorkOrder {
         this.sequenceNumber = sequenceNumber;
     }
 
-    public String getWorkOrderNumber() {
-        return workOrderNumber;
+    public String getOrderNumber() {
+        return orderNumber;
     }
 
-    public void setWorkOrderNumber(String workOrderNumber) {
-        this.workOrderNumber = workOrderNumber;
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
     }
 
     public String getOid() {
@@ -188,28 +188,28 @@ public class WorkOrder {
         this.workCentre = workCentre;
     }
 
-    public String getCompletedAmount() {
-        return completedAmount;
+    public String getCompletedQuantity() {
+        return completedQuantity;
     }
 
-    public void setCompletedAmount(String completedAmount) {
-        this.completedAmount = completedAmount;
+    public void setCompletedQuantity(String completedQuantity) {
+        this.completedQuantity = completedQuantity;
     }
 
-    public String getReportingAmount() {
-        return reportingAmount;
+    public String getReportQuantity() {
+        return reportQuantity;
     }
 
-    public void setReportingAmount(String reportingAmount) {
-        this.reportingAmount = reportingAmount;
+    public void setReportQuantity(String reportQuantity) {
+        this.reportQuantity = reportQuantity;
     }
 
-    public String getRejectionAmount() {
-        return rejectionAmount;
+    public String getScrapQuantity() {
+        return scrapQuantity;
     }
 
-    public void setRejectionAmount(String rejectionAmount) {
-        this.rejectionAmount = rejectionAmount;
+    public void setScrapQuantity(String scrapQuantity) {
+        this.scrapQuantity = scrapQuantity;
     }
 
     public String getOperationState() {
@@ -242,23 +242,23 @@ public class WorkOrder {
                 "batchNumber='" + batchNumber + '\'' +
                 ", contractNumber='" + contractNumber + '\'' +
                 ", itemNumber='" + itemNumber + '\'' +
-                ", name='" + name + '\'' +
+                ", productName='" + productName + '\'' +
                 ", processNumber='" + processNumber + '\'' +
-                ", specification='" + specification + '\'' +
-                ", amount='" + amount + '\'' +
+                ", productSpecification='" + productSpecification + '\'' +
+                ", productQuantity='" + productQuantity + '\'' +
                 ", material='" + material + '\'' +
                 ", implementationDate='" + implementationDate + '\'' +
                 ", cuttingSize='" + cuttingSize + '\'' +
-                ", cuttingAmount='" + cuttingAmount + '\'' +
+                ", cuttingQuantity='" + cuttingQuantity + '\'' +
                 ", programNumber='" + programNumber + '\'' +
                 ", sequenceNumber='" + sequenceNumber + '\'' +
-                ", workOrderNumber='" + workOrderNumber + '\'' +
+                ", orderNumber='" + orderNumber + '\'' +
                 ", oid='" + oid + '\'' +
                 ", id=" + id +
                 ", workCentre='" + workCentre + '\'' +
-                ", completedAmount='" + completedAmount + '\'' +
-                ", reportingAmount='" + reportingAmount + '\'' +
-                ", rejectionAmount='" + rejectionAmount + '\'' +
+                ", completedQuantity='" + completedQuantity + '\'' +
+                ", reportQuantity='" + reportQuantity + '\'' +
+                ", scrapQuantity='" + scrapQuantity + '\'' +
                 ", operationState='" + operationState + '\'' +
                 ", siteModule='" + siteModule + '\'' +
                 ", completionDate=" + completionDate +

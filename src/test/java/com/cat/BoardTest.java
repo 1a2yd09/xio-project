@@ -52,6 +52,6 @@ class BoardTest extends BaseTest {
         bc = BoardUtils.calBoardCategory(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO);
         assertEquals(BoardCategory.REMAINING, bc);
         bc = BoardUtils.calBoardCategory(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ONE);
-        assertEquals(BoardCategory.WASTED, bc);
+        assertEquals(BoardCategory.WASTE, bc);
     }
 }

@@ -17,7 +17,7 @@ public class StockSpecService {
     StockSpecDao stockSpecDao;
 
     /**
-     * 根据厚度对库存规格进行分组，每个分组中仅有对应厚度中最新被写入的规格
+     * 根据厚度对库存规格进行分组，每个分组中仅有对应厚度中最新被写入的规格。
      *
      * @return 库存件规格集合
      */
@@ -26,7 +26,7 @@ public class StockSpecService {
     }
 
     /**
-     * 新增库存件规格
+     * 新增库存件规格。
      *
      * @param height 厚度
      * @param width  宽度

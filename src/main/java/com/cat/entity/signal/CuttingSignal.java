@@ -5,7 +5,7 @@ package com.cat.entity.signal;
  */
 public class CuttingSignal extends BaseSignal {
     private String cuttingSize;
-    private Boolean towardEdge;
+    private Integer forwardEdge;
     private Integer orderId;
 
     public String getCuttingSize() {
@@ -16,12 +16,12 @@ public class CuttingSignal extends BaseSignal {
         this.cuttingSize = cuttingSize;
     }
 
-    public Boolean getTowardEdge() {
-        return towardEdge;
+    public Integer getForwardEdge() {
+        return forwardEdge;
     }
 
-    public void setTowardEdge(Boolean towardEdge) {
-        this.towardEdge = towardEdge;
+    public void setForwardEdge(Integer forwardEdge) {
+        this.forwardEdge = forwardEdge;
     }
 
     public Integer getOrderId() {
@@ -34,9 +34,10 @@ public class CuttingSignal extends BaseSignal {
 
     @Override
     public String toString() {
-        return "CuttingSignal{" +
+        return super.toString() +
+                "CuttingSignal{" +
                 "cuttingSize='" + cuttingSize + '\'' +
-                ", towardEdge=" + towardEdge +
+                ", forwardEdge=" + forwardEdge +
                 ", orderId=" + orderId +
                 '}';
     }

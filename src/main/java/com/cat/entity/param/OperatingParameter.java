@@ -9,21 +9,21 @@ import java.time.LocalDateTime;
  */
 public class OperatingParameter {
     private Long id;
-    private LocalDate workOrderDate;
+    private LocalDate orderDate;
     private BigDecimal fixedWidth;
     private BigDecimal wasteThreshold;
-    private String bottomOrderSort;
+    private String sortPattern;
     private LocalDateTime createdAt;
 
     public OperatingParameter() {
     }
 
-    public OperatingParameter(Long id, LocalDate workOrderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String bottomOrderSort, LocalDateTime createdAt) {
+    public OperatingParameter(Long id, LocalDate orderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String sortPattern, LocalDateTime createdAt) {
         this.id = id;
-        this.workOrderDate = workOrderDate;
+        this.orderDate = orderDate;
         this.fixedWidth = fixedWidth;
         this.wasteThreshold = wasteThreshold;
-        this.bottomOrderSort = bottomOrderSort;
+        this.sortPattern = sortPattern;
         this.createdAt = createdAt;
     }
 
@@ -35,12 +35,12 @@ public class OperatingParameter {
         this.id = id;
     }
 
-    public LocalDate getWorkOrderDate() {
-        return workOrderDate;
+    public LocalDate getOrderDate() {
+        return orderDate;
     }
 
-    public void setWorkOrderDate(LocalDate workOrderDate) {
-        this.workOrderDate = workOrderDate;
+    public void setOrderDate(LocalDate orderDate) {
+        this.orderDate = orderDate;
     }
 
     public BigDecimal getFixedWidth() {
@@ -59,12 +59,12 @@ public class OperatingParameter {
         this.wasteThreshold = wasteThreshold;
     }
 
-    public String getBottomOrderSort() {
-        return bottomOrderSort;
+    public String getSortPattern() {
+        return sortPattern;
     }
 
-    public void setBottomOrderSort(String bottomOrderSort) {
-        this.bottomOrderSort = bottomOrderSort;
+    public void setSortPattern(String sortPattern) {
+        this.sortPattern = sortPattern;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -79,10 +79,10 @@ public class OperatingParameter {
     public String toString() {
         return "OperatingParameter{" +
                 "id=" + id +
-                ", workOrderDate=" + workOrderDate +
+                ", orderDate=" + orderDate +
                 ", fixedWidth=" + fixedWidth +
                 ", wasteThreshold=" + wasteThreshold +
-                ", bottomOrderSort='" + bottomOrderSort + '\'' +
+                ", sortPattern='" + sortPattern + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

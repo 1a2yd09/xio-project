@@ -22,7 +22,7 @@ public class BoardUtils {
     }
 
     /**
-     * 将规格字符串转化为 BigDecimal 集合
+     * 将规格字符串转化为 BigDecimal 集合。
      *
      * @param specification 规格字符串
      * @return BigDecimal 集合
@@ -34,10 +34,10 @@ public class BoardUtils {
     }
 
     /**
-     * 将可变的规格数组转化为标准格式的规格字符串
+     * 将规格数组转化为标准规格字符串。
      *
      * @param measures 规格数组
-     * @return 标准格式的规格字符串
+     * @return 标准规格字符串
      */
     public static String getStandardSpecStr(BigDecimal... measures) {
         return String.join(SPEC_SEP, Arrays.stream(measures)
@@ -46,7 +46,7 @@ public class BoardUtils {
     }
 
     /**
-     * 将规格字符串转化为标准格式的规格字符串
+     * 将规格字符串转化为标准格式的规格字符串。
      *
      * @param spec 规格字符串
      * @return 标准格式的规格字符串
@@ -56,7 +56,7 @@ public class BoardUtils {
     }
 
     /**
-     * 依次比较两个规格字符串中的度量大小
+     * 依次比较两个规格字符串中的度量大小。
      *
      * @param sp1 规格1
      * @param sp2 规格2
@@ -74,7 +74,7 @@ public class BoardUtils {
     }
 
     /**
-     * 计算板材类型是属于余料还是废料，本质上每种板材类型都可以归结为这两个类别
+     * 计算板材类型是属于余料还是废料，本质上每种板材类型都可以归结为这两个类别。
      *
      * @param boardWidth     板材宽度
      * @param boardLength    板材长度
@@ -82,6 +82,6 @@ public class BoardUtils {
      * @return 板材类型
      */
     public static BoardCategory calBoardCategory(BigDecimal boardWidth, BigDecimal boardLength, BigDecimal wasteThreshold) {
-        return boardWidth.compareTo(wasteThreshold) >= 0 && boardLength.compareTo(wasteThreshold) >= 0 ? BoardCategory.REMAINING : BoardCategory.WASTED;
+        return boardWidth.compareTo(wasteThreshold) >= 0 && boardLength.compareTo(wasteThreshold) >= 0 ? BoardCategory.REMAINING : BoardCategory.WASTE;
     }
 }

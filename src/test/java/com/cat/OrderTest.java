@@ -31,21 +31,21 @@ class OrderTest extends BaseTest {
 
     @Test
     void testUtils() {
-        assertEquals(0, OrderUtils.amountPropStrToInt("null"));
-        assertEquals(0, OrderUtils.amountPropStrToInt(null));
-        assertEquals(3, OrderUtils.amountPropStrToInt("3"));
-        assertEquals("7", OrderUtils.addAmountPropWithInt("3", 4));
+        assertEquals(0, OrderUtils.quantityPropStrToInt("null"));
+        assertEquals(0, OrderUtils.quantityPropStrToInt(null));
+        assertEquals(3, OrderUtils.quantityPropStrToInt("3"));
+        assertEquals("7", OrderUtils.addQuantityPropWithInt("3", 4));
     }
 
     @Test
     void testGetAllWidthBetterBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
-        LocalDate date = op.getWorkOrderDate();
+        LocalDate date = op.getOrderDate();
         List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
         assertEquals(914, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
                 System.out.println(order);
             }
@@ -55,11 +55,11 @@ class OrderTest extends BaseTest {
     @Test
     void testGetAllWidthBetterNotBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
-        List<WorkOrder> orders = orderService.getNotBottomOrders(op.getWorkOrderDate());
+        List<WorkOrder> orders = orderService.getNotBottomOrders(op.getOrderDate());
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
                 System.out.println(order);
             }
@@ -71,7 +71,7 @@ class OrderTest extends BaseTest {
     @Transactional
     void testGetNotBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
-        LocalDate date = op.getWorkOrderDate();
+        LocalDate date = op.getOrderDate();
         // 获取未预处理的直梁工单，共82个
         List<WorkOrder> orders = orderService.getNotBottomOrders(date);
         assertEquals(82, orders.size());
@@ -85,10 +85,10 @@ class OrderTest extends BaseTest {
     @Test
     @Rollback
     @Transactional
-    void testAddOrderCompletedAmount() {
+    void testaddOrderCompletedQuantity() {
         WorkOrder order = orderService.getOrderById(3098562);
-        orderService.addOrderCompletedAmount(order, Integer.parseInt(order.getAmount()));
-        assertEquals(0, order.getUnfinishedAmount());
+        orderService.addOrderCompletedQuantity(order, Integer.parseInt(order.getProductQuantity()));
+        assertEquals(0, order.getIncompleteQuantity());
         assertEquals(OrderState.COMPLETED.value, order.getOperationState());
     }
 }

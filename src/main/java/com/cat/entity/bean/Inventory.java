@@ -9,7 +9,7 @@ public class Inventory {
     private Long id;
     private String specification;
     private String material;
-    private Integer amount;
+    private Integer quantity;
     private String category;
     private LocalDateTime createdAt;
 
@@ -30,7 +30,7 @@ public class Inventory {
         this.id = id;
     }
 
-    public String getSpecStr() {
+    public String getSpecification() {
         return specification;
     }
 
@@ -46,12 +46,12 @@ public class Inventory {
         this.material = material;
     }
 
-    public Integer getAmount() {
-        return amount;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setAmount(Integer amount) {
-        this.amount = amount;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     public String getCategory() {
@@ -76,7 +76,7 @@ public class Inventory {
                 "id=" + id +
                 ", specification='" + specification + '\'' +
                 ", material='" + material + '\'' +
-                ", amount=" + amount +
+                ", quantity=" + quantity +
                 ", category='" + category + '\'' +
                 ", createdAt=" + createdAt +
                 '}';

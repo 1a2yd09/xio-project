@@ -16,7 +16,7 @@ public class ParamUtils {
     }
 
     /**
-     * 获取一个默认的运行参数
+     * 获取一个默认的运行参数。
      *
      * @return 运行参数
      */
@@ -25,7 +25,7 @@ public class ParamUtils {
     }
 
     /**
-     * 获取一个默认的库存件规格
+     * 获取一个默认的库存件规格。
      *
      * @return 库存件规格
      */

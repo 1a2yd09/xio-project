@@ -37,11 +37,11 @@ public abstract class BaseBoard {
     }
 
     /**
-     * 获取标准格式的规格字符串
+     * 获取标准规格字符串。
      *
-     * @return 规格字符串
+     * @return 标准规格字符串
      */
-    public String getSpecStr() {
+    public String getStandardSpecStr() {
         return BoardUtils.getStandardSpecStr(this.height, this.width, this.length);
     }
 

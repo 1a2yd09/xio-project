@@ -18,7 +18,7 @@ public class OrderDao extends BaseDao {
     RowMapper<WorkOrder> orderM = new BeanPropertyRowMapper<>(WorkOrder.class);
 
     /**
-     * 更新工单运行状态
+     * 更新工单运行状态。
      *
      * @param order 工单
      */
@@ -27,21 +27,21 @@ public class OrderDao extends BaseDao {
     }
 
     /**
-     * 更新工单已完工数量
+     * 更新工单已完工数量。
      *
      * @param order 工单
      */
-    public void updateOrderCompletedAmount(WorkOrder order) {
-        // 由于工单原生表设计的不完善，该字段可能为空，需要对该字段进行判空处理，因为 update() 方法后续的参数数组不支持非空对象
-        if (order.getCompletedAmount() == null) {
+    public void updateOrderCompletedQuantity(WorkOrder order) {
+        // 由于工单原生表设计的不完善，该字段可能为空，需要对该字段进行判空处理，因为 update() 方法的参数数组不支持非空对象:
+        if (order.getCompletedQuantity() == null) {
             this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = null WHERE bid = ?", order.getId());
         } else {
-            this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = ? WHERE bid = ?", order.getCompletedAmount(), order.getId());
+            this.jdbcTemplate.update("UPDATE tb_local_work_order SET YWGSL = ? WHERE bid = ?", order.getCompletedQuantity(), order.getId());
         }
     }
 
     /**
-     * 根据工单 ID 获取工单
+     * 根据工单 ID 获取指定工单，不存在指定 ID 工单时将返回 null。
      *
      * @param id 工单 ID
      * @return 工单
@@ -55,7 +55,7 @@ public class OrderDao extends BaseDao {
     }
 
     /**
-     * 根据计划完工日期获取按顺序号升序的对重直梁工单集合
+     * 根据计划完工日期获取对重直梁工单集合（按顺序号升序排序）。
      *
      * @param date 计划完工日期
      * @return 对重直梁工单集合
@@ -67,7 +67,7 @@ public class OrderDao extends BaseDao {
     }
 
     /**
-     * 根据计划完工日期获取按顺序号升序的轿底工单集合
+     * 根据计划完工日期获取轿底工单集合（按顺序号升序排序）。
      *
      * @param date 计划完工日期
      * @return 轿底工单集合

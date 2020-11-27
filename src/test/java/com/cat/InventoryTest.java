@@ -17,24 +17,24 @@ class InventoryTest extends BaseTest {
     InventoryService inventoryService;
 
     @Test
-    void testUpdateInventoryAmount() {
+    void testupdateInventoryQuantity() {
         int retVal = inventoryService.getInventoryCount();
         assertEquals(0, retVal);
 
         Inventory inventory = new Inventory("2.5×309×1016", "镀锌板", BoardCategory.STOCK.value);
-        inventory.setAmount(1);
-        inventoryService.updateInventoryAmount(inventory);
+        inventory.setQuantity(1);
+        inventoryService.updateInventoryQuantity(inventory);
         retVal = inventoryService.getInventoryCount();
         assertEquals(1, retVal);
 
-        inventory.setAmount(5);
-        inventoryService.updateInventoryAmount(inventory);
+        inventory.setQuantity(5);
+        inventoryService.updateInventoryQuantity(inventory);
         retVal = inventoryService.getInventoryCount();
         assertEquals(1, retVal);
 
         inventory = new Inventory("2.5×309×1016", "镀锌板", BoardCategory.SEMI_PRODUCT.value);
-        inventory.setAmount(1);
-        inventoryService.updateInventoryAmount(inventory);
+        inventory.setQuantity(1);
+        inventoryService.updateInventoryQuantity(inventory);
         retVal = inventoryService.getInventoryCount();
         assertEquals(2, retVal);
     }

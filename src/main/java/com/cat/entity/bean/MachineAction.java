@@ -14,7 +14,7 @@ public class MachineAction {
     private String boardCategory;
     private String boardSpecification;
     private String boardMaterial;
-    private Integer workOrderId;
+    private Integer orderId;
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -73,12 +73,12 @@ public class MachineAction {
         this.boardMaterial = boardMaterial;
     }
 
-    public Integer getWorkOrderId() {
-        return workOrderId;
+    public Integer getOrderId() {
+        return orderId;
     }
 
-    public void setWorkOrderId(Integer workOrderId) {
-        this.workOrderId = workOrderId;
+    public void setOrderId(Integer orderId) {
+        this.orderId = orderId;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -99,7 +99,7 @@ public class MachineAction {
                 ", boardCategory='" + boardCategory + '\'' +
                 ", boardSpecification='" + boardSpecification + '\'' +
                 ", boardMaterial='" + boardMaterial + '\'' +
-                ", workOrderId=" + workOrderId +
+                ", orderId=" + orderId +
                 ", createdAt=" + createdAt +
                 '}';
     }

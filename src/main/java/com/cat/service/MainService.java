@@ -61,8 +61,7 @@ public class MainService {
         // 轿底工单:
         List<WorkOrder> orders = this.orderService.getBottomOrders(op.getSortPattern(), op.getOrderDate());
         for (WorkOrder order : orders) {
-            this.orderService.updateOrderState(order, OrderState.STARTED);
-            while (order.getIncompleteQuantity() != 0) {
+            while (!OrderState.COMPLETED.value.equals(order.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(order.getId());
                 CuttingSignal cs = this.receiveCuttingSignal(order);
                 order.setCuttingSize(cs.getCuttingSize());
@@ -79,8 +78,7 @@ public class MainService {
             if (i < orders.size() - 1) {
                 nextOrder = orders.get(i + 1);
             }
-            this.orderService.updateOrderState(currOrder, OrderState.STARTED);
-            while (currOrder.getIncompleteQuantity() != 0) {
+            while (!OrderState.COMPLETED.value.equals(currOrder.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
                 CuttingSignal cs = this.receiveCuttingSignal(currOrder);
                 currOrder.setCuttingSize(cs.getCuttingSize());

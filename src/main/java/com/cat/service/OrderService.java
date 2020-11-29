@@ -37,10 +37,7 @@ public class OrderService {
     public void addOrderCompletedQuantity(WorkOrder order, int quantity) {
         order.setCompletedQuantity(OrderUtils.addQuantityPropWithInt(order.getCompletedQuantity(), quantity));
         this.orderDao.updateOrderCompletedQuantity(order);
-
-        if (order.getIncompleteQuantity() == 0) {
-            this.updateOrderState(order, OrderState.COMPLETED);
-        }
+        this.updateOrderState(order, order.getIncompleteQuantity() == 0 ? OrderState.COMPLETED : OrderState.STARTED);
     }
 
     /**
@@ -60,7 +57,6 @@ public class OrderService {
             if (stock != null && stock.getMaterial().equals(order.getMaterial()) && stock.getQuantity() > 0) {
                 int usedStockQuantity = Math.min(order.getIncompleteQuantity(), stock.getQuantity());
                 // 使用库存件作为成品属于工单开工的行为之一:
-                this.updateOrderState(order, OrderState.STARTED);
                 this.addOrderCompletedQuantity(order, usedStockQuantity);
                 stock.setQuantity(stock.getQuantity() - usedStockQuantity);
                 this.inventoryDao.updateInventoryQuantity(stock);

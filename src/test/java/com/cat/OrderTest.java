@@ -80,6 +80,8 @@ class OrderTest extends BaseTest {
         // 获取经过预处理的直梁工单，其中前8个工单有6个因为使用了已有的库存件作为成品，因此未完工的工单数量为76个
         orders = orderService.getPreprocessNotBottomOrders(date);
         assertEquals(76, orders.size());
+        orders = orderService.getNotBottomOrders(date);
+        orders.forEach(System.out::println);
     }
 
     @Test

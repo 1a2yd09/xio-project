@@ -64,8 +64,7 @@ public class MainService {
             while (!OrderState.COMPLETED.value.equals(order.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(order.getId());
                 CuttingSignal cs = this.receiveCuttingSignal(order);
-                order.setCuttingSize(cs.getCuttingSize());
-                this.processingBottomOrder(order, op, cs.getForwardEdge());
+                this.processingBottomOrder(order, op, cs);
                 this.waitForAllMachineActionsCompleted();
                 this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
@@ -81,8 +80,7 @@ public class MainService {
             while (!OrderState.COMPLETED.value.equals(currOrder.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
                 CuttingSignal cs = this.receiveCuttingSignal(currOrder);
-                currOrder.setCuttingSize(cs.getCuttingSize());
-                this.processingNotBottomOrder(currOrder, nextOrder, op, specs, cs.getForwardEdge());
+                this.processingNotBottomOrder(currOrder, nextOrder, op, specs, cs);
                 this.waitForAllMachineActionsCompleted();
                 this.processCompletedAction(currOrder, BoardCategory.STOCK);
             }
@@ -143,17 +141,17 @@ public class MainService {
     /**
      * 轿底流程。
      *
-     * @param order       轿底工单
-     * @param parameter   运行参数
-     * @param forwardEdge 下料板朝向
+     * @param order         轿底工单
+     * @param parameter     运行参数
+     * @param cuttingSignal 下料信号
      */
-    public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, Integer forwardEdge) {
+    public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
         String material = order.getMaterial();
         int orderId = order.getId();
         BigDecimal fixedWidth = parameter.getFixedWidth();
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
-        CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, forwardEdge);
+        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), material, cuttingSignal.getForwardEdge());
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), material, cutBoard.getWidth(), order.getIncompleteQuantity());
         NormalBoard semiProductBoard = this.boardService.getSemiProduct(cutBoard, fixedWidth, productBoard);
 
@@ -166,18 +164,18 @@ public class MainService {
     /**
      * 对重直梁流程。
      *
-     * @param order       对重直梁工单
-     * @param nextOrder   后续对重直梁工单
-     * @param parameter   运行参数
-     * @param specs       库存件规格集合
-     * @param forwardEdge 下料板朝向
+     * @param order         对重直梁工单
+     * @param nextOrder     后续对重直梁工单
+     * @param parameter     运行参数
+     * @param specs         库存件规格集合
+     * @param cuttingSignal 下料信号
      */
-    public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, Integer forwardEdge) {
+    public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
         String material = order.getMaterial();
         int orderId = order.getId();
         BigDecimal wasteThreshold = parameter.getWasteThreshold();
 
-        CutBoard cutBoard = this.boardService.getCutBoard(order.getCuttingSize(), material, forwardEdge);
+        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), material, cuttingSignal.getForwardEdge());
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), material, cutBoard.getWidth(), order.getIncompleteQuantity());
 
         if (productBoard.getCutTimes() == order.getIncompleteQuantity()) {

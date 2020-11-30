@@ -8,6 +8,15 @@ public class CuttingSignal extends BaseSignal {
     private Integer forwardEdge;
     private Integer orderId;
 
+    public CuttingSignal() {
+    }
+
+    public CuttingSignal(String cuttingSize, Integer forwardEdge, Integer orderId) {
+        this.cuttingSize = cuttingSize;
+        this.forwardEdge = forwardEdge;
+        this.orderId = orderId;
+    }
+
     public String getCuttingSize() {
         return cuttingSize;
     }

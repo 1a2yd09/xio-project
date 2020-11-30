@@ -16,7 +16,11 @@ public enum OrderState {
     /**
      * 已完工
      */
-    COMPLETED("已完工");
+    COMPLETED("已完工"),
+    /**
+     * 已中断
+     */
+    INTERRUPTED("已中断");
 
     public final String value;
 

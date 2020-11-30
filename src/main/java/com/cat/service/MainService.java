@@ -5,6 +5,7 @@ import com.cat.entity.bean.MachineAction;
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.board.CutBoard;
 import com.cat.entity.board.NormalBoard;
+import com.cat.entity.message.OrderErrorMsg;
 import com.cat.entity.param.OperatingParameter;
 import com.cat.entity.param.StockSpecification;
 import com.cat.entity.signal.CuttingSignal;
@@ -12,12 +13,17 @@ import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderState;
+import com.cat.utils.BoardUtils;
 import com.cat.utils.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author CAT
@@ -47,6 +53,8 @@ public class MainService {
     InventoryService inventoryService;
     @Autowired
     StockSpecService stockSpecService;
+    @Autowired
+    MailService mailService;
 
     /**
      * 主流程。
@@ -56,21 +64,28 @@ public class MainService {
     public void start() throws InterruptedException {
         this.receiveStartSignal();
 
-        OperatingParameter op = this.parameterService.getLatestOperatingParameter();
+        OperatingParameter param = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
+        ExecutorService es = new ThreadPoolExecutor(4, 10, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
         // 轿底工单:
-        List<WorkOrder> orders = this.orderService.getBottomOrders(op.getSortPattern(), op.getOrderDate());
+        List<WorkOrder> orders = this.orderService.getBottomOrders(param.getSortPattern(), param.getOrderDate());
         for (WorkOrder order : orders) {
             while (!OrderState.COMPLETED.value.equals(order.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(order.getId());
-                CuttingSignal cs = this.receiveCuttingSignal(order);
-                this.processingBottomOrder(order, op, cs);
+                CuttingSignal signal = this.receiveCuttingSignal(order);
+                if (!BoardUtils.isFirstSpecGeSecondSpec(signal.getCuttingSize(), order.getProductSpecification())) {
+                    OrderErrorMsg msg = OrderErrorMsg.getInstance(order.getId(), signal.getCuttingSize(), order.getProductSpecification());
+                    es.submit(() -> this.mailService.sendOrderErrorMail(msg));
+                    this.orderService.updateOrderState(order, OrderState.INTERRUPTED);
+                    break;
+                }
+                this.processingBottomOrder(order, param, signal);
                 this.waitForAllMachineActionsCompleted();
                 this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
         }
         // 对重直梁工单:
-        orders = orderService.getPreprocessNotBottomOrders(op.getOrderDate());
+        orders = orderService.getPreprocessNotBottomOrders(param.getOrderDate());
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder currOrder = orders.get(i);
             WorkOrder nextOrder = OrderUtils.getFakeOrder();
@@ -79,8 +94,14 @@ public class MainService {
             }
             while (!OrderState.COMPLETED.value.equals(currOrder.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
-                CuttingSignal cs = this.receiveCuttingSignal(currOrder);
-                this.processingNotBottomOrder(currOrder, nextOrder, op, specs, cs);
+                CuttingSignal signal = this.receiveCuttingSignal(currOrder);
+                if (!BoardUtils.isFirstSpecGeSecondSpec(signal.getCuttingSize(), currOrder.getProductSpecification())) {
+                    OrderErrorMsg msg = OrderErrorMsg.getInstance(currOrder.getId(), signal.getCuttingSize(), currOrder.getProductSpecification());
+                    es.submit(() -> this.mailService.sendOrderErrorMail(msg));
+                    this.orderService.updateOrderState(currOrder, OrderState.INTERRUPTED);
+                    break;
+                }
+                this.processingNotBottomOrder(currOrder, nextOrder, param, specs, signal);
                 this.waitForAllMachineActionsCompleted();
                 this.processCompletedAction(currOrder, BoardCategory.STOCK);
             }

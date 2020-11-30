@@ -54,4 +54,16 @@ class BoardTest extends BaseTest {
         bc = BoardUtils.calBoardCategory(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ONE);
         assertEquals(BoardCategory.WASTE, bc);
     }
+
+    @Test
+    void testCompareTwoSpec() {
+        assertTrue(BoardUtils.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1100×1400"));
+        assertTrue(BoardUtils.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1400×1100"));
+        assertTrue(BoardUtils.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1200×1500"));
+        assertTrue(BoardUtils.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1200×1400"));
+        assertTrue(BoardUtils.isFirstSpecGeSecondSpec("2.5×1300×1400", "2.5×1200×1400"));
+        assertFalse(BoardUtils.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1300×1400"));
+        assertFalse(BoardUtils.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1100×1600"));
+        assertFalse(BoardUtils.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1300×1600"));
+    }
 }

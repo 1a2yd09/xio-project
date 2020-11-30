@@ -10,6 +10,10 @@ public class Arith {
 
     }
 
+    public static int cmp(BigDecimal v1, BigDecimal v2) {
+        return v1.compareTo(v2);
+    }
+
     public static BigDecimal sub(BigDecimal v1, BigDecimal v2) {
         return v1.subtract(v2);
     }

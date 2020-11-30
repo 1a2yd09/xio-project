@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author CAT
+ */
 public class BoardUtils {
     /**
      * 规格字符串分隔符
@@ -71,6 +74,27 @@ public class BoardUtils {
             }
         }
         return 0;
+    }
+
+    /**
+     * 比较第一个字符串所表示的规格是否大于等于第二个字符串所表示的规格。
+     *
+     * @param firstSpec  规格字符串一
+     * @param secondSpec 规格字符串二
+     * @return 结果
+     */
+    public static boolean isFirstSpecGeSecondSpec(String firstSpec, String secondSpec) {
+        List<BigDecimal> decList1 = BoardUtils.specStrToDecList(firstSpec);
+        List<BigDecimal> decList2 = BoardUtils.specStrToDecList(secondSpec);
+        BigDecimal cuttingWidth = decList1.get(1);
+        BigDecimal cuttingLength = decList1.get(2);
+        BigDecimal productWidth = decList2.get(1);
+        BigDecimal productLength = decList2.get(2);
+        if (Arith.cmp(cuttingWidth, productWidth) >= 0 && Arith.cmp(cuttingLength, productLength) >= 0) {
+            return true;
+        } else {
+            return Arith.cmp(cuttingWidth, productLength) >= 0 && Arith.cmp(cuttingLength, productWidth) >= 0;
+        }
     }
 
     /**

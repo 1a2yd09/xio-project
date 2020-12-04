@@ -14,15 +14,13 @@ import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderState;
 import com.cat.utils.BoardUtils;
 import com.cat.utils.OrderUtils;
+import com.cat.utils.Threads;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author CAT
@@ -56,7 +54,7 @@ public class MainService {
 
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-        ExecutorService es = new ThreadPoolExecutor(4, 10, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "mainThreadPool-Thread-" + r.hashCode()));
+        ExecutorService es = Threads.getPresetExecutorService("mainThreadPool");
         // 轿底工单:
         List<WorkOrder> orders = this.orderService.getBottomOrders(param.getSortPattern(), param.getOrderDate());
         for (WorkOrder order : orders) {

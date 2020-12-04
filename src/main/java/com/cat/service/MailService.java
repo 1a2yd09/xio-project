@@ -36,8 +36,8 @@ public class MailService {
             helper.setFrom(this.from);
             helper.setTo(this.to);
             helper.setSubject("Work order processing blocked");
-            String text = "<p>OrderId: %d.</p><p>CuttingSize: %s.</p><p>ProductSpecification: %s.</p>";
-            String html = String.format(text, msg.getOrderId(), msg.getCuttingSize(), msg.getProductSpecification());
+            String text = "<p>OrderId: %d.</p><p>CuttingSize: %s.</p><p>ProductSpecification: %s.</p><p>Send at: %s.</p>";
+            String html = String.format(text, msg.getOrderId(), msg.getCuttingSize(), msg.getProductSpecification(), msg.getCreatedAt());
             helper.setText(html, true);
 
             mailSender.send(mimeMessage);

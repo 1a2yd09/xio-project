@@ -58,7 +58,7 @@ public class MainService {
         // 轿底工单:
         List<WorkOrder> orders = this.orderService.getBottomOrders(param.getSortPattern(), param.getOrderDate());
         for (WorkOrder order : orders) {
-            while (!OrderState.COMPLETED.value.equals(order.getOperationState())) {
+            while (order.getIncompleteQuantity() != 0) {
                 this.signalService.insertTakeBoardSignal(order.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
                 if (!BoardUtils.isFirstSpecGeSecondSpec(cuttingSignal.getCuttingSize(), order.getProductSpecification())) {
@@ -80,7 +80,7 @@ public class MainService {
             if (i < orders.size() - 1) {
                 nextOrder = orders.get(i + 1);
             }
-            while (!OrderState.COMPLETED.value.equals(currOrder.getOperationState())) {
+            while (currOrder.getIncompleteQuantity() != 0) {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
                 if (!BoardUtils.isFirstSpecGeSecondSpec(cuttingSignal.getCuttingSize(), currOrder.getProductSpecification())) {
@@ -113,9 +113,7 @@ public class MainService {
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), material, cutBoard.getWidth(), order.getIncompleteQuantity());
         NormalBoard semiProductBoard = this.boardService.getSemiProduct(cutBoard, fixedWidth, productBoard);
 
-        if (semiProductBoard.getCutTimes() > 0) {
-            this.boardService.twoStep(cutBoard, semiProductBoard, wasteThreshold, orderId);
-        }
+        this.boardService.twoStep(cutBoard, semiProductBoard, wasteThreshold, orderId);
         this.boardService.threeStep(cutBoard, productBoard, wasteThreshold, orderId);
     }
 

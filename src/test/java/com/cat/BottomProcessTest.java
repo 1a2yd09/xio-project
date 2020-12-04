@@ -1,7 +1,6 @@
 package com.cat;
 
 import com.cat.entity.bean.WorkOrder;
-import com.cat.entity.signal.CuttingSignal;
 import com.cat.service.ActionService;
 import com.cat.service.MainService;
 import com.cat.service.OrderService;

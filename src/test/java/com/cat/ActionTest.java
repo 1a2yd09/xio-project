@@ -4,7 +4,6 @@ import com.cat.entity.bean.Inventory;
 import com.cat.entity.bean.MachineAction;
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.board.NormalBoard;
-import com.cat.entity.signal.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderState;
@@ -124,6 +123,19 @@ class ActionTest extends BaseTest {
         int newFinishedCount = inventory == null ? 0 : inventory.getQuantity();
         // 测试四，该半成品的数目等于原来的数目加上上面生成的半成品数目:
         assertEquals(newFinishedCount, oldFinishedCount + 5);
+    }
+
+    @Test
+    void testProductCanNotCut() {
+        WorkOrder order = orderService.getOrderById(3098528);
+        // 下料:2.5×200×1000
+        order.setCuttingSize("2.5×200×1000");
+        // 成品:2.5×300×1010
+        order.setProductSpecification("2.5×300×1010");
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        List<MachineAction> actions = actionService.getAllMachineActions();
+        assertNotNull(actions);
+        actions.forEach(System.out::println);
     }
 
     @Test

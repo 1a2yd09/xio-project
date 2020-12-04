@@ -103,8 +103,10 @@ public class BoardService {
      * @param orderId        工单 ID
      */
     public void twoStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
-        this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
+        if (targetBoard.getCutTimes() > 0) {
+            this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
+            this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
+        }
     }
 
     /**
@@ -116,9 +118,11 @@ public class BoardService {
      * @param orderId        工单 ID
      */
     public void threeStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
-        this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingExtraBoard(cutBoard, ForwardEdge.LONG, Arith.mul(targetBoard.getWidth(), targetBoard.getCutTimes()), wasteThreshold, orderId);
-        this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
+        if (targetBoard.getCutTimes() > 0) {
+            this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
+            this.cuttingExtraBoard(cutBoard, ForwardEdge.LONG, Arith.mul(targetBoard.getWidth(), targetBoard.getCutTimes()), wasteThreshold, orderId);
+            this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
+        }
     }
 
     /**

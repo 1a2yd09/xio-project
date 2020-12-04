@@ -11,7 +11,6 @@ import com.cat.entity.param.StockSpecification;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
-import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderState;
 import com.cat.utils.BoardUtils;
 import com.cat.utils.OrderUtils;
@@ -30,15 +29,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class MainService {
-    /**
-     * 同步锁对象
-     */
-    private static final Object LOCK = new Object();
-    /**
-     * 同步等待时间
-     */
-    private static final long WAIT_TIME = 3_000L;
-
     @Autowired
     BoardService boardService;
     @Autowired
@@ -62,7 +52,7 @@ public class MainService {
      * @throws InterruptedException 等待过程被中断
      */
     public void start() throws InterruptedException {
-        this.receiveStartSignal();
+        this.signalService.waitingForNewStartSignal();
 
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
@@ -72,7 +62,7 @@ public class MainService {
         for (WorkOrder order : orders) {
             while (!OrderState.COMPLETED.value.equals(order.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(order.getId());
-                CuttingSignal cuttingSignal = this.receiveCuttingSignal(order);
+                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
                 if (!BoardUtils.isFirstSpecGeSecondSpec(cuttingSignal.getCuttingSize(), order.getProductSpecification())) {
                     OrderErrorMsg msg = OrderErrorMsg.getInstance(order.getId(), cuttingSignal.getCuttingSize(), order.getProductSpecification());
                     es.submit(() -> this.mailService.sendOrderErrorMail(msg));
@@ -80,7 +70,7 @@ public class MainService {
                     break;
                 }
                 this.processingBottomOrder(order, param, cuttingSignal);
-                this.waitForAllMachineActionsCompleted();
+                this.actionService.waitingForAllMachineActionsCompleted();
                 this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
         }
@@ -88,73 +78,22 @@ public class MainService {
         orders = orderService.getPreprocessNotBottomOrders(param.getOrderDate());
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder currOrder = orders.get(i);
+            WorkOrder nextOrder = OrderUtils.getFakeOrder();
+            if (i < orders.size() - 1) {
+                nextOrder = orders.get(i + 1);
+            }
             while (!OrderState.COMPLETED.value.equals(currOrder.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
-                CuttingSignal cuttingSignal = this.receiveCuttingSignal(currOrder);
+                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
                 if (!BoardUtils.isFirstSpecGeSecondSpec(cuttingSignal.getCuttingSize(), currOrder.getProductSpecification())) {
                     OrderErrorMsg msg = OrderErrorMsg.getInstance(currOrder.getId(), cuttingSignal.getCuttingSize(), currOrder.getProductSpecification());
                     es.submit(() -> this.mailService.sendOrderErrorMail(msg));
                     this.orderService.updateOrderState(currOrder, OrderState.INTERRUPTED);
                     break;
                 }
-                WorkOrder nextOrder = OrderUtils.getFakeOrder();
-                if (i < orders.size() - 1) {
-                    nextOrder = orders.get(i + 1);
-                }
                 this.processingNotBottomOrder(currOrder, nextOrder, param, specs, cuttingSignal);
-                this.waitForAllMachineActionsCompleted();
+                this.actionService.waitingForAllMachineActionsCompleted();
                 this.processCompletedAction(currOrder, BoardCategory.STOCK);
-            }
-        }
-    }
-
-    /**
-     * 接收开工信号。
-     *
-     * @throws InterruptedException 等待过程被中断
-     */
-    public void receiveStartSignal() throws InterruptedException {
-        // test:
-        this.signalService.insertStartSignal();
-        synchronized (LOCK) {
-            while (!this.signalService.isReceivedNewStartSignal()) {
-                LOCK.wait(WAIT_TIME);
-            }
-        }
-    }
-
-    /**
-     * 接收下料信号。
-     *
-     * @param order 工单
-     * @return 下料信号
-     * @throws InterruptedException 等待过程被中断
-     */
-    public CuttingSignal receiveCuttingSignal(WorkOrder order) throws InterruptedException {
-        // test:
-        this.signalService.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
-        synchronized (LOCK) {
-            while (true) {
-                CuttingSignal cuttingSignal = this.signalService.getLatestNotProcessedCuttingSignal();
-                if (cuttingSignal != null) {
-                    return cuttingSignal;
-                }
-                LOCK.wait(WAIT_TIME);
-            }
-        }
-    }
-
-    /**
-     * 等待所有机器动作都被处理完毕。
-     *
-     * @throws InterruptedException 等待过程被中断
-     */
-    public void waitForAllMachineActionsCompleted() throws InterruptedException {
-        // test:
-        this.actionService.completedAllMachineActions();
-        synchronized (LOCK) {
-            while (!this.actionService.isAllMachineActionsProcessed()) {
-                LOCK.wait(WAIT_TIME);
             }
         }
     }

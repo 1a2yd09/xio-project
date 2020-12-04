@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.cat.utils.Threads.LOCK;
+import static com.cat.utils.Threads.WAIT_TIME;
+
 /**
  * @author CAT
  */
@@ -15,6 +18,21 @@ import java.util.List;
 public class ActionService {
     @Autowired
     ActionDao actionDao;
+
+    /**
+     * 等待所有机器动作都被处理完毕。
+     *
+     * @throws InterruptedException 等待过程被中断
+     */
+    public void waitingForAllMachineActionsCompleted() throws InterruptedException {
+        // test:
+        this.completedAllMachineActions();
+        synchronized (LOCK) {
+            while (!this.isAllMachineActionsProcessed()) {
+                LOCK.wait(WAIT_TIME);
+            }
+        }
+    }
 
     /**
      * 查看当前机器动作表中的全部动作是否都被处理。

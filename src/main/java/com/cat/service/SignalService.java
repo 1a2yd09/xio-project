@@ -1,12 +1,16 @@
 package com.cat.service;
 
 import com.cat.dao.SignalDao;
+import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
 import com.cat.enums.ForwardEdge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static com.cat.utils.Threads.LOCK;
+import static com.cat.utils.Threads.WAIT_TIME;
 
 /**
  * @author CAT
@@ -15,6 +19,42 @@ import org.springframework.stereotype.Component;
 public class SignalService {
     @Autowired
     SignalDao signalDao;
+
+    /**
+     * 等待新的开工信号。
+     *
+     * @throws InterruptedException 等待过程被中断
+     */
+    public void waitingForNewStartSignal() throws InterruptedException {
+        // test:
+        this.insertStartSignal();
+        synchronized (LOCK) {
+            while (!this.isReceivedNewStartSignal()) {
+                LOCK.wait(WAIT_TIME);
+            }
+        }
+    }
+
+    /**
+     * 接收新的下料信号。
+     *
+     * @param order 工单
+     * @return 下料信号
+     * @throws InterruptedException 接收过程被中断
+     */
+    public CuttingSignal receiveNewCuttingSignal(WorkOrder order) throws InterruptedException {
+        // test:
+        this.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
+        synchronized (LOCK) {
+            while (true) {
+                CuttingSignal cuttingSignal = this.getLatestNotProcessedCuttingSignal();
+                if (cuttingSignal != null) {
+                    return cuttingSignal;
+                }
+                LOCK.wait(WAIT_TIME);
+            }
+        }
+    }
 
     /**
      * 是否接收到新的开工信号。

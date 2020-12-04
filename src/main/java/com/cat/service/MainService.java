@@ -66,20 +66,20 @@ public class MainService {
 
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-        ExecutorService es = new ThreadPoolExecutor(4, 10, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
+        ExecutorService es = new ThreadPoolExecutor(4, 10, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "mainThreadPool-Thread-" + r.hashCode()));
         // 轿底工单:
         List<WorkOrder> orders = this.orderService.getBottomOrders(param.getSortPattern(), param.getOrderDate());
         for (WorkOrder order : orders) {
             while (!OrderState.COMPLETED.value.equals(order.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(order.getId());
-                CuttingSignal signal = this.receiveCuttingSignal(order);
-                if (!BoardUtils.isFirstSpecGeSecondSpec(signal.getCuttingSize(), order.getProductSpecification())) {
-                    OrderErrorMsg msg = OrderErrorMsg.getInstance(order.getId(), signal.getCuttingSize(), order.getProductSpecification());
+                CuttingSignal cuttingSignal = this.receiveCuttingSignal(order);
+                if (!BoardUtils.isFirstSpecGeSecondSpec(cuttingSignal.getCuttingSize(), order.getProductSpecification())) {
+                    OrderErrorMsg msg = OrderErrorMsg.getInstance(order.getId(), cuttingSignal.getCuttingSize(), order.getProductSpecification());
                     es.submit(() -> this.mailService.sendOrderErrorMail(msg));
                     this.orderService.updateOrderState(order, OrderState.INTERRUPTED);
                     break;
                 }
-                this.processingBottomOrder(order, param, signal);
+                this.processingBottomOrder(order, param, cuttingSignal);
                 this.waitForAllMachineActionsCompleted();
                 this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
             }
@@ -88,20 +88,20 @@ public class MainService {
         orders = orderService.getPreprocessNotBottomOrders(param.getOrderDate());
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder currOrder = orders.get(i);
-            WorkOrder nextOrder = OrderUtils.getFakeOrder();
-            if (i < orders.size() - 1) {
-                nextOrder = orders.get(i + 1);
-            }
             while (!OrderState.COMPLETED.value.equals(currOrder.getOperationState())) {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
-                CuttingSignal signal = this.receiveCuttingSignal(currOrder);
-                if (!BoardUtils.isFirstSpecGeSecondSpec(signal.getCuttingSize(), currOrder.getProductSpecification())) {
-                    OrderErrorMsg msg = OrderErrorMsg.getInstance(currOrder.getId(), signal.getCuttingSize(), currOrder.getProductSpecification());
+                CuttingSignal cuttingSignal = this.receiveCuttingSignal(currOrder);
+                if (!BoardUtils.isFirstSpecGeSecondSpec(cuttingSignal.getCuttingSize(), currOrder.getProductSpecification())) {
+                    OrderErrorMsg msg = OrderErrorMsg.getInstance(currOrder.getId(), cuttingSignal.getCuttingSize(), currOrder.getProductSpecification());
                     es.submit(() -> this.mailService.sendOrderErrorMail(msg));
                     this.orderService.updateOrderState(currOrder, OrderState.INTERRUPTED);
                     break;
                 }
-                this.processingNotBottomOrder(currOrder, nextOrder, param, specs, signal);
+                WorkOrder nextOrder = OrderUtils.getFakeOrder();
+                if (i < orders.size() - 1) {
+                    nextOrder = orders.get(i + 1);
+                }
+                this.processingNotBottomOrder(currOrder, nextOrder, param, specs, cuttingSignal);
                 this.waitForAllMachineActionsCompleted();
                 this.processCompletedAction(currOrder, BoardCategory.STOCK);
             }

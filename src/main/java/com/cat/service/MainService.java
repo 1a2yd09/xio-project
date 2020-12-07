@@ -5,22 +5,17 @@ import com.cat.entity.bean.MachineAction;
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.board.CutBoard;
 import com.cat.entity.board.NormalBoard;
-import com.cat.entity.message.OrderErrorMsg;
 import com.cat.entity.param.OperatingParameter;
 import com.cat.entity.param.StockSpecification;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
-import com.cat.enums.OrderState;
-import com.cat.utils.BoardUtils;
 import com.cat.utils.OrderUtils;
-import com.cat.utils.Threads;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 /**
  * @author CAT
@@ -54,19 +49,12 @@ public class MainService {
 
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-        ExecutorService es = Threads.getPresetExecutorService("mainThreadPool");
         // 轿底工单:
         List<WorkOrder> orders = this.orderService.getBottomOrders(param.getSortPattern(), param.getOrderDate());
         for (WorkOrder order : orders) {
             while (order.getIncompleteQuantity() != 0) {
                 this.signalService.insertTakeBoardSignal(order.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
-                if (!BoardUtils.isFirstSpecGeSecondSpec(cuttingSignal.getCuttingSize(), order.getProductSpecification())) {
-                    OrderErrorMsg msg = OrderErrorMsg.getInstance(order.getId(), cuttingSignal.getCuttingSize(), order.getProductSpecification());
-                    es.submit(() -> this.mailService.sendOrderErrorMail(msg));
-                    this.orderService.updateOrderState(order, OrderState.INTERRUPTED);
-                    break;
-                }
                 this.processingBottomOrder(order, param, cuttingSignal);
                 this.actionService.waitingForAllMachineActionsCompleted();
                 this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
@@ -83,12 +71,6 @@ public class MainService {
             while (currOrder.getIncompleteQuantity() != 0) {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
-                if (!BoardUtils.isFirstSpecGeSecondSpec(cuttingSignal.getCuttingSize(), currOrder.getProductSpecification())) {
-                    OrderErrorMsg msg = OrderErrorMsg.getInstance(currOrder.getId(), cuttingSignal.getCuttingSize(), currOrder.getProductSpecification());
-                    es.submit(() -> this.mailService.sendOrderErrorMail(msg));
-                    this.orderService.updateOrderState(currOrder, OrderState.INTERRUPTED);
-                    break;
-                }
                 this.processingNotBottomOrder(currOrder, nextOrder, param, specs, cuttingSignal);
                 this.actionService.waitingForAllMachineActionsCompleted();
                 this.processCompletedAction(currOrder, BoardCategory.STOCK);

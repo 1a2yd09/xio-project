@@ -128,10 +128,8 @@ class ActionTest extends BaseTest {
     @Test
     void testProductCanNotCut() {
         WorkOrder order = orderService.getOrderById(3098528);
-        // 下料:2.5×200×1000
-        order.setCuttingSize("2.5×200×1000");
-        // 成品:2.5×300×1010
-        order.setProductSpecification("2.5×300×1010");
+        order.setCuttingSize("2.5×200×200");
+        order.setProductSpecification("2.5×400×400");
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
         List<MachineAction> actions = actionService.getAllMachineActions();
         assertNotNull(actions);

@@ -56,10 +56,11 @@ public class BoardService {
             } else {
                 cutBoard.setLength(Arith.sub(cutBoard.getLength(), dis));
             }
-            // 如果下料板剩余宽度大于零，表示动作为进刀动作，如果下料板剩余宽度等于零，则用送板动作替换进刀动作:
-            if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
+            // 如果下料板剩余宽度大于零，表示动作为裁剪动作，如果下料板剩余宽度等于零，则用送板动作替换裁剪动作:
+            int res = Arith.cmp(cutBoard.getWidth(), BigDecimal.ZERO);
+            if (res > 0) {
                 this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
-            } else if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) == 0) {
+            } else if (res == 0) {
                 this.actionDao.insertMachineAction(ActionCategory.SEND, targetBoard, orderId);
             }
         }
@@ -74,8 +75,10 @@ public class BoardService {
      * @param orderId     工单 ID
      */
     public void cuttingTargetBoard(CutBoard cutBoard, ForwardEdge forwardEdge, NormalBoard targetBoard, Integer orderId) {
-        this.rotatingCutBoard(cutBoard, forwardEdge, orderId);
-        this.cuttingCutBoard(cutBoard, targetBoard, orderId);
+        if (targetBoard.getCutTimes() > 0) {
+            this.rotatingCutBoard(cutBoard, forwardEdge, orderId);
+            this.cuttingCutBoard(cutBoard, targetBoard, orderId);
+        }
     }
 
     /**
@@ -89,9 +92,7 @@ public class BoardService {
      */
     public void cuttingExtraBoard(CutBoard cutBoard, ForwardEdge forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold, Integer orderId) {
         NormalBoard extraBoard = this.getExtraBoard(cutBoard, forwardEdge, targetMeasure, wasteThreshold);
-        if (extraBoard.getCutTimes() > 0) {
-            this.cuttingTargetBoard(cutBoard, forwardEdge, extraBoard, orderId);
-        }
+        this.cuttingTargetBoard(cutBoard, forwardEdge, extraBoard, orderId);
     }
 
     /**
@@ -103,10 +104,8 @@ public class BoardService {
      * @param orderId        工单 ID
      */
     public void twoStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
-        if (targetBoard.getCutTimes() > 0) {
-            this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-            this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
-        }
+        this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
+        this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
     }
 
     /**
@@ -118,11 +117,9 @@ public class BoardService {
      * @param orderId        工单 ID
      */
     public void threeStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
-        if (targetBoard.getCutTimes() > 0) {
-            this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-            this.cuttingExtraBoard(cutBoard, ForwardEdge.LONG, Arith.mul(targetBoard.getWidth(), targetBoard.getCutTimes()), wasteThreshold, orderId);
-            this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
-        }
+        this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
+        this.cuttingExtraBoard(cutBoard, ForwardEdge.LONG, Arith.mul(targetBoard.getWidth(), targetBoard.getCutTimes()), wasteThreshold, orderId);
+        this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
     }
 
     /**

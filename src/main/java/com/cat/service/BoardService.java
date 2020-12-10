@@ -25,101 +25,56 @@ public class BoardService {
     @Autowired
     ActionDao actionDao;
 
-    /**
-     * 新增下料板旋转动作。
-     *
-     * @param cutBoard    下料板
-     * @param forwardEdge 下料板旋转后的朝向
-     * @param orderId     工单 ID
-     */
     public void rotatingCutBoard(CutBoard cutBoard, ForwardEdge forwardEdge, Integer orderId) {
-        // 如果下料板此时朝向和指定朝向不同，则旋转下料板:
         if (cutBoard.getForwardEdge() != forwardEdge) {
-            this.actionDao.insertMachineAction(ActionCategory.ROTATE, cutBoard, orderId);
             cutBoard.setForwardEdge(forwardEdge);
+            this.actionDao.insertMachineAction(ActionCategory.ROTATE, cutBoard, orderId);
         }
     }
 
-    /**
-     * 新增下料板裁剪动作。
-     *
-     * @param cutBoard    下料板
-     * @param targetBoard 裁剪板
-     * @param orderId     工单 ID
-     */
     public void cuttingCutBoard(CutBoard cutBoard, NormalBoard targetBoard, Integer orderId) {
-        for (int i = 0; i < targetBoard.getCutTimes(); i++) {
-            BigDecimal dis = targetBoard.getWidth();
-            // 下料板根据自身朝向从宽度或长度当中扣除进刀距离:
-            if (cutBoard.getForwardEdge() == ForwardEdge.LONG) {
-                cutBoard.setWidth(Arith.sub(cutBoard.getWidth(), dis));
-            } else {
-                cutBoard.setLength(Arith.sub(cutBoard.getLength(), dis));
-            }
-            // 如果下料板剩余宽度大于零，表示动作为裁剪动作，如果下料板剩余宽度等于零，则用送板动作替换裁剪动作:
-            int res = Arith.cmp(cutBoard.getWidth(), BigDecimal.ZERO);
-            if (res > 0) {
-                this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
-            } else if (res == 0) {
-                this.actionDao.insertMachineAction(ActionCategory.SEND, targetBoard, orderId);
+        BigDecimal dis = targetBoard.getWidth();
+        if (cutBoard.getForwardEdge() == ForwardEdge.LONG) {
+            cutBoard.setWidth(Arith.sub(cutBoard.getWidth(), dis));
+        } else {
+            cutBoard.setLength(Arith.sub(cutBoard.getLength(), dis));
+        }
+        this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
+    }
+
+    public void sendingBoard(CutBoard cutBoard, NormalBoard targetBoard, Integer orderId) {
+        cutBoard.setWidth(BigDecimal.ZERO);
+        this.actionDao.insertMachineAction(ActionCategory.SEND, targetBoard, orderId);
+    }
+
+    public void cutting(CutBoard cutBoard, List<NormalBoard> normalBoards, BigDecimal wasteThreshold, Integer orderId) {
+        for (NormalBoard normalBoard : normalBoards) {
+            if (normalBoard.getCutTimes() > 0) {
+                NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
+                if (extraBoard.getCutTimes() > 0) {
+                    this.rotatingCutBoard(cutBoard, ForwardEdge.SHORT, orderId);
+                    this.cuttingCutBoard(cutBoard, extraBoard, orderId);
+                }
+                this.rotatingCutBoard(cutBoard, ForwardEdge.LONG, orderId);
+                for (int i = 0; i < normalBoard.getCutTimes(); i++) {
+                    BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), normalBoard.getWidth());
+                    if (remainingWidth.compareTo(new BigDecimal(50)) > 0) {
+                        this.cuttingCutBoard(cutBoard, normalBoard, orderId);
+                    } else {
+                        extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
+                        if (extraBoard.getCutTimes() > 0) {
+                            this.cuttingCutBoard(cutBoard, extraBoard, orderId);
+                        }
+                        this.sendingBoard(cutBoard, normalBoard, orderId);
+                    }
+                }
             }
         }
-    }
-
-    /**
-     * 指定下料板的裁剪方向并裁剪指定板材。
-     *
-     * @param cutBoard    下料板
-     * @param forwardEdge 裁剪方向
-     * @param targetBoard 指定板材
-     * @param orderId     工单 ID
-     */
-    public void cuttingTargetBoard(CutBoard cutBoard, ForwardEdge forwardEdge, NormalBoard targetBoard, Integer orderId) {
-        this.rotatingCutBoard(cutBoard, forwardEdge, orderId);
-        this.cuttingCutBoard(cutBoard, targetBoard, orderId);
-    }
-
-    /**
-     * 指定下料板的裁剪方向并裁剪额外板材。
-     *
-     * @param cutBoard       下料板
-     * @param forwardEdge    裁剪方向
-     * @param targetMeasure  目标度量
-     * @param wasteThreshold 废料阈值
-     * @param orderId        工单 ID
-     */
-    public void cuttingExtraBoard(CutBoard cutBoard, ForwardEdge forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold, Integer orderId) {
-        NormalBoard extraBoard = this.getExtraBoard(cutBoard, forwardEdge, targetMeasure, wasteThreshold);
-        if (extraBoard.getCutTimes() > 0) {
-            this.cuttingTargetBoard(cutBoard, forwardEdge, extraBoard, orderId);
+        if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
+            NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, BigDecimal.ZERO, wasteThreshold);
+            this.rotatingCutBoard(cutBoard, ForwardEdge.LONG, orderId);
+            this.sendingBoard(cutBoard, extraBoard, orderId);
         }
-    }
-
-    /**
-     * 预先板材裁剪。
-     *
-     * @param cutBoard       下料板
-     * @param targetBoard    目标板
-     * @param wasteThreshold 废料阈值
-     * @param orderId        工单 ID
-     */
-    public void twoStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
-        this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
-    }
-
-    /**
-     * 后续板材裁剪。
-     *
-     * @param cutBoard       下料板
-     * @param targetBoard    目标板
-     * @param wasteThreshold 废料阈值
-     * @param orderId        工单 ID
-     */
-    public void threeStep(CutBoard cutBoard, NormalBoard targetBoard, BigDecimal wasteThreshold, Integer orderId) {
-        this.cuttingExtraBoard(cutBoard, ForwardEdge.SHORT, targetBoard.getLength(), wasteThreshold, orderId);
-        this.cuttingExtraBoard(cutBoard, ForwardEdge.LONG, Arith.mul(targetBoard.getWidth(), targetBoard.getCutTimes()), wasteThreshold, orderId);
-        this.cuttingTargetBoard(cutBoard, ForwardEdge.LONG, targetBoard, orderId);
     }
 
     /**

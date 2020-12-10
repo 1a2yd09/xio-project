@@ -7,6 +7,7 @@ import com.cat.service.MailService;
 import com.cat.service.OrderService;
 import com.cat.utils.BoardUtils;
 import com.cat.utils.Threads;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -23,6 +24,7 @@ class MailTest extends BaseTest {
     @Autowired
     OrderService orderService;
 
+    @Disabled("The mail function does not require repeated tests.")
     @Test
     @Transactional
     @Rollback

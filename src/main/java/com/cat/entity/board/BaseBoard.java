@@ -16,10 +16,10 @@ public abstract class BaseBoard {
     private String material;
     private BoardCategory category;
 
-    public BaseBoard() {
+    protected BaseBoard() {
     }
 
-    public BaseBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category) {
+    protected BaseBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category) {
         this.height = height;
         this.width = width;
         this.length = length;
@@ -27,7 +27,7 @@ public abstract class BaseBoard {
         this.category = category;
     }
 
-    public BaseBoard(String specification, String material, BoardCategory category) {
+    protected BaseBoard(String specification, String material, BoardCategory category) {
         List<BigDecimal> list = BoardUtils.specStrToDecList(specification);
         this.height = list.get(0);
         this.width = list.get(1);

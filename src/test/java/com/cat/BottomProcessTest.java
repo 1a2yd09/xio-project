@@ -52,4 +52,26 @@ class BottomProcessTest extends BaseTest {
         // 裁剪长度(1589->1345.5)-旋转-裁剪宽度(1250->1189)-送成品
         assertEquals(4, actionService.getMachineActionCount());
     }
+
+    @Test
+    void testBottomProductCanNotCut1() {
+        WorkOrder order = orderService.getOrderById(3098528);
+        order.setCuttingSize("2.5×400×400");
+        order.setProductSpecification("2.5×500×500");
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        actionService.getAllMachineActions().forEach(System.out::println);
+        // 旋转-半成品-废料-半成品
+        assertEquals(4, actionService.getMachineActionCount());
+    }
+
+    @Test
+    void testBottomProductCanNotCut2() {
+        WorkOrder order = orderService.getOrderById(3098528);
+        order.setCuttingSize("2.5×100×100");
+        order.setProductSpecification("2.5×500×500");
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        actionService.getAllMachineActions().forEach(System.out::println);
+        // 旋转-余料
+        assertEquals(2, actionService.getMachineActionCount());
+    }
 }

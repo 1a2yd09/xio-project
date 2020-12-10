@@ -126,29 +126,6 @@ class ActionTest extends BaseTest {
     }
 
     @Test
-    void testBottomProductCanNotCut() {
-        WorkOrder order = orderService.getOrderById(3098528);
-        order.setCuttingSize("2.5×400×400");
-        order.setProductSpecification("2.5×500×500");
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
-        List<MachineAction> actions = actionService.getAllMachineActions();
-        assertNotNull(actions);
-        actions.forEach(System.out::println);
-    }
-
-    @Test
-    void testNotBottomProductCanNotCut() {
-        WorkOrder order = orderService.getOrderById(3098562);
-        order.setCuttingSize("2.5×400×400");
-        order.setProductSpecification("2.5×500×500");
-        stockSpecService.insertStockSpec(new BigDecimal("2.5"), new BigDecimal("180"), new BigDecimal("180"));
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
-        List<MachineAction> actions = actionService.getAllMachineActions();
-        assertNotNull(actions);
-        actions.forEach(System.out::println);
-    }
-
-    @Test
     void testCompletedAllActions() {
         WorkOrder order = orderService.getOrderById(3101165);
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));

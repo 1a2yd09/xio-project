@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
  * @author CAT
  */
 public class BoardUtils {
+    public static final BigDecimal CLAMP_LENGTH = new BigDecimal(50);
     /**
      * 规格字符串分隔符
      */

@@ -25,55 +25,44 @@ public class BoardService {
     @Autowired
     ActionDao actionDao;
 
-    public void rotatingCutBoard(CutBoard cutBoard, ForwardEdge forwardEdge, Integer orderId) {
-        if (cutBoard.getForwardEdge() != forwardEdge) {
-            cutBoard.setForwardEdge(forwardEdge);
-            this.actionDao.insertMachineAction(ActionCategory.ROTATE, cutBoard, orderId);
+    public void cuttingBoard(CutBoard cutBoard, ForwardEdge forwardEdge, NormalBoard targetBoard, Integer orderId) {
+        if (targetBoard.getCutTimes() > 0) {
+            if (cutBoard.getForwardEdge() != forwardEdge) {
+                cutBoard.setForwardEdge(forwardEdge);
+                this.actionDao.insertMachineAction(ActionCategory.ROTATE, cutBoard, orderId);
+            }
+            BigDecimal dis = targetBoard.getWidth();
+            if (cutBoard.getForwardEdge() == ForwardEdge.LONG) {
+                cutBoard.setWidth(Arith.sub(cutBoard.getWidth(), dis));
+            } else {
+                cutBoard.setLength(Arith.sub(cutBoard.getLength(), dis));
+            }
+            if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
+                this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
+            } else {
+                this.actionDao.insertMachineAction(ActionCategory.SEND, targetBoard, orderId);
+            }
         }
-    }
-
-    public void cuttingCutBoard(CutBoard cutBoard, NormalBoard targetBoard, Integer orderId) {
-        BigDecimal dis = targetBoard.getWidth();
-        if (cutBoard.getForwardEdge() == ForwardEdge.LONG) {
-            cutBoard.setWidth(Arith.sub(cutBoard.getWidth(), dis));
-        } else {
-            cutBoard.setLength(Arith.sub(cutBoard.getLength(), dis));
-        }
-        this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
-    }
-
-    public void sendingBoard(CutBoard cutBoard, NormalBoard targetBoard, Integer orderId) {
-        cutBoard.setWidth(BigDecimal.ZERO);
-        this.actionDao.insertMachineAction(ActionCategory.SEND, targetBoard, orderId);
     }
 
     public void cutting(CutBoard cutBoard, List<NormalBoard> normalBoards, BigDecimal wasteThreshold, Integer orderId) {
         for (NormalBoard normalBoard : normalBoards) {
-            if (normalBoard.getCutTimes() > 0) {
-                NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
-                if (extraBoard.getCutTimes() > 0) {
-                    this.rotatingCutBoard(cutBoard, ForwardEdge.SHORT, orderId);
-                    this.cuttingCutBoard(cutBoard, extraBoard, orderId);
+            NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
+            this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, orderId);
+
+            for (int i = 0; i < normalBoard.getCutTimes(); i++) {
+                BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), normalBoard.getWidth());
+                if (remainingWidth.compareTo(BoardUtils.CLAMP_LENGTH) <= 0) {
+                    extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
+                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, orderId);
                 }
-                this.rotatingCutBoard(cutBoard, ForwardEdge.LONG, orderId);
-                for (int i = 0; i < normalBoard.getCutTimes(); i++) {
-                    BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), normalBoard.getWidth());
-                    if (remainingWidth.compareTo(new BigDecimal(50)) > 0) {
-                        this.cuttingCutBoard(cutBoard, normalBoard, orderId);
-                    } else {
-                        extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
-                        if (extraBoard.getCutTimes() > 0) {
-                            this.cuttingCutBoard(cutBoard, extraBoard, orderId);
-                        }
-                        this.sendingBoard(cutBoard, normalBoard, orderId);
-                    }
-                }
+
+                this.cuttingBoard(cutBoard, ForwardEdge.LONG, normalBoard, orderId);
             }
         }
         if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
             NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, BigDecimal.ZERO, wasteThreshold);
-            this.rotatingCutBoard(cutBoard, ForwardEdge.LONG, orderId);
-            this.sendingBoard(cutBoard, extraBoard, orderId);
+            this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, orderId);
         }
     }
 

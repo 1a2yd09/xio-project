@@ -75,10 +75,8 @@ public class BoardService {
      * @param orderId     工单 ID
      */
     public void cuttingTargetBoard(CutBoard cutBoard, ForwardEdge forwardEdge, NormalBoard targetBoard, Integer orderId) {
-        if (targetBoard.getCutTimes() > 0) {
-            this.rotatingCutBoard(cutBoard, forwardEdge, orderId);
-            this.cuttingCutBoard(cutBoard, targetBoard, orderId);
-        }
+        this.rotatingCutBoard(cutBoard, forwardEdge, orderId);
+        this.cuttingCutBoard(cutBoard, targetBoard, orderId);
     }
 
     /**
@@ -92,7 +90,9 @@ public class BoardService {
      */
     public void cuttingExtraBoard(CutBoard cutBoard, ForwardEdge forwardEdge, BigDecimal targetMeasure, BigDecimal wasteThreshold, Integer orderId) {
         NormalBoard extraBoard = this.getExtraBoard(cutBoard, forwardEdge, targetMeasure, wasteThreshold);
-        this.cuttingTargetBoard(cutBoard, forwardEdge, extraBoard, orderId);
+        if (extraBoard.getCutTimes() > 0) {
+            this.cuttingTargetBoard(cutBoard, forwardEdge, extraBoard, orderId);
+        }
     }
 
     /**

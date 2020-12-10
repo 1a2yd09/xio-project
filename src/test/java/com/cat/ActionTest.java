@@ -126,7 +126,7 @@ class ActionTest extends BaseTest {
     }
 
     @Test
-    void testProductCanNotCut() {
+    void testBottomProductCanNotCut() {
         WorkOrder order = orderService.getOrderById(3098528);
         order.setCuttingSize("2.5×200×200");
         order.setProductSpecification("2.5×400×400");

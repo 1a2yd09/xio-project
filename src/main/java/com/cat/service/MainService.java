@@ -95,7 +95,9 @@ public class MainService {
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), material, cutBoard.getWidth(), order.getIncompleteQuantity());
         NormalBoard semiProductBoard = this.boardService.getSemiProduct(cutBoard, fixedWidth, productBoard);
 
-        this.boardService.twoStep(cutBoard, semiProductBoard, wasteThreshold, orderId);
+        if (semiProductBoard.getCutTimes() > 0) {
+            this.boardService.twoStep(cutBoard, semiProductBoard, wasteThreshold, orderId);
+        }
         this.boardService.threeStep(cutBoard, productBoard, wasteThreshold, orderId);
     }
 

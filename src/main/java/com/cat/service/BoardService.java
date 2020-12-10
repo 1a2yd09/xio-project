@@ -25,18 +25,28 @@ public class BoardService {
     @Autowired
     ActionDao actionDao;
 
+    /**
+     * 板材裁剪函数，负责下料板材的实际旋转和裁剪操作。
+     *
+     * @param cutBoard    下料板
+     * @param forwardEdge 朝向
+     * @param targetBoard 目标板材
+     * @param orderId     工单 ID
+     */
     public void cuttingBoard(CutBoard cutBoard, ForwardEdge forwardEdge, NormalBoard targetBoard, Integer orderId) {
         if (targetBoard.getCutTimes() > 0) {
             if (cutBoard.getForwardEdge() != forwardEdge) {
                 cutBoard.setForwardEdge(forwardEdge);
                 this.actionDao.insertMachineAction(ActionCategory.ROTATE, cutBoard, orderId);
             }
+
             BigDecimal dis = targetBoard.getWidth();
             if (cutBoard.getForwardEdge() == ForwardEdge.LONG) {
                 cutBoard.setWidth(Arith.sub(cutBoard.getWidth(), dis));
             } else {
                 cutBoard.setLength(Arith.sub(cutBoard.getLength(), dis));
             }
+
             if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
                 this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
             } else {
@@ -45,6 +55,14 @@ public class BoardService {
         }
     }
 
+    /**
+     * 板材裁剪流程，负责定义下料板整个裁剪流程。
+     *
+     * @param cutBoard       下料板
+     * @param normalBoards   目标板材列表
+     * @param wasteThreshold 废料阈值
+     * @param orderId        工单 ID
+     */
     public void cutting(CutBoard cutBoard, List<NormalBoard> normalBoards, BigDecimal wasteThreshold, Integer orderId) {
         for (NormalBoard normalBoard : normalBoards) {
             NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);

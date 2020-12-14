@@ -29,7 +29,7 @@ public class OrderService {
     InventoryDao inventoryDao;
 
     /**
-     * 增加工单的已完工数目。
+     * 增加工单的已完工数目并更新工单状态。
      *
      * @param order    工单
      * @param quantity 新完工的成品数目

@@ -2,7 +2,6 @@ package com.cat;
 
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.message.OrderErrorMsg;
-import com.cat.enums.OrderState;
 import com.cat.service.MailService;
 import com.cat.service.OrderService;
 import com.cat.utils.BoardUtils;
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class MailTest extends BaseTest {
     @Autowired
@@ -32,11 +31,10 @@ class MailTest extends BaseTest {
         // product: 2.5×309×1016
         WorkOrder order = orderService.getOrderById(3098528);
         String fakeCuttingSize = "2.5×300×1000";
-        ExecutorService es = Threads.getPresetExecutorService("emailPool");
+        ExecutorService es = Threads.EMAIL_POOL;
         if (!BoardUtils.isFirstSpecGeSecondSpec(fakeCuttingSize, order.getProductSpecification())) {
             OrderErrorMsg msg = OrderErrorMsg.getInstance(order.getId(), fakeCuttingSize, order.getProductSpecification());
             es.submit(() -> mailService.sendOrderErrorMail(msg));
-            orderService.updateOrderState(order, OrderState.INTERRUPTED);
         }
         try {
             TimeUnit.SECONDS.sleep(5);
@@ -44,6 +42,6 @@ class MailTest extends BaseTest {
             e.printStackTrace();
         }
         order = orderService.getOrderById(3098528);
-        assertEquals(OrderState.INTERRUPTED.value, order.getOperationState());
+        assertNotNull(order);
     }
 }

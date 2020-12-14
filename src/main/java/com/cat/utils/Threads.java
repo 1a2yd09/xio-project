@@ -22,6 +22,8 @@ public class Threads {
      */
     public static final long WAIT_TIME = 3_000L;
 
+    public static final ExecutorService EMAIL_POOL = getPresetExecutorService("EmailPool");
+
     /**
      * 获取一个预设的线程池对象。
      *

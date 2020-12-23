@@ -36,8 +36,6 @@ public class MainService {
     InventoryService inventoryService;
     @Autowired
     StockSpecService stockSpecService;
-    @Autowired
-    MailService mailService;
 
     /**
      * 主流程。

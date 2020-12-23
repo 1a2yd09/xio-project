@@ -65,16 +65,16 @@ public class BoardService {
      */
     public void cutting(CutBoard cutBoard, List<NormalBoard> normalBoards, BigDecimal wasteThreshold, Integer orderId) {
         for (NormalBoard normalBoard : normalBoards) {
-            NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
-            this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, orderId);
-
+            if (normalBoard.getCutTimes() > 0) {
+                NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
+                this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, orderId);
+            }
             for (int i = 0; i < normalBoard.getCutTimes(); i++) {
                 BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), normalBoard.getWidth());
                 if (remainingWidth.compareTo(BoardUtils.CLAMP_LENGTH) <= 0) {
-                    extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
+                    NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
                     this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, orderId);
                 }
-
                 this.cuttingBoard(cutBoard, ForwardEdge.LONG, normalBoard, orderId);
             }
         }
@@ -93,11 +93,7 @@ public class BoardService {
      * @return 下料板
      */
     public CutBoard getCutBoard(String cuttingSize, String material, Integer forwardEdge) {
-        if (forwardEdge == 1) {
-            return new CutBoard(cuttingSize, material, ForwardEdge.LONG);
-        } else {
-            return new CutBoard(cuttingSize, material, ForwardEdge.SHORT);
-        }
+        return new CutBoard(cuttingSize, material, forwardEdge == 1 ? ForwardEdge.LONG : ForwardEdge.SHORT);
     }
 
     /**

@@ -56,7 +56,7 @@ class BottomProcessTest extends BaseTest {
     @Test
     void testBottomProductCanNotCut1() {
         WorkOrder order = orderService.getOrderById(3098528);
-        order.setCuttingSize("2.5×400×400");
+        order.setCuttingSize("2.5×400×600");
         order.setProductSpecification("2.5×500×500");
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);

@@ -195,7 +195,10 @@ public class BoardService {
      */
     public NormalBoard getNextProduct(WorkOrder nextOrder, CutBoard currCutBoard, NormalBoard currProduct) {
         NormalBoard nextProduct = new NormalBoard(nextOrder.getProductSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
-        if (currCutBoard.getMaterial().equals(nextProduct.getMaterial()) && currProduct.getLength().compareTo(nextProduct.getLength()) > 0) {
+        // 当前成品次数大于零的限制条件是因为不允许两个工单的成品混合出板:
+        if (currCutBoard.getMaterial().equals(nextProduct.getMaterial()) &&
+                currProduct.getCutTimes() > 0 &&
+                currProduct.getLength().compareTo(nextProduct.getLength()) > 0) {
             BigDecimal remainingWidth = Arith.sub(currCutBoard.getWidth(), Arith.mul(currProduct.getWidth(), currProduct.getCutTimes()));
             // 后续成品的裁剪次数取决于最大裁剪次数以及工单未完成数目中的最小值:
             nextProduct.setCutTimes(Math.min(Arith.div(remainingWidth, nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));

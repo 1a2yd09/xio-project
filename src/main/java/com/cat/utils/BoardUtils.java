@@ -1,17 +1,20 @@
 package com.cat.utils;
 
+import com.cat.entity.board.NormalBoard;
 import com.cat.enums.BoardCategory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * @author CAT
  */
 public class BoardUtils {
+    /**
+     * 夹钳长度
+     */
     public static final BigDecimal CLAMP_LENGTH = new BigDecimal(50);
     /**
      * 规格字符串分隔符
@@ -108,5 +111,9 @@ public class BoardUtils {
      */
     public static BoardCategory calBoardCategory(BigDecimal boardWidth, BigDecimal boardLength, BigDecimal wasteThreshold) {
         return boardWidth.compareTo(wasteThreshold) >= 0 && boardLength.compareTo(wasteThreshold) >= 0 ? BoardCategory.REMAINING : BoardCategory.WASTE;
+    }
+
+    public static Queue<NormalBoard> getBoardLengthPriorityQueue() {
+        return new PriorityQueue<>(Comparator.comparing(NormalBoard::getLength).reversed());
     }
 }

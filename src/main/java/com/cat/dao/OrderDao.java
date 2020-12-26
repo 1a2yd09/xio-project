@@ -77,4 +77,22 @@ public class OrderDao extends BaseDao {
                 "WHERE site_module = ? AND CAST(completion_date AS DATE) = ? " +
                 "ORDER BY CAST(sequence_number AS INT), id", this.orderM, OrderModule.BOTTOM.value, date);
     }
+
+    /**
+     * 获取当前生产工单表中的全体工单。
+     *
+     * @return 全体生产工单
+     */
+    public List<WorkOrder> getAllProductionOrders() {
+        return this.jdbcTemplate.query("SELECT * FROM vi_local_work_order", this.orderM);
+    }
+
+    /**
+     * 根据工单 ID 从远程工单表中删除对应工单。
+     *
+     * @param id 工单 ID。
+     */
+    public void deleteRemoteOrderById(Integer id) {
+        this.jdbcTemplate.update("DELETE FROM tb_remote_work_order WHERE bid = ?", id);
+    }
 }

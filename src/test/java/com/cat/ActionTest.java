@@ -127,7 +127,7 @@ class ActionTest extends BaseTest {
 
     @Test
     void testCompletedAllActions() {
-        WorkOrder order = orderService.getOrderById(3101165);
+        WorkOrder order = orderService.getOrderById(3098528);
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
         assertFalse(actionService.isAllMachineActionsProcessed());
         actionService.completedMachineActionById(1);

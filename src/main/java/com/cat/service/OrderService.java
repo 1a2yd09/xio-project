@@ -115,4 +115,22 @@ public class OrderService {
         order.setOperationState(state.value);
         this.orderDao.updateOrderState(order);
     }
+
+    /**
+     * 获取当前生产工单表中的全体工单。
+     *
+     * @return 全体生产工单
+     */
+    public List<WorkOrder> getAllProductionOrders() {
+        return this.orderDao.getAllProductionOrders();
+    }
+
+    /**
+     * 根据工单 ID 从远程工单表中删除对应工单。
+     *
+     * @param id 工单 ID。
+     */
+    public void deleteRemoteOrderById(Integer id) {
+        this.orderDao.deleteRemoteOrderById(id);
+    }
 }

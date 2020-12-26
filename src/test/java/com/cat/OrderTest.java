@@ -42,7 +42,7 @@ class OrderTest extends BaseTest {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getOrderDate();
         List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
-        assertEquals(914, orders.size());
+        assertEquals(681, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
             NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
@@ -87,7 +87,7 @@ class OrderTest extends BaseTest {
     @Test
     @Rollback
     @Transactional
-    void testaddOrderCompletedQuantity() {
+    void testAddOrderCompletedQuantity() {
         WorkOrder order = orderService.getOrderById(3098562);
         orderService.addOrderCompletedQuantity(order, Integer.parseInt(order.getProductQuantity()));
         assertEquals(0, order.getIncompleteQuantity());

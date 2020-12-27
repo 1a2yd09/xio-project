@@ -95,4 +95,14 @@ public class OrderDao extends BaseDao {
     public void deleteRemoteOrderById(Integer id) {
         this.jdbcTemplate.update("DELETE FROM tb_remote_work_order WHERE bid = ?", id);
     }
+
+    /**
+     * 根据工单 ID 修改远程工单表中对应工单的下料板规格。
+     *
+     * @param cuttingSize 下料板规格
+     * @param id          工单 ID
+     */
+    public void updateRemoteOrderCuttingSize(String cuttingSize, Integer id) {
+        this.jdbcTemplate.update("UPDATE tb_remote_work_order SET [b.CU_ORGSIZE] = ? WHERE bid = ?", cuttingSize, id);
+    }
 }

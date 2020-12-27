@@ -13,9 +13,13 @@ import java.util.stream.Collectors;
  */
 public class BoardUtils {
     /**
-     * 夹钳长度
+     * 夹钳宽度
      */
-    public static final BigDecimal CLAMP_LENGTH = new BigDecimal(50);
+    public static final BigDecimal CLAMP_WIDTH = new BigDecimal(900);
+    /**
+     * 夹钳深度
+     */
+    public static final BigDecimal CLAMP_DEPTH = new BigDecimal(50);
     /**
      * 规格字符串分隔符
      */
@@ -115,5 +119,19 @@ public class BoardUtils {
 
     public static Queue<NormalBoard> getBoardLengthPriorityQueue() {
         return new PriorityQueue<>(Comparator.comparing(NormalBoard::getLength).reversed());
+    }
+
+    public static BigDecimal processPostProductAllWidth(BigDecimal productAllWidth, BigDecimal productLength, BigDecimal preLength) {
+        if (productAllWidth.compareTo(CLAMP_WIDTH) < 0 && productLength.compareTo(preLength) < 0) {
+            return CLAMP_WIDTH;
+        }
+        return productAllWidth;
+    }
+
+    public static boolean isAllowCutting(BigDecimal remainingWidth, BigDecimal productLength, BigDecimal postLength) {
+        if (remainingWidth.compareTo(CLAMP_WIDTH) < 0 && productLength.compareTo(postLength) == 0) {
+            return true;
+        }
+        return remainingWidth.compareTo(CLAMP_WIDTH) >= 0 && productLength.compareTo(postLength) >= 0;
     }
 }

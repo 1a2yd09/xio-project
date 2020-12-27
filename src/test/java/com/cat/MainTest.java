@@ -20,6 +20,6 @@ class MainTest extends BaseTest {
     @Test
     void testSomething() throws InterruptedException {
         mainService.start();
-        assertEquals(7381, actionService.getProcessedActionCount());
+        assertEquals(5353, actionService.getProcessedActionCount());
     }
 }

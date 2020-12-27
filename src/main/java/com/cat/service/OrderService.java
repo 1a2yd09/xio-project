@@ -133,4 +133,14 @@ public class OrderService {
     public void deleteRemoteOrderById(Integer id) {
         this.orderDao.deleteRemoteOrderById(id);
     }
+
+    /**
+     * 根据工单 ID 修改远程工单表中对应工单的下料板规格。
+     *
+     * @param cuttingSize 下料板规格
+     * @param id          工单 ID
+     */
+    public void updateRemoteOrderCuttingSize(String cuttingSize, Integer id) {
+        this.orderDao.updateRemoteOrderCuttingSize(cuttingSize, id);
+    }
 }

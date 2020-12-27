@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author CAT
@@ -55,7 +57,7 @@ public class MainService {
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
                 this.processingBottomOrder(order, param, cuttingSignal);
                 this.actionService.waitingForAllMachineActionsCompleted();
-                this.processCompletedAction(order, BoardCategory.SEMI_PRODUCT);
+                this.processCompletedAction(BoardCategory.SEMI_PRODUCT, order);
             }
         }
         // 对重直梁工单:
@@ -71,7 +73,7 @@ public class MainService {
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
                 this.processingNotBottomOrder(currOrder, nextOrder, param, specs, cuttingSignal);
                 this.actionService.waitingForAllMachineActionsCompleted();
-                this.processCompletedAction(currOrder, BoardCategory.STOCK);
+                this.processCompletedAction(BoardCategory.STOCK, currOrder, nextOrder);
             }
         }
     }
@@ -88,9 +90,9 @@ public class MainService {
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity());
         NormalBoard semiProductBoard = this.boardService.getSemiProduct(cutBoard, parameter.getFixedWidth(), productBoard);
 
-        List<NormalBoard> normalBoards = new ArrayList<>();
-        normalBoards.add(semiProductBoard);
-        normalBoards.add(productBoard);
+        List<Map<Integer, NormalBoard>> normalBoards = new ArrayList<>();
+        normalBoards.add(Map.of(order.getId(), semiProductBoard));
+        normalBoards.add(Map.of(order.getId(), productBoard));
 
         this.boardService.cutting(cutBoard, normalBoards, parameter.getWasteThreshold(), order.getId());
     }
@@ -105,45 +107,49 @@ public class MainService {
      * @param cuttingSignal 下料信号
      */
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
+        Integer currOrderId = order.getId();
         CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge());
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity());
 
-        List<NormalBoard> normalBoards = new ArrayList<>();
+        List<Map<Integer, NormalBoard>> normalBoards = new ArrayList<>();
 
-        if (productBoard.getCutTimes() == 0 || productBoard.getCutTimes() == order.getIncompleteQuantity()) {
+        if (productBoard.getCutTimes() == order.getIncompleteQuantity()) {
             NormalBoard nextProduct = this.boardService.getNextProduct(nextOrder, cutBoard, productBoard);
             if (nextProduct.getCutTimes() > 0) {
-                normalBoards.add(productBoard);
-                normalBoards.add(nextProduct);
+                normalBoards.add(Map.of(currOrderId, productBoard));
+                normalBoards.add(Map.of(nextOrder.getId(), nextProduct));
             } else {
                 NormalBoard stockBoard = this.boardService.getMatchStock(specs, cutBoard, productBoard);
                 if (stockBoard.getCutTimes() > 0) {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
-                        normalBoards.add(productBoard);
-                        normalBoards.add(stockBoard);
+                        normalBoards.add(Map.of(currOrderId, productBoard));
+                        normalBoards.add(Map.of(currOrderId, stockBoard));
                     } else {
-                        normalBoards.add(stockBoard);
-                        normalBoards.add(productBoard);
+                        normalBoards.add(Map.of(currOrderId, stockBoard));
+                        normalBoards.add(Map.of(currOrderId, productBoard));
                     }
                 } else {
-                    normalBoards.add(productBoard);
+                    normalBoards.add(Map.of(currOrderId, productBoard));
                 }
             }
         } else {
-            normalBoards.add(productBoard);
+            normalBoards.add(Map.of(currOrderId, productBoard));
         }
 
-        this.boardService.cutting(cutBoard, normalBoards, parameter.getWasteThreshold(), order.getId());
+        this.boardService.cutting(cutBoard, normalBoards, parameter.getWasteThreshold(), currOrderId);
     }
 
     /**
      * 处理一组被机器处理完毕的动作。
      *
-     * @param order             工单
      * @param inventoryCategory 存货类型
+     * @param orders            工单列表
      */
-    public void processCompletedAction(WorkOrder order, BoardCategory inventoryCategory) {
-        int productCount = 0;
+    public void processCompletedAction(BoardCategory inventoryCategory, WorkOrder... orders) {
+        Map<Integer, Integer> map = new HashMap<>(orders.length);
+        for (WorkOrder order : orders) {
+            map.put(order.getId(), 0);
+        }
         Inventory inventory = null;
         int inventoryCount = 0;
 
@@ -152,7 +158,8 @@ public class MainService {
             if (ActionState.COMPLETED.value.equals(action.getState())) {
                 String boardCategory = action.getBoardCategory();
                 if (BoardCategory.PRODUCT.value.equals(boardCategory)) {
-                    productCount++;
+                    Integer orderId = action.getOrderId();
+                    map.put(orderId, map.get(orderId) + 1);
                 } else if (inventoryCategory.value.equals(boardCategory)) {
                     if (inventory == null) {
                         inventory = new Inventory(action.getBoardSpecification(), action.getBoardMaterial(), inventoryCategory.value);
@@ -162,7 +169,9 @@ public class MainService {
             }
         }
 
-        this.orderService.addOrderCompletedQuantity(order, productCount);
+        for (WorkOrder order : orders) {
+            this.orderService.addOrderCompletedQuantity(order, map.get(order.getId()));
+        }
         if (inventory != null) {
             inventory.setQuantity(inventoryCount);
             this.inventoryService.updateInventoryQuantity(inventory);

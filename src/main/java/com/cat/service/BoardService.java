@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author CAT
@@ -61,26 +62,30 @@ public class BoardService {
      * @param cutBoard       下料板
      * @param normalBoards   目标板材列表
      * @param wasteThreshold 废料阈值
-     * @param orderId        工单 ID
+     * @param currOrderId    当前工单 ID
      */
-    public void cutting(CutBoard cutBoard, List<NormalBoard> normalBoards, BigDecimal wasteThreshold, Integer orderId) {
-        for (NormalBoard normalBoard : normalBoards) {
-            if (normalBoard.getCutTimes() > 0) {
-                NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
-                this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, orderId);
-            }
-            for (int i = 0; i < normalBoard.getCutTimes(); i++) {
-                BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), normalBoard.getWidth());
-                if (remainingWidth.compareTo(BoardUtils.CLAMP_LENGTH) <= 0) {
-                    NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
-                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, orderId);
+    public void cutting(CutBoard cutBoard, List<Map<Integer, NormalBoard>> normalBoards, BigDecimal wasteThreshold, Integer currOrderId) {
+        for (Map<Integer, NormalBoard> boardMap : normalBoards) {
+            for (Map.Entry<Integer, NormalBoard> map : boardMap.entrySet()) {
+                Integer orderId = map.getKey();
+                NormalBoard normalBoard = map.getValue();
+                if (normalBoard.getCutTimes() > 0) {
+                    NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
+                    this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, orderId);
                 }
-                this.cuttingBoard(cutBoard, ForwardEdge.LONG, normalBoard, orderId);
+                for (int i = 0; i < normalBoard.getCutTimes(); i++) {
+                    BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), normalBoard.getWidth());
+                    if (remainingWidth.compareTo(BoardUtils.CLAMP_DEPTH) <= 0) {
+                        NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
+                        this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, orderId);
+                    }
+                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, normalBoard, orderId);
+                }
             }
         }
         if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
             NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, BigDecimal.ZERO, wasteThreshold);
-            this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, orderId);
+            this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, currOrderId);
         }
     }
 
@@ -129,7 +134,9 @@ public class BoardService {
     public NormalBoard getSemiProduct(CutBoard cutBoard, BigDecimal fixedWidth, NormalBoard product) {
         NormalBoard semiProduct = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), cutBoard.getMaterial(), BoardCategory.SEMI_PRODUCT);
         if (semiProduct.getWidth().compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), Arith.mul(product.getWidth(), product.getCutTimes()));
+            BigDecimal productAllWidth = Arith.mul(product.getWidth(), product.getCutTimes());
+            productAllWidth = BoardUtils.processPostProductAllWidth(productAllWidth, product.getLength(), semiProduct.getLength());
+            BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), productAllWidth);
             // 半成品的裁剪次数取决于下料板裁剪成品后的剩余宽度以及半成品自身宽度:
             semiProduct.setCutTimes(Arith.div(remainingWidth, semiProduct.getWidth()));
         }
@@ -151,9 +158,17 @@ public class BoardService {
                 .orElse(ParamUtils.getDefaultStockSpec());
         NormalBoard stock = new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), cutBoard.getMaterial(), BoardCategory.STOCK);
         if (stock.getWidth().compareTo(BigDecimal.ZERO) > 0 && cutBoard.getLength().compareTo(stock.getLength()) > 0) {
-            BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), Arith.mul(product.getWidth(), product.getCutTimes()));
-            // 库存件的裁剪次数取决于下料板裁剪成品后的剩余宽度以及库存件自身宽度:
-            stock.setCutTimes(Arith.div(remainingWidth, stock.getWidth()));
+            BigDecimal productAllWidth = Arith.mul(product.getWidth(), product.getCutTimes());
+            BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), productAllWidth);
+            if (product.getLength().compareTo(stock.getLength()) >= 0) {
+                if (BoardUtils.isAllowCutting(remainingWidth, product.getLength(), stock.getLength())) {
+                    stock.setCutTimes(Arith.div(remainingWidth, stock.getWidth()));
+                }
+            } else {
+                productAllWidth = BoardUtils.processPostProductAllWidth(productAllWidth, product.getLength(), stock.getLength());
+                remainingWidth = Arith.sub(cutBoard.getWidth(), productAllWidth);
+                stock.setCutTimes(Arith.div(remainingWidth, stock.getWidth()));
+            }
         }
         return stock;
     }
@@ -195,13 +210,11 @@ public class BoardService {
      */
     public NormalBoard getNextProduct(WorkOrder nextOrder, CutBoard currCutBoard, NormalBoard currProduct) {
         NormalBoard nextProduct = new NormalBoard(nextOrder.getProductSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
-        // 当前成品次数大于零的限制条件是因为不允许两个工单的成品混合出板:
-        if (currCutBoard.getMaterial().equals(nextProduct.getMaterial()) &&
-                currProduct.getCutTimes() > 0 &&
-                currProduct.getLength().compareTo(nextProduct.getLength()) > 0) {
+        if (currProduct.getMaterial().equals(nextProduct.getMaterial())) {
             BigDecimal remainingWidth = Arith.sub(currCutBoard.getWidth(), Arith.mul(currProduct.getWidth(), currProduct.getCutTimes()));
-            // 后续成品的裁剪次数取决于最大裁剪次数以及工单未完成数目中的最小值:
-            nextProduct.setCutTimes(Math.min(Arith.div(remainingWidth, nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));
+            if (BoardUtils.isAllowCutting(remainingWidth, currProduct.getLength(), nextProduct.getLength())) {
+                nextProduct.setCutTimes(Math.min(Arith.div(remainingWidth, nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));
+            }
         }
         return nextProduct;
     }

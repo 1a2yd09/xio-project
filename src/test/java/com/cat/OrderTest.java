@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,11 +43,26 @@ class OrderTest extends BaseTest {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getOrderDate();
         List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
-        assertEquals(681, orders.size());
+        assertEquals(677, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
             NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
+                System.out.println(order);
+            }
+        }
+    }
+
+    @Test
+    void testGetAllWidthBottomOrder() {
+        OperatingParameter op = parameterService.getLatestOperatingParameter();
+        LocalDate date = op.getOrderDate();
+        List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
+        assertEquals(677, orders.size());
+        for (WorkOrder order : orders) {
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
+            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            if (cutBoard.getWidth().compareTo(new BigDecimal(900)) < 0 || board.getLength().compareTo(new BigDecimal(900)) < 0) {
                 System.out.println(order);
             }
         }
@@ -61,6 +77,20 @@ class OrderTest extends BaseTest {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
             NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
+                System.out.println(order);
+            }
+        }
+    }
+
+    @Test
+    void testGetAllWidthNotBottomOrder() {
+        OperatingParameter op = parameterService.getLatestOperatingParameter();
+        List<WorkOrder> orders = orderService.getNotBottomOrders(op.getOrderDate());
+        assertEquals(82, orders.size());
+        for (WorkOrder order : orders) {
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
+            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            if (board.getLength().compareTo(new BigDecimal(900)) < 0 || cutBoard.getWidth().compareTo(new BigDecimal(900)) < 0) {
                 System.out.println(order);
             }
         }

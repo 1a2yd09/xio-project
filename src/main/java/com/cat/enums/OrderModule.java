@@ -16,7 +16,15 @@ public enum OrderModule {
     /**
      * 对重架工地模块
      */
-    WEIGHT("对重架工地模块");
+    WEIGHT("对重架工地模块"),
+    /**
+     * 轿底平台
+     */
+    BOTTOM_PLATFORM("轿底平台"),
+    /**
+     * 直梁对重
+     */
+    STRAIGHT_WEIGHT("直梁对重");
 
     public final String value;
 

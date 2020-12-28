@@ -13,17 +13,27 @@ public class OperatingParameter {
     private BigDecimal fixedWidth;
     private BigDecimal wasteThreshold;
     private String sortPattern;
+    private String orderModule;
     private LocalDateTime createdAt;
 
     public OperatingParameter() {
     }
 
-    public OperatingParameter(Long id, LocalDate orderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String sortPattern, LocalDateTime createdAt) {
+    public OperatingParameter(LocalDate orderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String sortPattern, String orderModule) {
+        this.orderDate = orderDate;
+        this.fixedWidth = fixedWidth;
+        this.wasteThreshold = wasteThreshold;
+        this.sortPattern = sortPattern;
+        this.orderModule = orderModule;
+    }
+
+    public OperatingParameter(Long id, LocalDate orderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String sortPattern, String orderModule, LocalDateTime createdAt) {
         this.id = id;
         this.orderDate = orderDate;
         this.fixedWidth = fixedWidth;
         this.wasteThreshold = wasteThreshold;
         this.sortPattern = sortPattern;
+        this.orderModule = orderModule;
         this.createdAt = createdAt;
     }
 
@@ -67,6 +77,14 @@ public class OperatingParameter {
         this.sortPattern = sortPattern;
     }
 
+    public String getOrderModule() {
+        return orderModule;
+    }
+
+    public void setOrderModule(String orderModule) {
+        this.orderModule = orderModule;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -83,6 +101,7 @@ public class OperatingParameter {
                 ", fixedWidth=" + fixedWidth +
                 ", wasteThreshold=" + wasteThreshold +
                 ", sortPattern='" + sortPattern + '\'' +
+                ", orderModule='" + orderModule + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

@@ -2,6 +2,7 @@ package com.cat.utils;
 
 import com.cat.entity.param.OperatingParameter;
 import com.cat.entity.param.StockSpecification;
+import com.cat.enums.OrderModule;
 import com.cat.enums.OrderSortPattern;
 
 import java.math.BigDecimal;
@@ -21,7 +22,11 @@ public class ParamUtils {
      * @return 运行参数
      */
     public static OperatingParameter getDefaultParameter() {
-        return new OperatingParameter(-1L, LocalDate.now(), BigDecimal.ZERO, BigDecimal.ZERO, OrderSortPattern.BY_SEQ.value, LocalDateTime.now());
+        return new OperatingParameter(-1L, LocalDate.now(), BigDecimal.ZERO, BigDecimal.ZERO, OrderSortPattern.BY_SEQ.value, OrderModule.BOTTOM_PLATFORM.value, LocalDateTime.now());
+    }
+
+    public static OperatingParameter getCommonParameter(OrderSortPattern orderSortPattern, OrderModule orderModule) {
+        return new OperatingParameter(LocalDate.of(2019, 11, 13), new BigDecimal(192), new BigDecimal(100), orderSortPattern.value, orderModule.value);
     }
 
     /**

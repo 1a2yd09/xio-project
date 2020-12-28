@@ -5,6 +5,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 /**
  * @author CAT
  */
@@ -21,5 +24,19 @@ public class ParameterDao extends BaseDao {
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    /**
+     * 新增运行参数。
+     *
+     * @param orderDate      工单日期
+     * @param fixedWidth     固定宽度
+     * @param wasteThreshold 废料阈值
+     * @param sortPattern    排序方式
+     * @param orderModule    工单模块
+     */
+    public void insertOperatingParameter(LocalDate orderDate, BigDecimal fixedWidth, BigDecimal wasteThreshold, String sortPattern, String orderModule) {
+        this.jdbcTemplate.update("INSERT INTO tb_operating_parameter (order_date, fixed_width, waste_threshold, sort_pattern, order_module) " +
+                "VALUES (?, ?, ?, ?, ?)", orderDate, fixedWidth, wasteThreshold, sortPattern, orderModule);
     }
 }

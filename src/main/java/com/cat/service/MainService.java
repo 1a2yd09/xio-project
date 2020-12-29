@@ -10,6 +10,7 @@ import com.cat.entity.param.StockSpecification;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
+import com.cat.enums.OrderModule;
 import com.cat.utils.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,38 +43,35 @@ public class MainService {
     /**
      * 主流程。
      *
+     * @param orderModule 工单模块
      * @throws InterruptedException 等待过程被中断
      */
-    public void start() throws InterruptedException {
+    public void start(OrderModule orderModule) throws InterruptedException {
         this.signalService.waitingForNewStartSignal();
 
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-        // 轿底工单:
-        List<WorkOrder> orders = this.orderService.getBottomOrders(param.getSortPattern(), param.getOrderDate());
-        for (WorkOrder order : orders) {
-            while (order.getIncompleteQuantity() != 0) {
-                this.signalService.insertTakeBoardSignal(order.getId());
-                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
-                this.processingBottomOrder(order, param, cuttingSignal);
-                this.actionService.waitingForAllMachineActionsCompleted();
-                this.processCompletedAction(BoardCategory.SEMI_PRODUCT, order);
-            }
-        }
-        // 对重直梁工单:
-        orders = orderService.getPreprocessNotBottomOrders(param.getOrderDate());
+        List<WorkOrder> orders = this.orderService.getProductionOrders(orderModule, param);
+
         for (int i = 0; i < orders.size(); i++) {
-            WorkOrder currOrder = orders.get(i);
-            WorkOrder nextOrder = OrderUtils.getFakeOrder();
-            if (i < orders.size() - 1) {
-                nextOrder = orders.get(i + 1);
-            }
-            while (currOrder.getIncompleteQuantity() != 0) {
-                this.signalService.insertTakeBoardSignal(currOrder.getId());
-                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
-                this.processingNotBottomOrder(currOrder, nextOrder, param, specs, cuttingSignal);
-                this.actionService.waitingForAllMachineActionsCompleted();
-                this.processCompletedAction(BoardCategory.STOCK, currOrder, nextOrder);
+            WorkOrder currentOrder = orders.get(i);
+            while (currentOrder.getIncompleteQuantity() != 0) {
+                this.signalService.insertTakeBoardSignal(currentOrder.getId());
+                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currentOrder);
+
+                if (OrderModule.BOTTOM_PLATFORM == orderModule) {
+                    this.processingBottomOrder(currentOrder, param, cuttingSignal);
+                    this.actionService.waitingForAllMachineActionsCompleted();
+                    this.processCompletedAction(BoardCategory.SEMI_PRODUCT, currentOrder);
+                } else {
+                    WorkOrder nextOrder = OrderUtils.getFakeOrder();
+                    if (i < orders.size() - 1) {
+                        nextOrder = orders.get(i + 1);
+                    }
+                    this.processingNotBottomOrder(currentOrder, nextOrder, param, specs, cuttingSignal);
+                    this.actionService.waitingForAllMachineActionsCompleted();
+                    this.processCompletedAction(BoardCategory.STOCK, currentOrder, nextOrder);
+                }
             }
         }
     }

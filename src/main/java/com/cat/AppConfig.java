@@ -1,5 +1,6 @@
 package com.cat;
 
+import com.cat.enums.OrderModule;
 import com.cat.service.MainService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -29,7 +30,7 @@ public class AppConfig {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         MainService mainService = context.getBean(MainService.class);
         try {
-            mainService.start();
+            mainService.start(OrderModule.BOTTOM_PLATFORM);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

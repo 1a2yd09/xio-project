@@ -4,7 +4,9 @@ import com.cat.dao.InventoryDao;
 import com.cat.dao.OrderDao;
 import com.cat.entity.bean.Inventory;
 import com.cat.entity.bean.WorkOrder;
+import com.cat.entity.param.OperatingParameter;
 import com.cat.enums.BoardCategory;
+import com.cat.enums.OrderModule;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.OrderState;
 import com.cat.utils.BoardUtils;
@@ -123,6 +125,21 @@ public class OrderService {
      */
     public List<WorkOrder> getAllProductionOrders() {
         return this.orderDao.getAllProductionOrders();
+    }
+
+    /**
+     * 根据工单模块和运行参数获取指定的生产工单。
+     *
+     * @param orderModule 工单模块
+     * @param param       运行参数
+     * @return 生产工单列表
+     */
+    public List<WorkOrder> getProductionOrders(OrderModule orderModule, OperatingParameter param) {
+        if (OrderModule.BOTTOM_PLATFORM == orderModule) {
+            return this.getBottomOrders(param.getSortPattern(), param.getOrderDate());
+        } else {
+            return this.getPreprocessNotBottomOrders(param.getOrderDate());
+        }
     }
 
     /**

@@ -132,6 +132,31 @@ public class OrderService {
     }
 
     /**
+     * 获取经过预处理的当前生产工单表中的全体工单。
+     *
+     * @return 预处理的对重直梁工单集合
+     */
+    public List<WorkOrder> getPreprocessProductionOrders() {
+        List<WorkOrder> orders = this.getAllProductionOrders();
+        Map<String, Inventory> stockMap = this.inventoryDao.getInventories(BoardCategory.STOCK.value)
+                .stream()
+                .collect(Collectors.toMap(stock -> BoardUtils.getStandardSpecStr(stock.getSpecification()), Function.identity()));
+
+        for (WorkOrder order : orders) {
+            Inventory stock = stockMap.get(BoardUtils.getStandardSpecStr(order.getProductSpecification()));
+            if (stock != null && stock.getMaterial().equals(order.getMaterial()) && stock.getQuantity() > 0) {
+                int usedStockQuantity = Math.min(order.getIncompleteQuantity(), stock.getQuantity());
+                // 使用库存件作为成品属于工单开工的行为之一:
+                this.addOrderCompletedQuantity(order, usedStockQuantity);
+                stock.setQuantity(stock.getQuantity() - usedStockQuantity);
+                this.inventoryDao.updateInventoryQuantity(stock);
+            }
+        }
+
+        return orders.stream().filter(order -> order.getIncompleteQuantity() > 0).collect(Collectors.toList());
+    }
+
+    /**
      * 根据工单模块和运行参数获取指定的生产工单。
      *
      * @param orderModule 工单模块

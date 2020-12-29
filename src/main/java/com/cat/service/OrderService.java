@@ -31,7 +31,7 @@ public class OrderService {
     InventoryDao inventoryDao;
 
     /**
-     * 增加工单的已完工数目并更新工单状态。
+     * 增加工单的已完工数目并更新工单状态，如果更新后工单状态为已完工，则将工单从生产工单表迁移至完工工单表。
      *
      * @param order    工单
      * @param quantity 新完工的成品数目
@@ -40,6 +40,10 @@ public class OrderService {
         order.setCompletedQuantity(OrderUtils.addQuantityPropWithInt(order.getCompletedQuantity(), quantity));
         this.orderDao.updateOrderCompletedQuantity(order);
         this.updateOrderState(order, order.getIncompleteQuantity() == 0 ? OrderState.COMPLETED : OrderState.STARTED);
+        if (OrderState.COMPLETED.value.equals(order.getOperationState())) {
+            this.transferWorkOrderToCompleted(order.getId());
+            this.deleteOrderById(order.getId());
+        }
     }
 
     /**
@@ -152,6 +156,15 @@ public class OrderService {
     }
 
     /**
+     * 根据工单 ID 从工单表中删除对应工单。
+     *
+     * @param id 工单 ID。
+     */
+    public void deleteOrderById(Integer id) {
+        this.orderDao.deleteOrderById(id);
+    }
+
+    /**
      * 根据工单 ID 修改远程工单表中对应工单的下料板规格。
      *
      * @param cuttingSize 下料板规格
@@ -159,5 +172,23 @@ public class OrderService {
      */
     public void updateRemoteOrderCuttingSize(String cuttingSize, Integer id) {
         this.orderDao.updateRemoteOrderCuttingSize(cuttingSize, id);
+    }
+
+    /**
+     * 根据工单 ID 将已完工工单迁移至完工工单表中。
+     *
+     * @param id 工单 ID
+     */
+    public void transferWorkOrderToCompleted(Integer id) {
+        this.orderDao.transferWorkOrderToCompleted(id);
+    }
+
+    /**
+     * 获取完工工单表当中的工单个数。
+     *
+     * @return 工单个数
+     */
+    public Integer getCompletedOrderCount() {
+        return this.orderDao.getCompletedOrderCount();
     }
 }

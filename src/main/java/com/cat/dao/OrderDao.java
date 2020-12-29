@@ -97,6 +97,15 @@ public class OrderDao extends BaseDao {
     }
 
     /**
+     * 根据工单 ID 从工单表中删除对应工单。
+     *
+     * @param id 工单 ID。
+     */
+    public void deleteOrderById(Integer id) {
+        this.jdbcTemplate.update("DELETE FROM tb_local_work_order WHERE bid = ?", id);
+    }
+
+    /**
      * 根据工单 ID 修改远程工单表中对应工单的下料板规格。
      *
      * @param cuttingSize 下料板规格
@@ -104,5 +113,23 @@ public class OrderDao extends BaseDao {
      */
     public void updateRemoteOrderCuttingSize(String cuttingSize, Integer id) {
         this.jdbcTemplate.update("UPDATE tb_remote_work_order SET [b.CU_ORGSIZE] = ? WHERE bid = ?", cuttingSize, id);
+    }
+
+    /**
+     * 根据工单 ID 将已完工工单迁移至完工工单表中。
+     *
+     * @param id 工单 ID
+     */
+    public void transferWorkOrderToCompleted(Integer id) {
+        this.jdbcTemplate.update("INSERT INTO tb_completed_work_order SELECT * FROM tb_local_work_order WHERE bid = ?", id);
+    }
+
+    /**
+     * 获取完工工单表当中的工单个数。
+     *
+     * @return 工单个数
+     */
+    public Integer getCompletedOrderCount() {
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tb_completed_work_order", Integer.class);
     }
 }

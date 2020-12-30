@@ -3,8 +3,10 @@ package com.cat.service;
 import com.cat.dao.SignalDao;
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.signal.CuttingSignal;
+import com.cat.entity.signal.ProcessControlSignal;
 import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
+import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -69,6 +71,56 @@ public class SignalService {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 等待新的流程启动信号。
+     *
+     * @throws InterruptedException 等待过程被中断
+     */
+    public void waitingForNewProcessStartSignal() throws InterruptedException {
+        // test:
+        this.insertProcessControlSignal(ControlSignalCategory.START);
+        synchronized (LOCK) {
+            while (!this.isReceivedNewProcessControlSignal(ControlSignalCategory.START)) {
+                LOCK.wait(WAIT_TIME);
+            }
+        }
+    }
+
+    /**
+     * 是否接收到新的流程控制信号。
+     *
+     * @param signalCategory 流程控制信号枚举类型
+     * @return true 表示接收到新的控制信号，false 表示未接收到新的控制信号
+     */
+    public boolean isReceivedNewProcessControlSignal(ControlSignalCategory signalCategory) {
+        ProcessControlSignal controlSignal = this.getLatestNotProcessedControlSignal(signalCategory);
+        if (controlSignal != null) {
+            controlSignal.setProcessed(true);
+            this.signalDao.updateProcessControlSignalProcessed(controlSignal);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 根据控制信号类型查询最新未被处理的控制信号，不存在未被处理的控制信号时返回 null。
+     *
+     * @param signalCategory 控制信号枚举类型
+     * @return 控制信号
+     */
+    public ProcessControlSignal getLatestNotProcessedControlSignal(ControlSignalCategory signalCategory) {
+        return this.signalDao.getLatestNotProcessedControlSignal(signalCategory.value);
+    }
+
+    /**
+     * 新增流程控制信号。
+     *
+     * @param signalCategory 控制信号枚举类型
+     */
+    public void insertProcessControlSignal(ControlSignalCategory signalCategory) {
+        this.signalDao.insertProcessControlSignal(signalCategory.value);
     }
 
     /**

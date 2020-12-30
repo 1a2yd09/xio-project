@@ -10,6 +10,7 @@ import com.cat.entity.param.StockSpecification;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
+import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.OrderModule;
 import com.cat.utils.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class MainService {
      * @throws InterruptedException 等待过程被中断
      */
     public void start(OrderModule orderModule) throws InterruptedException {
-        this.signalService.waitingForNewStartSignal();
+        this.signalService.waitingForNewProcessStartSignal();
 
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
@@ -71,6 +72,10 @@ public class MainService {
                     this.processingNotBottomOrder(currentOrder, nextOrder, param, specs, cuttingSignal);
                     this.actionService.waitingForAllMachineActionsCompleted();
                     this.processCompletedAction(BoardCategory.STOCK, currentOrder, nextOrder);
+                }
+
+                if (signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.STOP)) {
+                    return;
                 }
             }
         }

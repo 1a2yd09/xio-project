@@ -1,6 +1,7 @@
 package com.cat.dao;
 
 import com.cat.entity.signal.CuttingSignal;
+import com.cat.entity.signal.ProcessControlSignal;
 import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
 import com.cat.enums.ForwardEdge;
@@ -13,6 +14,39 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SignalDao extends BaseDao {
+    /**
+     * 根据控制信号类型查询最新未被处理的控制信号，不存在未被处理的控制信号时返回 null。
+     *
+     * @param category 控制信号类型
+     * @return 控制信号
+     */
+    public ProcessControlSignal getLatestNotProcessedControlSignal(Integer category) {
+        try {
+            return this.jdbcTemplate.queryForObject("SELECT TOP 1 * FROM tb_process_control_signal " +
+                    "WHERE processed = 0 AND category = ? ORDER BY id DESC", new BeanPropertyRowMapper<>(ProcessControlSignal.class), category);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    /**
+     * 更新流程控制信号状态。
+     *
+     * @param controlSignal 流程控制信号
+     */
+    public void updateProcessControlSignalProcessed(ProcessControlSignal controlSignal) {
+        this.jdbcTemplate.update("UPDATE tb_process_control_signal SET processed = ? WHERE id = ?", controlSignal.getProcessed(), controlSignal.getId());
+    }
+
+    /**
+     * 新增流程控制信号。
+     *
+     * @param category 控制信号类型
+     */
+    public void insertProcessControlSignal(Integer category) {
+        this.jdbcTemplate.update("INSERT INTO tb_process_control_signal(category) VALUES (?)", category);
+    }
+
     /**
      * 查询最新未被处理的开工信号，不存在未被处理的开工信号时返回 null。
      *

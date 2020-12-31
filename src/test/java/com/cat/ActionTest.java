@@ -37,7 +37,7 @@ class ActionTest extends BaseTest {
     ParameterService parameterService;
 
     @Test
-    void testProcessingFinishedAction1() {
+    void testProcessingFinishedAction1() throws InterruptedException {
         // 经过下述直梁流程，将生成1个库存件和2个成品，工单本身需求2个成品:
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
@@ -82,7 +82,7 @@ class ActionTest extends BaseTest {
     }
 
     @Test
-    void testProcessingFinishedAction2() {
+    void testProcessingFinishedAction2() throws InterruptedException {
         // 经过下述轿底流程，将生成1个半成品和2个成品，工单本身需求2个成品:
         // 下料板 2.5×1250×2504:
         // 成品板 2.5×121×2185:

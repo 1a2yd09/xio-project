@@ -62,7 +62,6 @@ public class MainService {
 
                 if (OrderModule.BOTTOM_PLATFORM == orderModule) {
                     this.processingBottomOrder(currentOrder, param, cuttingSignal);
-                    this.actionService.waitingForAllMachineActionsCompleted();
                     this.processCompletedAction(BoardCategory.SEMI_PRODUCT, currentOrder);
                 } else {
                     WorkOrder nextOrder = OrderUtils.getFakeOrder();
@@ -70,7 +69,6 @@ public class MainService {
                         nextOrder = orders.get(i + 1);
                     }
                     this.processingNotBottomOrder(currentOrder, nextOrder, param, specs, cuttingSignal);
-                    this.actionService.waitingForAllMachineActionsCompleted();
                     this.processCompletedAction(BoardCategory.STOCK, currentOrder, nextOrder);
                 }
 
@@ -148,7 +146,9 @@ public class MainService {
      * @param inventoryCategory 存货类型
      * @param orders            工单列表
      */
-    public void processCompletedAction(BoardCategory inventoryCategory, WorkOrder... orders) {
+    public void processCompletedAction(BoardCategory inventoryCategory, WorkOrder... orders) throws InterruptedException {
+        this.actionService.waitingForAllMachineActionsCompleted();
+
         Map<Integer, Integer> map = new HashMap<>(orders.length);
         for (WorkOrder order : orders) {
             map.put(order.getId(), 0);

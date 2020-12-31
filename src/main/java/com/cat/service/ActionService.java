@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
-import static com.cat.utils.Threads.LOCK;
-import static com.cat.utils.Threads.WAIT_TIME;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author CAT
@@ -27,10 +25,8 @@ public class ActionService {
     public void waitingForAllMachineActionsCompleted() throws InterruptedException {
         // test:
         this.completedAllMachineActions();
-        synchronized (LOCK) {
-            while (!this.isAllMachineActionsProcessed()) {
-                LOCK.wait(WAIT_TIME);
-            }
+        while (!this.isAllMachineActionsProcessed()) {
+            TimeUnit.SECONDS.sleep(3);
         }
     }
 

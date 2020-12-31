@@ -11,6 +11,8 @@ import com.cat.enums.ForwardEdge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.cat.utils.Threads.LOCK;
 import static com.cat.utils.Threads.WAIT_TIME;
 
@@ -47,14 +49,12 @@ public class SignalService {
     public CuttingSignal receiveNewCuttingSignal(WorkOrder order) throws InterruptedException {
         // test:
         this.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
-        synchronized (LOCK) {
-            while (true) {
-                CuttingSignal cuttingSignal = this.getLatestNotProcessedCuttingSignal();
-                if (cuttingSignal != null) {
-                    return cuttingSignal;
-                }
-                LOCK.wait(WAIT_TIME);
+        while (true) {
+            CuttingSignal cuttingSignal = this.getLatestNotProcessedCuttingSignal();
+            if (cuttingSignal != null) {
+                return cuttingSignal;
             }
+            TimeUnit.SECONDS.sleep(3);
         }
     }
 
@@ -81,10 +81,8 @@ public class SignalService {
     public void waitingForNewProcessStartSignal() throws InterruptedException {
         // test:
         this.insertProcessControlSignal(ControlSignalCategory.START);
-        synchronized (LOCK) {
-            while (!this.isReceivedNewProcessControlSignal(ControlSignalCategory.START)) {
-                LOCK.wait(WAIT_TIME);
-            }
+        while (!this.isReceivedNewProcessControlSignal(ControlSignalCategory.START)) {
+            TimeUnit.SECONDS.sleep(3);
         }
     }
 

@@ -2,7 +2,6 @@ package com.cat.dao;
 
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.entity.signal.ProcessControlSignal;
-import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
 import com.cat.enums.ForwardEdge;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -45,35 +44,6 @@ public class SignalDao extends BaseDao {
      */
     public void insertProcessControlSignal(Integer category) {
         this.jdbcTemplate.update("INSERT INTO tb_process_control_signal(category) VALUES (?)", category);
-    }
-
-    /**
-     * 查询最新未被处理的开工信号，不存在未被处理的开工信号时返回 null。
-     *
-     * @return 开工信号
-     */
-    public StartSignal getLatestNotProcessedStartSignal() {
-        try {
-            return this.jdbcTemplate.queryForObject("SELECT TOP 1 * FROM tb_start_signal WHERE processed = 0 ORDER BY id DESC", new BeanPropertyRowMapper<>(StartSignal.class));
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    /**
-     * 更新开工信号状态。
-     *
-     * @param startSignal 开工信号
-     */
-    public void updateStartSignalProcessed(StartSignal startSignal) {
-        this.jdbcTemplate.update("UPDATE tb_start_signal SET processed = ? WHERE id = ?", startSignal.getProcessed(), startSignal.getId());
-    }
-
-    /**
-     * 新增开工信号。
-     */
-    public void insertStartSignal() {
-        this.jdbcTemplate.update("INSERT INTO tb_start_signal(processed) VALUES (DEFAULT)");
     }
 
     /**

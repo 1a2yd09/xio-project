@@ -4,7 +4,6 @@ import com.cat.dao.SignalDao;
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.entity.signal.ProcessControlSignal;
-import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
@@ -13,9 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.cat.utils.Threads.LOCK;
-import static com.cat.utils.Threads.WAIT_TIME;
-
 /**
  * @author CAT
  */
@@ -23,21 +19,6 @@ import static com.cat.utils.Threads.WAIT_TIME;
 public class SignalService {
     @Autowired
     SignalDao signalDao;
-
-    /**
-     * 等待新的开工信号。
-     *
-     * @throws InterruptedException 等待过程被中断
-     */
-    public void waitingForNewStartSignal() throws InterruptedException {
-        // test:
-        this.insertStartSignal();
-        synchronized (LOCK) {
-            while (!this.isReceivedNewStartSignal()) {
-                LOCK.wait(WAIT_TIME);
-            }
-        }
-    }
 
     /**
      * 接收新的下料信号。
@@ -56,21 +37,6 @@ public class SignalService {
             }
             TimeUnit.SECONDS.sleep(3);
         }
-    }
-
-    /**
-     * 是否接收到新的开工信号。
-     *
-     * @return true 表示接收到新的开工信号，false 表示未接收到新的开工信号
-     */
-    public boolean isReceivedNewStartSignal() {
-        StartSignal startSignal = this.getLatestNotProcessedStartSignal();
-        if (startSignal != null) {
-            startSignal.setProcessed(true);
-            this.signalDao.updateStartSignalProcessed(startSignal);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -119,22 +85,6 @@ public class SignalService {
      */
     public void insertProcessControlSignal(ControlSignalCategory signalCategory) {
         this.signalDao.insertProcessControlSignal(signalCategory.value);
-    }
-
-    /**
-     * 查询最新未被处理的开工信号，不存在未被处理的开工信号时返回 null。
-     *
-     * @return 开工信号
-     */
-    public StartSignal getLatestNotProcessedStartSignal() {
-        return this.signalDao.getLatestNotProcessedStartSignal();
-    }
-
-    /**
-     * 新增开工信号。
-     */
-    public void insertStartSignal() {
-        this.signalDao.insertStartSignal();
     }
 
     /**

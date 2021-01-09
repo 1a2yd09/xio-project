@@ -2,7 +2,6 @@ package com.cat;
 
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.entity.signal.ProcessControlSignal;
-import com.cat.entity.signal.StartSignal;
 import com.cat.entity.signal.TakeBoardSignal;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
@@ -36,17 +35,6 @@ class SignalTest extends BaseTest {
         ProcessControlSignal controlSignal = signalService.getLatestNotProcessedControlSignal(ControlSignalCategory.START);
         System.out.println(controlSignal);
         assertTrue(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.START));
-    }
-
-    @Test
-    void testReceiveNewSignal() {
-        boolean flag = signalService.isReceivedNewStartSignal();
-        assertFalse(flag);
-        signalService.insertStartSignal();
-        StartSignal startSignal = signalService.getLatestNotProcessedStartSignal();
-        System.out.println(startSignal);
-        flag = signalService.isReceivedNewStartSignal();
-        assertTrue(flag);
     }
 
     @Test

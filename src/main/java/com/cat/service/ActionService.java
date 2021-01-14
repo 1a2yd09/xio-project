@@ -3,6 +3,8 @@ package com.cat.service;
 import com.cat.dao.ActionDao;
 import com.cat.entity.bean.MachineAction;
 import com.cat.enums.ActionState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class ActionService {
+    final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     ActionDao actionDao;
 
@@ -26,8 +30,10 @@ public class ActionService {
         // test:
         this.completedAllMachineActions();
         while (!this.isAllMachineActionsProcessed()) {
+            logger.info("等待动作处理...");
             TimeUnit.SECONDS.sleep(3);
         }
+        logger.info("动作处理完毕...");
     }
 
     /**

@@ -121,6 +121,14 @@ public class BoardUtils {
         return new PriorityQueue<>(Comparator.comparing(NormalBoard::getLength).reversed());
     }
 
+    /**
+     * 当后续裁剪板材为成品时，如果成品总宽度小于夹钳宽度且需修剪长度，则必须保证留有夹钳宽度大小的剩余宽度供裁剪成品。
+     *
+     * @param productAllWidth 成品所需总宽度
+     * @param productLength   成品长度
+     * @param preLength       预先板材长度
+     * @return 保证成品板裁剪的总宽度
+     */
     public static BigDecimal processPostProductAllWidth(BigDecimal productAllWidth, BigDecimal productLength, BigDecimal preLength) {
         if (productAllWidth.compareTo(CLAMP_WIDTH) < 0 && productLength.compareTo(preLength) < 0) {
             return CLAMP_WIDTH;
@@ -128,6 +136,14 @@ public class BoardUtils {
         return productAllWidth;
     }
 
+    /**
+     * 当后续裁剪板材为非成品时，如果下料剩余宽度小于夹钳宽度且后续板材长度等于成品长度，则允许裁剪。
+     *
+     * @param remainingWidth 剩余宽度
+     * @param productLength  成品长度
+     * @param postLength     后续板材长度
+     * @return 是否允许裁剪后续板材
+     */
     public static boolean isAllowCutting(BigDecimal remainingWidth, BigDecimal productLength, BigDecimal postLength) {
         if (remainingWidth.compareTo(CLAMP_WIDTH) < 0 && productLength.compareTo(postLength) == 0) {
             return true;

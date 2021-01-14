@@ -31,6 +31,7 @@ public class AppConfig {
         MainService mainService = context.getBean(MainService.class);
         try {
             mainService.start(OrderModule.BOTTOM_PLATFORM);
+            mainService.start(OrderModule.STRAIGHT_WEIGHT);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

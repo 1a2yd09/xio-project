@@ -29,7 +29,8 @@ public class CutBoard extends BaseBoard {
 
     @Override
     public String toString() {
-        return "CutBoard{" +
+        return super.toString() +
+                "CutBoard{" +
                 "forwardEdge=" + forwardEdge +
                 '}';
     }

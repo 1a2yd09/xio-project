@@ -7,6 +7,8 @@ import com.cat.entity.signal.ProcessControlSignal;
 import com.cat.entity.signal.TakeBoardSignal;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class SignalService {
+    final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     SignalDao signalDao;
 
@@ -31,8 +35,10 @@ public class SignalService {
         // test:
         this.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
         while (true) {
+            logger.info("等待下料信号...");
             CuttingSignal cuttingSignal = this.getLatestNotProcessedCuttingSignal();
             if (cuttingSignal != null) {
+                logger.info("获取到新的下料信号...");
                 return cuttingSignal;
             }
             TimeUnit.SECONDS.sleep(3);
@@ -48,8 +54,10 @@ public class SignalService {
         // test:
         this.insertProcessControlSignal(ControlSignalCategory.START);
         while (!this.isReceivedNewProcessControlSignal(ControlSignalCategory.START)) {
+            logger.info("等待流程启动信号...");
             TimeUnit.SECONDS.sleep(3);
         }
+        logger.info("获取到新的流程启动信号...");
     }
 
     /**

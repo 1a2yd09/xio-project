@@ -48,6 +48,21 @@ class NotBottomProcessTest extends BaseTest {
     }
 
     /**
+     * 不是最后一次
+     */
+    @Test
+    void test11() {
+        WorkOrder order = orderService.getOrderById(3098562);
+        order.setProductQuantity("10");
+        // 该工单需求10个成品，但1次只能裁剪5个成品，因此不是最后一次:
+        // 下料板: 4.00×1245.00×3400.00
+        // 成品板: 4.0×245×3190
+        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        // 裁剪长度(3400->3190)-旋转-裁剪成品(4个)-裁剪废料-送成品:
+        actionService.getAllMachineActions().forEach(System.out::println);
+    }
+
+    /**
      * 是最后一次-剩余板材可复用于后续成品(材质相同、剩余宽度大于900且当前成品长度大于等于后续成品长度)
      */
     @Test
@@ -63,6 +78,45 @@ class NotBottomProcessTest extends BaseTest {
         // 裁剪长度-旋转-裁剪当前成品(1个)-旋转-裁剪长度-旋转-裁剪后续成品(2个)-送余料
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(9, actionService.getMachineActionCount());
+    }
+
+    /**
+     * 是最后一次-剩余板材可复用于后续成品(材质相同、剩余宽度大于900且当前成品长度大于等于后续成品长度)
+     */
+    @Test
+    void test22() {
+        WorkOrder order = orderService.getOrderById(3098562);
+        order.setProductQuantity("1");
+        // 下料板: 4.00×1245.00×3400.00
+        // 成品板: 4.0×245×3190
+        WorkOrder nextOrder = orderService.getOrderById(3118526);
+        nextOrder.setProductQuantity("4");
+        // 成品需求量: 2
+        // 成品板: 4.0×245×3130
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        // 裁剪长度-旋转-裁剪当前成品(1个)-旋转-裁剪长度-旋转-裁剪后续成品(2个)-送余料
+        actionService.getAllMachineActions().forEach(System.out::println);
+    }
+
+    /**
+     * 是最后一次-剩余板材可复用于后续成品(材质相同、剩余宽度大于900且当前成品长度大于等于后续成品长度)
+     */
+    @Test
+    void test222() {
+        WorkOrder order = orderService.getOrderById(3098562);
+        order.setCuttingSize("4×1300×3500");
+        order.setProductQuantity("3");
+        order.setProductSpecification("4×245×3400");
+        // 下料板: 4.00×1245.00×3400.00
+        // 成品板: 4.0×245×3190
+        WorkOrder nextOrder = orderService.getOrderById(3118526);
+        nextOrder.setProductSpecification("4×242×3300");
+        nextOrder.setProductQuantity("2");
+        // 成品需求量: 2
+        // 成品板: 4.0×245×3130
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        // 裁剪长度-旋转-裁剪当前成品(1个)-旋转-裁剪长度-旋转-裁剪后续成品(2个)-送余料
+        actionService.getAllMachineActions().forEach(System.out::println);
     }
 
     /**
@@ -120,6 +174,23 @@ class NotBottomProcessTest extends BaseTest {
     }
 
     /**
+     * 是最后一次-不可复用(用于修边的宽度不够)-不可库存件(规格表为空)
+     */
+    @Test
+    void test55() {
+        WorkOrder order = orderService.getOrderById(3098562);
+        order.setProductQuantity("2");
+        // 下料板: 4.00×1245.00×3400.00
+        // 成品板: 4.0×245×3190
+        WorkOrder nextOrder = orderService.getOrderById(3118526);
+        // 成品板: 4.0×245×3130
+        // 替换后续工单的成品规格
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        actionService.getAllMachineActions().forEach(System.out::println);
+        // 裁剪长度-旋转-裁宽度-送板:
+    }
+
+    /**
      * 是最后一次-不可复用(无后续工单)-能库存-库存先(由于成品总宽度小于900，因此对宽度进行补齐)
      */
     @Test
@@ -139,6 +210,24 @@ class NotBottomProcessTest extends BaseTest {
     }
 
     /**
+     * 是最后一次-不可复用(无后续工单)-能库存-库存先(由于成品总宽度小于900，因此对宽度进行补齐)
+     */
+    @Test
+    void test66() {
+        WorkOrder order = orderService.getOrderById(3098562);
+        order.setProductQuantity("1");
+        // 下料板: 4.00×1245.00×3400.00
+        // 成品板: 4.0×245×3190
+        // 向库存规格表中写入一个比成品长度更长的库存件:
+        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        product.setLength(new BigDecimal("3200"));
+        stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
+        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        actionService.getAllMachineActions().forEach(System.out::println);
+        // 裁剪长度-旋转-裁库存件(1个)-旋转-裁剪长度-旋转-裁剪成品-送余料:
+    }
+
+    /**
      * 是最后一次-不可复用(无后续工单)-能库存-成品先
      */
     @Test
@@ -154,6 +243,23 @@ class NotBottomProcessTest extends BaseTest {
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁剪成品(1个)-裁剪库存件(3个)-裁剪废料-送库存:
         assertEquals(8, actionService.getMachineActionCount());
+    }
+
+    /**
+     * 是最后一次-不可复用(无后续工单)-能库存-成品先
+     */
+    @Test
+    void test77() {
+        WorkOrder order = orderService.getOrderById(3098562);
+        order.setProductQuantity("1");
+        // 下料板: 4.00×1245.00×3400.00
+        // 成品板: 4.0×245×3190
+        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        // 向规格表中写入一个和成品规格一致的库存件:
+        stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
+        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        actionService.getAllMachineActions().forEach(System.out::println);
+        // 裁剪长度-旋转-裁剪成品(1个)-裁剪库存件(3个)-裁剪废料-送库存:
     }
 
     @Disabled("TODO")

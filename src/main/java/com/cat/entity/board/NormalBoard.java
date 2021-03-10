@@ -31,6 +31,10 @@ public class NormalBoard extends BaseBoard {
         this.cutTimes = cutTimes;
     }
 
+    public BigDecimal getNormalBoardAllWidth() {
+        return this.getWidth().multiply(BigDecimal.valueOf(this.cutTimes));
+    }
+
     @Override
     public String toString() {
         return super.toString() +

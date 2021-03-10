@@ -15,11 +15,11 @@ public class BoardUtils {
     /**
      * 夹钳宽度
      */
-    public static final BigDecimal CLAMP_WIDTH = new BigDecimal(900);
+    public static final BigDecimal CLAMP_WIDTH = new BigDecimal(500);
     /**
      * 夹钳深度
      */
-    public static final BigDecimal CLAMP_DEPTH = new BigDecimal(50);
+    public static final BigDecimal CLAMP_DEPTH = new BigDecimal(242);
     /**
      * 规格字符串分隔符
      */
@@ -149,5 +149,13 @@ public class BoardUtils {
             return true;
         }
         return remainingWidth.compareTo(CLAMP_WIDTH) >= 0 && productLength.compareTo(postLength) >= 0;
+    }
+
+    public static BigDecimal getAvailableWidth(BigDecimal cutBoardWidth, BigDecimal normalBoardWidth) {
+        return Arith.cmp(normalBoardWidth, CLAMP_DEPTH) >= 0 ? cutBoardWidth : cutBoardWidth.subtract(CLAMP_DEPTH);
+    }
+
+    public static boolean isAllowBackToFront(BigDecimal boardAllWidth, BigDecimal boardWidth) {
+        return boardAllWidth.compareTo(CLAMP_WIDTH) >= 0 && boardWidth.compareTo(CLAMP_DEPTH) >= 0;
     }
 }

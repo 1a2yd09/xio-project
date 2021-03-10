@@ -1,5 +1,7 @@
 package com.cat.service;
 
+import com.cat.entity.Board;
+import com.cat.entity.BoardList;
 import com.cat.entity.bean.Inventory;
 import com.cat.entity.bean.MachineAction;
 import com.cat.entity.bean.WorkOrder;
@@ -18,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,11 +116,11 @@ public class MainService {
         NormalBoard semiProductBoard = this.boardService.getSemiProduct(cutBoard, parameter.getFixedWidth(), productBoard);
         logger.info("半成品信息: {}", semiProductBoard);
 
-        List<Map<Integer, NormalBoard>> normalBoards = new ArrayList<>();
-        normalBoards.add(Map.of(order.getId(), semiProductBoard));
-        normalBoards.add(Map.of(order.getId(), productBoard));
+        BoardList boardList = new BoardList();
+        boardList.addBoard(new Board(order.getId(), semiProductBoard));
+        boardList.addBoard(new Board(order.getId(), productBoard));
 
-        this.boardService.cutting(cutBoard, normalBoards, parameter.getWasteThreshold(), order.getId());
+        this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold(), order.getId());
     }
 
     /**
@@ -138,34 +139,34 @@ public class MainService {
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity());
         logger.info("成品板信息: {}", productBoard);
 
-        List<Map<Integer, NormalBoard>> normalBoards = new ArrayList<>();
+        BoardList boardList = new BoardList();
 
         if (productBoard.getCutTimes() == order.getIncompleteQuantity()) {
             NormalBoard nextProduct = this.boardService.getNextProduct(nextOrder, cutBoard, productBoard);
             logger.info("后续成品板信息: {}", nextProduct);
             if (nextProduct.getCutTimes() > 0) {
-                normalBoards.add(Map.of(currOrderId, productBoard));
-                normalBoards.add(Map.of(nextOrder.getId(), nextProduct));
+                boardList.addBoard(new Board(currOrderId, productBoard));
+                boardList.addBoard(new Board(nextOrder.getId(), nextProduct));
             } else {
                 NormalBoard stockBoard = this.boardService.getMatchStock(specs, cutBoard, productBoard);
                 logger.info("库存件信息: {}", stockBoard);
                 if (stockBoard.getCutTimes() > 0) {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
-                        normalBoards.add(Map.of(currOrderId, productBoard));
-                        normalBoards.add(Map.of(currOrderId, stockBoard));
+                        boardList.addBoard(new Board(currOrderId, productBoard));
+                        boardList.addBoard(new Board(currOrderId, stockBoard));
                     } else {
-                        normalBoards.add(Map.of(currOrderId, stockBoard));
-                        normalBoards.add(Map.of(currOrderId, productBoard));
+                        boardList.addBoard(new Board(currOrderId, stockBoard));
+                        boardList.addBoard(new Board(currOrderId, productBoard));
                     }
                 } else {
-                    normalBoards.add(Map.of(currOrderId, productBoard));
+                    boardList.addBoard(new Board(currOrderId, productBoard));
                 }
             }
         } else {
-            normalBoards.add(Map.of(currOrderId, productBoard));
+            boardList.addBoard(new Board(currOrderId, productBoard));
         }
 
-        this.boardService.cutting(cutBoard, normalBoards, parameter.getWasteThreshold(), currOrderId);
+        this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold(), currOrderId);
     }
 
     /**

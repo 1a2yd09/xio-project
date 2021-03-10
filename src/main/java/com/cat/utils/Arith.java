@@ -25,4 +25,8 @@ public class Arith {
     public static int div(BigDecimal v1, BigDecimal v2) {
         return v1.divideToIntegralValue(v2).intValue();
     }
+
+    public static BigDecimal max(BigDecimal v1, BigDecimal v2) {
+        return v1.compareTo(v2) >= 0 ? v1 : v2;
+    }
 }

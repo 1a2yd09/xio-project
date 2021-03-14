@@ -30,9 +30,9 @@ public class NormalBoard extends BaseBoard {
     }
 
     /**
-     * 获取板材总宽度。
+     * 获取加工当前板材所需总宽度。
      *
-     * @return 板材总宽度
+     * @return 总宽度
      */
     public BigDecimal getNormalBoardAllWidth() {
         return this.getWidth().multiply(BigDecimal.valueOf(this.cutTimes));

@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author CAT
@@ -56,39 +55,6 @@ public class BoardService {
             } else {
                 this.actionMapper.insertMachineAction(MachineAction.of(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId));
             }
-        }
-    }
-
-    /**
-     * 板材裁剪流程，负责定义下料板整个裁剪流程。
-     *
-     * @param cutBoard       下料板
-     * @param normalBoards   目标板材列表
-     * @param wasteThreshold 废料阈值
-     * @param currOrderId    当前工单 ID
-     */
-    public void cutting(CutBoard cutBoard, List<Map<Integer, NormalBoard>> normalBoards, BigDecimal wasteThreshold, Integer currOrderId) {
-        for (Map<Integer, NormalBoard> boardMap : normalBoards) {
-            for (Map.Entry<Integer, NormalBoard> map : boardMap.entrySet()) {
-                Integer orderId = map.getKey();
-                NormalBoard normalBoard = map.getValue();
-                if (normalBoard.getCutTimes() > 0) {
-                    NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
-                    this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, orderId);
-                }
-                for (int i = 0; i < normalBoard.getCutTimes(); i++) {
-                    BigDecimal remainingWidth = Arith.sub(cutBoard.getWidth(), normalBoard.getWidth());
-                    if (remainingWidth.compareTo(BoardUtils.CLAMP_DEPTH) <= 0) {
-                        NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
-                        this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, orderId);
-                    }
-                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, normalBoard, orderId);
-                }
-            }
-        }
-        if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
-            NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, BigDecimal.ZERO, wasteThreshold);
-            this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, currOrderId);
         }
     }
 

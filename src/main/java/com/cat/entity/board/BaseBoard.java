@@ -39,9 +39,9 @@ public abstract class BaseBoard {
     }
 
     /**
-     * 获取标准规格字符串。
+     * 获取标准板材规格字符串。
      *
-     * @return 标准规格字符串
+     * @return 标准板材规格字符串
      */
     public String getStandardSpecStr() {
         return BoardUtils.getStandardSpecStr(this.height, this.width, this.length);

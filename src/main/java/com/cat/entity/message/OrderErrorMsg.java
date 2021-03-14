@@ -15,7 +15,7 @@ public class OrderErrorMsg {
     private LocalDateTime createdAt;
 
     /**
-     * 获取一个消息对象。
+     * 实例化工单错误消息对象。
      *
      * @param orderId              工单 ID
      * @param cuttingSize          下料尺寸

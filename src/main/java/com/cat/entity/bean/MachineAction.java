@@ -26,6 +26,15 @@ public class MachineAction {
     private Integer orderId;
     private LocalDateTime createdAt;
 
+    /**
+     * 根据指定参数实例化机器动作对象
+     *
+     * @param actionCategory 动作类型
+     * @param dis            进刀距离
+     * @param baseBoard      板材对象
+     * @param orderId        工单 ID
+     * @return 机器动作对象
+     */
     public static MachineAction of(ActionCategory actionCategory, BigDecimal dis, BaseBoard baseBoard, Integer orderId) {
         MachineAction action = new MachineAction();
         action.setActionCategory(actionCategory.value);

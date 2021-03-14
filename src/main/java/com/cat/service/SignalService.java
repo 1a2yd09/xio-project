@@ -1,28 +1,25 @@
 package com.cat.service;
 
-import com.cat.dao.SignalDao;
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.signal.CuttingSignal;
-import com.cat.entity.signal.ProcessControlSignal;
 import com.cat.entity.signal.TakeBoardSignal;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
+import com.cat.mapper.SignalMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.concurrent.TimeUnit;
+import org.springframework.stereotype.Service;
 
 /**
  * @author CAT
  */
-@Component
+@Service
 public class SignalService {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    SignalDao signalDao;
+    SignalMapper signalMapper;
 
     /**
      * 接收新的下料信号。
@@ -34,15 +31,10 @@ public class SignalService {
     public CuttingSignal receiveNewCuttingSignal(WorkOrder order) throws InterruptedException {
         // test:
         this.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
-        while (true) {
-            logger.info("等待下料信号...");
-            CuttingSignal cuttingSignal = this.getLatestNotProcessedCuttingSignal();
-            if (cuttingSignal != null) {
-                logger.info("获取到新的下料信号...");
-                return cuttingSignal;
-            }
-            TimeUnit.SECONDS.sleep(3);
-        }
+        logger.info("等待下料信号...");
+        CuttingSignal signal = TaskService.CUTTING_MESSAGE_QUEUE.take();
+        logger.info("获取到新的下料信号...");
+        return signal;
     }
 
     /**
@@ -53,37 +45,9 @@ public class SignalService {
     public void waitingForNewProcessStartSignal() throws InterruptedException {
         // test:
         this.insertProcessControlSignal(ControlSignalCategory.START);
-        while (!this.isReceivedNewProcessControlSignal(ControlSignalCategory.START)) {
-            logger.info("等待流程启动信号...");
-            TimeUnit.SECONDS.sleep(3);
-        }
+        logger.info("等待流程启动信号...");
+        TaskService.START_CONTROL_MESSAGE_QUEUE.take();
         logger.info("获取到新的流程启动信号...");
-    }
-
-    /**
-     * 是否接收到新的流程控制信号。
-     *
-     * @param signalCategory 流程控制信号枚举类型
-     * @return true 表示接收到新的控制信号，false 表示未接收到新的控制信号
-     */
-    public boolean isReceivedNewProcessControlSignal(ControlSignalCategory signalCategory) {
-        ProcessControlSignal controlSignal = this.getLatestNotProcessedControlSignal(signalCategory);
-        if (controlSignal != null) {
-            controlSignal.setProcessed(true);
-            this.signalDao.updateProcessControlSignalProcessed(controlSignal);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * 根据控制信号类型查询最新未被处理的控制信号，不存在未被处理的控制信号时返回 null。
-     *
-     * @param signalCategory 控制信号枚举类型
-     * @return 控制信号
-     */
-    public ProcessControlSignal getLatestNotProcessedControlSignal(ControlSignalCategory signalCategory) {
-        return this.signalDao.getLatestNotProcessedControlSignal(signalCategory.value);
     }
 
     /**
@@ -92,7 +56,7 @@ public class SignalService {
      * @param signalCategory 控制信号枚举类型
      */
     public void insertProcessControlSignal(ControlSignalCategory signalCategory) {
-        this.signalDao.insertProcessControlSignal(signalCategory.value);
+        this.signalMapper.insertProcessControlSignal(signalCategory.value);
     }
 
     /**
@@ -101,7 +65,7 @@ public class SignalService {
      * @return 取板信号
      */
     public TakeBoardSignal getLatestTakeBoardSignal() {
-        return this.signalDao.getLatestTakeBoardSignal();
+        return this.signalMapper.getLatestTakeBoardSignal();
     }
 
     /**
@@ -110,7 +74,7 @@ public class SignalService {
      * @param orderId 工单 ID
      */
     public void insertTakeBoardSignal(Integer orderId) {
-        this.signalDao.insertTakeBoardSignal(orderId);
+        this.signalMapper.insertTakeBoardSignal(orderId);
     }
 
     /**
@@ -119,10 +83,10 @@ public class SignalService {
      * @return 下料信号
      */
     public CuttingSignal getLatestNotProcessedCuttingSignal() {
-        CuttingSignal cuttingSignal = this.signalDao.getLatestNotProcessedCuttingSignal();
+        CuttingSignal cuttingSignal = this.signalMapper.getLatestNotProcessedCuttingSignal();
         if (cuttingSignal != null) {
             cuttingSignal.setProcessed(true);
-            this.signalDao.updateCuttingSignalProcessed(cuttingSignal);
+            this.signalMapper.updateCuttingSignal(cuttingSignal);
             return cuttingSignal;
         }
         return null;
@@ -136,6 +100,6 @@ public class SignalService {
      * @param orderId     工单 ID
      */
     public void insertCuttingSignal(String cuttingSize, ForwardEdge forwardEdge, Integer orderId) {
-        this.signalDao.insertCuttingSignal(cuttingSize, forwardEdge, orderId);
+        this.signalMapper.insertCuttingSignal(cuttingSize, forwardEdge.code, orderId);
     }
 }

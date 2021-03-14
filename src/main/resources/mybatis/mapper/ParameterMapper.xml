@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cat.mapper.ParameterMapper">
+    <resultMap id="paramMap" type="com.cat.entity.param.OperatingParameter"/>
+
+    <select id="getLatestOperatingParameter" resultMap="paramMap">
+        SELECT TOP 1 *
+        FROM tb_operating_parameter
+        ORDER BY id DESC
+    </select>
+
+    <insert id="insertOperatingParameter">
+        INSERT INTO tb_operating_parameter (order_date, fixed_width, waste_threshold, sort_pattern, order_module)
+        VALUES (#{orderDate}, #{fixedWidth}, #{wasteThreshold}, #{sortPattern}, #{orderModule})
+    </insert>
+</mapper>

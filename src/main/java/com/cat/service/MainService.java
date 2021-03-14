@@ -12,13 +12,12 @@ import com.cat.entity.param.StockSpecification;
 import com.cat.entity.signal.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
-import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.OrderModule;
 import com.cat.utils.OrderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +26,7 @@ import java.util.Map;
 /**
  * @author CAT
  */
-@Component
+@Service
 public class MainService {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -93,10 +92,10 @@ public class MainService {
                     this.processCompletedAction(BoardCategory.STOCK, currentOrder, nextOrder);
                 }
 
-                if (signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.STOP)) {
-                    logger.info("接收到新的流程中止信号...");
-                    return;
-                }
+//                if (signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.STOP)) {
+//                    logger.info("接收到新的流程中止信号...");
+//                    return;
+//                }
             }
         }
     }

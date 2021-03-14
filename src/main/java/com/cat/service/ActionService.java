@@ -1,25 +1,24 @@
 package com.cat.service;
 
-import com.cat.dao.ActionDao;
 import com.cat.entity.bean.MachineAction;
 import com.cat.enums.ActionState;
+import com.cat.mapper.ActionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author CAT
  */
-@Component
+@Service
 public class ActionService {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    ActionDao actionDao;
+    ActionMapper actionMapper;
 
     /**
      * 等待所有机器动作都被处理完毕。
@@ -29,10 +28,8 @@ public class ActionService {
     public void waitingForAllMachineActionsCompleted() throws InterruptedException {
         // test:
         this.completedAllMachineActions();
-        while (!this.isAllMachineActionsProcessed()) {
-            logger.info("等待动作处理...");
-            TimeUnit.SECONDS.sleep(3);
-        }
+        logger.info("等待动作处理...");
+        TaskService.ACTION_DONE_MESSAGE_QUEUE.take();
         logger.info("动作处理完毕...");
     }
 
@@ -43,7 +40,7 @@ public class ActionService {
      */
     public boolean isAllMachineActionsProcessed() {
         // 如果机器动作表中的最后一个动作状态不为“未完成”，则表示全部机器动作都被处理完毕:
-        return !ActionState.INCOMPLETE.value.equals(this.actionDao.getFinalMachineActionState());
+        return !ActionState.INCOMPLETE.value.equals(this.actionMapper.getFinalMachineActionState());
     }
 
     /**
@@ -52,7 +49,7 @@ public class ActionService {
      * @return 记录数量
      */
     public Integer getMachineActionCount() {
-        return this.actionDao.getMachineActionCount();
+        return this.actionMapper.getMachineActionCount();
     }
 
     /**
@@ -61,7 +58,7 @@ public class ActionService {
      * @return 记录数量
      */
     public Integer getProcessedActionCount() {
-        return this.actionDao.getProcessedActionCount();
+        return this.actionMapper.getProcessedActionCount();
     }
 
     /**
@@ -70,14 +67,14 @@ public class ActionService {
      * @return 机器动作集合
      */
     public List<MachineAction> getAllMachineActions() {
-        return this.actionDao.getAllMachineActions();
+        return this.actionMapper.getAllMachineActions();
     }
 
     /**
      * 将当前机器动作表中的所有机器动作状态置为已完成。
      */
     public void completedAllMachineActions() {
-        this.actionDao.completedAllMachineActions();
+        this.actionMapper.completedAllMachineActions();
     }
 
     /**
@@ -86,20 +83,20 @@ public class ActionService {
      * @param id 动作 ID
      */
     public void completedMachineActionById(Integer id) {
-        this.actionDao.completedMachineActionById(id);
+        this.actionMapper.completedMachineActionById(id);
     }
 
     /**
      * 将机器动作表中的所有记录转移到已处理动作表。
      */
     public void transferAllMachineActions() {
-        this.actionDao.transferAllMachineActions();
+        this.actionMapper.transferAllMachineActions();
     }
 
     /**
      * 清空机器动作表。
      */
     public void truncateMachineAction() {
-        this.actionDao.truncateMachineAction();
+        this.actionMapper.truncateMachineAction();
     }
 }

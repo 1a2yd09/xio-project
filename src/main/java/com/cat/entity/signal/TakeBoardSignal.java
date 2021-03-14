@@ -1,24 +1,17 @@
 package com.cat.entity.signal;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 /**
  * @author CAT
  */
+@Data
+@NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TakeBoardSignal extends BaseSignal {
     private Integer orderId;
-
-    public Integer getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Integer orderId) {
-        this.orderId = orderId;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() +
-                "TakeBoardSignal{" +
-                "orderId=" + orderId +
-                '}';
-    }
 }

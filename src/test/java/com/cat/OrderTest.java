@@ -11,6 +11,7 @@ import com.cat.service.InventoryService;
 import com.cat.service.OrderService;
 import com.cat.service.ParameterService;
 import com.cat.utils.OrderUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -122,5 +123,11 @@ class OrderTest extends BaseTest {
         orderService.addOrderCompletedQuantity(order, Integer.parseInt(order.getProductQuantity()));
         assertEquals(0, order.getIncompleteQuantity());
         assertEquals(OrderState.COMPLETED.value, order.getOperationState());
+    }
+
+    @Test
+    void testGetOrder() {
+        Assertions.assertEquals(82, this.orderService.getNotBottomOrders(LocalDate.of(2019, 11, 13)).size());
+        Assertions.assertEquals(677, this.orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, LocalDate.of(2019, 11, 13)).size());
     }
 }

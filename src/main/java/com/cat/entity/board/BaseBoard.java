@@ -2,6 +2,7 @@ package com.cat.entity.board;
 
 import com.cat.enums.BoardCategory;
 import com.cat.utils.BoardUtils;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * @author CAT
  */
+@Data
 public abstract class BaseBoard {
     private BigDecimal height;
     private BigDecimal width;
@@ -43,56 +45,5 @@ public abstract class BaseBoard {
      */
     public String getStandardSpecStr() {
         return BoardUtils.getStandardSpecStr(this.height, this.width, this.length);
-    }
-
-    public BigDecimal getHeight() {
-        return height;
-    }
-
-    public void setHeight(BigDecimal height) {
-        this.height = height;
-    }
-
-    public BigDecimal getWidth() {
-        return width;
-    }
-
-    public void setWidth(BigDecimal width) {
-        this.width = width;
-    }
-
-    public BigDecimal getLength() {
-        return length;
-    }
-
-    public void setLength(BigDecimal length) {
-        this.length = length;
-    }
-
-    public String getMaterial() {
-        return material;
-    }
-
-    public void setMaterial(String material) {
-        this.material = material;
-    }
-
-    public BoardCategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(BoardCategory category) {
-        this.category = category;
-    }
-
-    @Override
-    public String toString() {
-        return "BaseBoard{" +
-                "height=" + height +
-                ", width=" + width +
-                ", length=" + length +
-                ", material='" + material + '\'' +
-                ", category=" + category +
-                '}';
     }
 }

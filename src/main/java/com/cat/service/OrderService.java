@@ -1,7 +1,5 @@
 package com.cat.service;
 
-import com.cat.dao.InventoryDao;
-import com.cat.dao.OrderDao;
 import com.cat.entity.bean.Inventory;
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.param.OperatingParameter;
@@ -9,12 +7,16 @@ import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderModule;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.OrderState;
+import com.cat.mapper.InventoryMapper;
+import com.cat.mapper.OrderMapper;
 import com.cat.utils.BoardUtils;
 import com.cat.utils.OrderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -23,12 +25,12 @@ import java.util.stream.Collectors;
 /**
  * @author CAT
  */
-@Component
+@Service
 public class OrderService {
     @Autowired
-    OrderDao orderDao;
+    InventoryMapper inventoryMapper;
     @Autowired
-    InventoryDao inventoryDao;
+    OrderMapper orderMapper;
 
     /**
      * 增加工单的已完工数目并更新工单状态，如果更新后工单状态为已完工，则将工单从生产工单表迁移至完工工单表。
@@ -38,7 +40,7 @@ public class OrderService {
      */
     public void addOrderCompletedQuantity(WorkOrder order, int quantity) {
         order.setCompletedQuantity(OrderUtils.addQuantityPropWithInt(order.getCompletedQuantity(), quantity));
-        this.orderDao.updateOrderCompletedQuantity(order);
+        this.orderMapper.updateOrderCompletedQuantity(order);
         this.updateOrderState(order, order.getIncompleteQuantity() == 0 ? OrderState.COMPLETED : OrderState.STARTED);
         if (OrderState.COMPLETED.value.equals(order.getOperationState())) {
             this.transferWorkOrderToCompleted(order.getId());
@@ -54,7 +56,7 @@ public class OrderService {
      */
     public List<WorkOrder> getPreprocessNotBottomOrders(LocalDate date) {
         List<WorkOrder> orders = this.getNotBottomOrders(date);
-        Map<String, Inventory> stockMap = this.inventoryDao.getInventories(BoardCategory.STOCK.value)
+        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(null, BoardCategory.STOCK.value)
                 .stream()
                 .collect(Collectors.toMap(stock -> BoardUtils.getStandardSpecStr(stock.getSpecification()), Function.identity()));
 
@@ -65,7 +67,7 @@ public class OrderService {
                 // 使用库存件作为成品属于工单开工的行为之一:
                 this.addOrderCompletedQuantity(order, usedStockQuantity);
                 stock.setQuantity(stock.getQuantity() - usedStockQuantity);
-                this.inventoryDao.updateInventoryQuantity(stock);
+                this.inventoryMapper.updateInventoryQuantity(stock);
             }
         }
 
@@ -80,12 +82,22 @@ public class OrderService {
      * @return 轿底工单集合
      */
     public List<WorkOrder> getBottomOrders(String sortPattern, LocalDate date) {
-        List<WorkOrder> orders = this.orderDao.getBottomOrders(date);
+        List<WorkOrder> orders = this.orderMapper.getBottomOrders(OrderModule.BOTTOM.value, LocalDateTime.of(date, LocalTime.of(0, 0, 0, 0)));
         if (OrderSortPattern.BY_SPEC.value.equals(sortPattern)) {
             // 如果要求按照规格排序，指的是”依次“按照成品的厚度、宽度、长度降序排序，三者都相同则按工单 ID 升序排序:
             orders.sort((o1, o2) -> {
                 int retVal = BoardUtils.compareTwoSpecStr(o1.getProductSpecification(), o2.getProductSpecification());
                 return retVal != 0 ? -retVal : o1.getId() - o2.getId();
+            });
+        } else {
+            orders.sort((o1, o2) -> {
+                Integer sn1 = Integer.parseInt(o1.getSequenceNumber());
+                Integer sn2 = Integer.parseInt(o2.getSequenceNumber());
+                if (!sn1.equals(sn2)) {
+                    return sn1.compareTo(sn2);
+                } else {
+                    return o1.getId() - o2.getId();
+                }
             });
         }
         return orders;
@@ -98,7 +110,17 @@ public class OrderService {
      * @return 对重直梁工单集合
      */
     public List<WorkOrder> getNotBottomOrders(LocalDate date) {
-        return this.orderDao.getNotBottomOrders(date);
+        List<WorkOrder> orders = this.orderMapper.getNotBottomOrders(OrderModule.BOTTOM.value, LocalDateTime.of(date, LocalTime.of(0, 0, 0, 0)));
+        orders.sort((o1, o2) -> {
+            Integer sn1 = Integer.parseInt(o1.getSequenceNumber());
+            Integer sn2 = Integer.parseInt(o2.getSequenceNumber());
+            if (!sn1.equals(sn2)) {
+                return sn1.compareTo(sn2);
+            } else {
+                return o1.getId() - o2.getId();
+            }
+        });
+        return orders;
     }
 
     /**
@@ -108,7 +130,7 @@ public class OrderService {
      * @return 工单
      */
     public WorkOrder getOrderById(Integer id) {
-        return this.orderDao.getOrderById(id);
+        return this.orderMapper.getOrderById(id);
     }
 
     /**
@@ -119,7 +141,7 @@ public class OrderService {
      */
     public void updateOrderState(WorkOrder order, OrderState state) {
         order.setOperationState(state.value);
-        this.orderDao.updateOrderState(order);
+        this.orderMapper.updateOrderState(order);
     }
 
     /**
@@ -128,7 +150,7 @@ public class OrderService {
      * @return 全体生产工单
      */
     public List<WorkOrder> getAllProductionOrders() {
-        return this.orderDao.getAllProductionOrders();
+        return this.orderMapper.getAllProductionOrders();
     }
 
     /**
@@ -138,7 +160,7 @@ public class OrderService {
      */
     public List<WorkOrder> getPreprocessProductionOrders() {
         List<WorkOrder> orders = this.getAllProductionOrders();
-        Map<String, Inventory> stockMap = this.inventoryDao.getInventories(BoardCategory.STOCK.value)
+        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(null, BoardCategory.STOCK.value)
                 .stream()
                 .collect(Collectors.toMap(stock -> BoardUtils.getStandardSpecStr(stock.getSpecification()), Function.identity()));
 
@@ -149,7 +171,7 @@ public class OrderService {
                 // 使用库存件作为成品属于工单开工的行为之一:
                 this.addOrderCompletedQuantity(order, usedStockQuantity);
                 stock.setQuantity(stock.getQuantity() - usedStockQuantity);
-                this.inventoryDao.updateInventoryQuantity(stock);
+                this.inventoryMapper.updateInventoryQuantity(stock);
             }
         }
 
@@ -177,7 +199,7 @@ public class OrderService {
      * @param id 工单 ID。
      */
     public void deleteRemoteOrderById(Integer id) {
-        this.orderDao.deleteRemoteOrderById(id);
+        this.orderMapper.deleteRemoteOrderById(id);
     }
 
     /**
@@ -186,7 +208,7 @@ public class OrderService {
      * @param id 工单 ID。
      */
     public void deleteOrderById(Integer id) {
-        this.orderDao.deleteOrderById(id);
+        this.orderMapper.deleteOrderById(id);
     }
 
     /**
@@ -196,7 +218,7 @@ public class OrderService {
      * @param id          工单 ID
      */
     public void updateRemoteOrderCuttingSize(String cuttingSize, Integer id) {
-        this.orderDao.updateRemoteOrderCuttingSize(cuttingSize, id);
+        this.orderMapper.updateRemoteOrderCuttingSize(cuttingSize, id);
     }
 
     /**
@@ -205,7 +227,7 @@ public class OrderService {
      * @param id 工单 ID
      */
     public void transferWorkOrderToCompleted(Integer id) {
-        this.orderDao.transferWorkOrderToCompleted(id);
+        this.orderMapper.transferWorkOrderToCompleted(id);
     }
 
     /**
@@ -214,6 +236,6 @@ public class OrderService {
      * @return 工单个数
      */
     public Integer getCompletedOrderCount() {
-        return this.orderDao.getCompletedOrderCount();
+        return this.orderMapper.getCompletedOrderCount();
     }
 }

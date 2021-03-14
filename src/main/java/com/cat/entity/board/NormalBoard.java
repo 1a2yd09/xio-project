@@ -1,12 +1,18 @@
 package com.cat.entity.board;
 
 import com.cat.enums.BoardCategory;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
 /**
  * @author CAT
  */
+@Data
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class NormalBoard extends BaseBoard {
     private Integer cutTimes;
 
@@ -23,23 +29,12 @@ public class NormalBoard extends BaseBoard {
         this.cutTimes = 0;
     }
 
-    public Integer getCutTimes() {
-        return cutTimes;
-    }
-
-    public void setCutTimes(Integer cutTimes) {
-        this.cutTimes = cutTimes;
-    }
-
+    /**
+     * 获取板材总宽度。
+     *
+     * @return 板材总宽度
+     */
     public BigDecimal getNormalBoardAllWidth() {
         return this.getWidth().multiply(BigDecimal.valueOf(this.cutTimes));
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() +
-                "NormalBoard{" +
-                "cutTimes=" + cutTimes +
-                '}';
     }
 }

@@ -1,10 +1,13 @@
 package com.cat.entity.message;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
  * @author CAT
  */
+@Data
 public class OrderErrorMsg {
     private Integer orderId;
     private String cuttingSize;
@@ -26,47 +29,5 @@ public class OrderErrorMsg {
         msg.setProductSpecification(productSpecification);
         msg.setCreatedAt(LocalDateTime.now());
         return msg;
-    }
-
-    public Integer getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Integer orderId) {
-        this.orderId = orderId;
-    }
-
-    public String getCuttingSize() {
-        return cuttingSize;
-    }
-
-    public void setCuttingSize(String cuttingSize) {
-        this.cuttingSize = cuttingSize;
-    }
-
-    public String getProductSpecification() {
-        return productSpecification;
-    }
-
-    public void setProductSpecification(String productSpecification) {
-        this.productSpecification = productSpecification;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "OrderErrorMsg{" +
-                "orderId=" + orderId +
-                ", cuttingSize='" + cuttingSize + '\'' +
-                ", productSpecification='" + productSpecification + '\'' +
-                ", createdAt=" + createdAt +
-                '}';
     }
 }

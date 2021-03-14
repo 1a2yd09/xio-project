@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cat.mapper.ActionMapper">
+    <resultMap id="actionMap" type="com.cat.entity.bean.MachineAction"/>
+
+    <insert id="insertMachineAction">
+        INSERT INTO tb_machine_action (action_category, cut_distance, board_category, board_specification,
+                                       board_material, order_id)
+        VALUES (#{actionCategory}, #{cutDistance}, #{boardCategory}, #{boardSpecification}, #{boardMaterial},
+                #{orderId})
+    </insert>
+
+    <update id="truncateMachineAction">
+        TRUNCATE TABLE tb_machine_action
+    </update>
+
+    <select id="getMachineActionCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM tb_machine_action
+    </select>
+
+    <select id="getProcessedActionCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM tb_processed_action
+    </select>
+
+    <select id="getAllMachineActions" resultMap="actionMap">
+        SELECT *
+        FROM tb_machine_action
+        ORDER BY id
+    </select>
+
+    <select id="getFinalMachineActionState" resultType="string">
+        SELECT TOP 1 state
+        FROM tb_machine_action
+        ORDER BY id DESC
+    </select>
+
+    <update id="completedAllMachineActions">
+        UPDATE tb_machine_action
+        SET state = N'已完成'
+        WHERE state != N'已完成'
+    </update>
+
+    <update id="completedMachineActionById">
+        UPDATE tb_machine_action
+        SET state = N'已完成'
+        WHERE id = #{id}
+    </update>
+
+    <insert id="transferAllMachineActions">
+        INSERT INTO tb_processed_action
+        SELECT id,
+               state,
+               action_category,
+               cut_distance,
+               board_category,
+               board_specification,
+               board_material,
+               order_id,
+               created_at
+        FROM tb_machine_action
+    </insert>
+</mapper>

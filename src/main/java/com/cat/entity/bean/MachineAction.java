@@ -1,11 +1,20 @@
 package com.cat.entity.bean;
 
+import com.cat.entity.board.BaseBoard;
+import com.cat.enums.ActionCategory;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
  * @author CAT
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MachineAction {
     private Long id;
     private String state;
@@ -17,90 +26,14 @@ public class MachineAction {
     private Integer orderId;
     private LocalDateTime createdAt;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public String getActionCategory() {
-        return actionCategory;
-    }
-
-    public void setActionCategory(String actionCategory) {
-        this.actionCategory = actionCategory;
-    }
-
-    public BigDecimal getCutDistance() {
-        return cutDistance;
-    }
-
-    public void setCutDistance(BigDecimal cutDistance) {
-        this.cutDistance = cutDistance;
-    }
-
-    public String getBoardCategory() {
-        return boardCategory;
-    }
-
-    public void setBoardCategory(String boardCategory) {
-        this.boardCategory = boardCategory;
-    }
-
-    public String getBoardSpecification() {
-        return boardSpecification;
-    }
-
-    public void setBoardSpecification(String boardSpecification) {
-        this.boardSpecification = boardSpecification;
-    }
-
-    public String getBoardMaterial() {
-        return boardMaterial;
-    }
-
-    public void setBoardMaterial(String boardMaterial) {
-        this.boardMaterial = boardMaterial;
-    }
-
-    public Integer getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Integer orderId) {
-        this.orderId = orderId;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "MachineAction{" +
-                "id=" + id +
-                ", state='" + state + '\'' +
-                ", actionCategory='" + actionCategory + '\'' +
-                ", cutDistance=" + cutDistance +
-                ", boardCategory='" + boardCategory + '\'' +
-                ", boardSpecification='" + boardSpecification + '\'' +
-                ", boardMaterial='" + boardMaterial + '\'' +
-                ", orderId=" + orderId +
-                ", createdAt=" + createdAt +
-                '}';
+    public static MachineAction of(ActionCategory actionCategory, BigDecimal dis, BaseBoard baseBoard, Integer orderId) {
+        MachineAction action = new MachineAction();
+        action.setActionCategory(actionCategory.value);
+        action.setCutDistance(dis);
+        action.setBoardCategory(baseBoard.getCategory().value);
+        action.setBoardSpecification(baseBoard.getStandardSpecStr());
+        action.setBoardMaterial(baseBoard.getMaterial());
+        action.setOrderId(orderId);
+        return action;
     }
 }

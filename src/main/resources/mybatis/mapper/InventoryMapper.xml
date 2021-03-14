@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cat.mapper.InventoryMapper">
+    <resultMap id="inventoryMap" type="com.cat.entity.bean.Inventory"/>
+
+    <select id="getInventories" resultMap="inventoryMap">
+        SELECT *
+        FROM tb_inventory
+        WHERE category = #{category}
+        <if test="material != null">
+            AND material = #{material}
+        </if>
+    </select>
+
+    <insert id="insertInventory">
+        INSERT INTO tb_inventory (specification, material, quantity, category)
+        VALUES (#{specification}, #{material}, #{quantity}, #{category})
+    </insert>
+
+    <update id="updateInventoryQuantity">
+        UPDATE tb_inventory
+        SET quantity = #{quantity}
+        WHERE id = #{id}
+    </update>
+
+    <select id="getInventoryCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM tb_inventory
+    </select>
+</mapper>

@@ -1,24 +1,17 @@
 package com.cat.entity.signal;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 /**
  * @author CAT
  */
+@Data
+@NoArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class ProcessControlSignal extends BaseSignal {
     private Integer category;
-
-    public Integer getCategory() {
-        return category;
-    }
-
-    public void setCategory(Integer category) {
-        this.category = category;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() +
-                "ProcessControlSignal{" +
-                "category=" + category +
-                '}';
-    }
 }

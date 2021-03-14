@@ -19,23 +19,23 @@ class SignalTest extends BaseTest {
     @Autowired
     SignalService signalService;
 
-    @Test
-    void testProcessStopSignal() {
-        assertFalse(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.STOP));
-        signalService.insertProcessControlSignal(ControlSignalCategory.STOP);
-        ProcessControlSignal controlSignal = signalService.getLatestNotProcessedControlSignal(ControlSignalCategory.STOP);
-        System.out.println(controlSignal);
-        assertTrue(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.STOP));
-    }
-
-    @Test
-    void testProcessStartSignal() {
-        assertFalse(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.START));
-        signalService.insertProcessControlSignal(ControlSignalCategory.START);
-        ProcessControlSignal controlSignal = signalService.getLatestNotProcessedControlSignal(ControlSignalCategory.START);
-        System.out.println(controlSignal);
-        assertTrue(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.START));
-    }
+//    @Test
+//    void testProcessStopSignal() {
+//        assertFalse(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.STOP));
+//        signalService.insertProcessControlSignal(ControlSignalCategory.STOP);
+//        ProcessControlSignal controlSignal = signalService.getLatestNotProcessedControlSignal(ControlSignalCategory.STOP);
+//        System.out.println(controlSignal);
+//        assertTrue(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.STOP));
+//    }
+//
+//    @Test
+//    void testProcessStartSignal() {
+//        assertFalse(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.START));
+//        signalService.insertProcessControlSignal(ControlSignalCategory.START);
+//        ProcessControlSignal controlSignal = signalService.getLatestNotProcessedControlSignal(ControlSignalCategory.START);
+//        System.out.println(controlSignal);
+//        assertTrue(signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.START));
+//    }
 
     @Test
     void testTakeBoardSignal() {

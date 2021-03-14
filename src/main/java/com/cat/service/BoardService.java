@@ -1,8 +1,8 @@
 package com.cat.service;
 
-import com.cat.dao.ActionDao;
 import com.cat.entity.Board;
 import com.cat.entity.BoardList;
+import com.cat.entity.bean.MachineAction;
 import com.cat.entity.bean.WorkOrder;
 import com.cat.entity.board.CutBoard;
 import com.cat.entity.board.NormalBoard;
@@ -10,11 +10,12 @@ import com.cat.entity.param.StockSpecification;
 import com.cat.enums.ActionCategory;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.ForwardEdge;
+import com.cat.mapper.ActionMapper;
 import com.cat.utils.Arith;
 import com.cat.utils.BoardUtils;
 import com.cat.utils.ParamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,10 +24,10 @@ import java.util.Map;
 /**
  * @author CAT
  */
-@Component
+@Service
 public class BoardService {
     @Autowired
-    ActionDao actionDao;
+    ActionMapper actionMapper;
 
     /**
      * 板材裁剪函数，负责下料板材的实际旋转和裁剪操作。
@@ -40,7 +41,7 @@ public class BoardService {
         if (targetBoard.getCutTimes() > 0) {
             if (cutBoard.getForwardEdge() != forwardEdge) {
                 cutBoard.setForwardEdge(forwardEdge);
-                this.actionDao.insertMachineAction(ActionCategory.ROTATE, cutBoard, orderId);
+                this.actionMapper.insertMachineAction(MachineAction.of(ActionCategory.ROTATE, BigDecimal.ZERO, cutBoard, orderId));
             }
 
             BigDecimal dis = targetBoard.getWidth();
@@ -51,9 +52,9 @@ public class BoardService {
             }
 
             if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
-                this.actionDao.insertMachineAction(ActionCategory.CUT, dis, targetBoard, orderId);
+                this.actionMapper.insertMachineAction(MachineAction.of(ActionCategory.CUT, dis, targetBoard, orderId));
             } else {
-                this.actionDao.insertMachineAction(ActionCategory.SEND, targetBoard, orderId);
+                this.actionMapper.insertMachineAction(MachineAction.of(ActionCategory.SEND, BigDecimal.ZERO, targetBoard, orderId));
             }
         }
     }

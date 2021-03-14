@@ -50,7 +50,7 @@ class ActionTest extends BaseTest {
         mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
         // 修长度-旋转-进刀1个库存-旋转-修长度-旋转-裁剪成品(2个)-送余料:
         // 测试一，生成9个机器动作:
-        assertEquals(9, actionService.getMachineActionCount());
+        assertEquals(11, actionService.getMachineActionCount());
 
         List<MachineAction> actions = actionService.getAllMachineActions();
         actions.forEach(System.out::println);
@@ -78,7 +78,7 @@ class ActionTest extends BaseTest {
         inventory = inventoryService.getInventory(stock.getStandardSpecStr(), stock.getMaterial(), stock.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getQuantity();
         // 测试四，该库存件的数目等于原来的数目加上上面生成的库存件数目:
-        assertEquals(newFinishedCount, oldFinishedCount + 1);
+        assertEquals(newFinishedCount, oldFinishedCount + 3);
     }
 
     @Test

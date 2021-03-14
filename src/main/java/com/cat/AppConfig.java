@@ -4,18 +4,24 @@ import com.cat.enums.OrderModule;
 import com.cat.service.MainService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -23,6 +29,8 @@ import java.util.Properties;
  */
 @Configuration
 @ComponentScan
+@MapperScan("com.cat.mapper")
+@EnableScheduling
 @EnableTransactionManagement
 @PropertySource({"classpath:jdbc.properties", "classpath:smtp.properties"})
 public class AppConfig {
@@ -30,7 +38,7 @@ public class AppConfig {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         MainService mainService = context.getBean(MainService.class);
         try {
-            mainService.start(OrderModule.BOTTOM_PLATFORM);
+//            mainService.start(OrderModule.BOTTOM_PLATFORM);
             mainService.start(OrderModule.STRAIGHT_WEIGHT);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -47,6 +55,16 @@ public class AppConfig {
     @Bean
     JdbcTemplate createJdbcTemplate(@Autowired DataSource dataSource) {
         return new JdbcTemplate(dataSource);
+    }
+
+    @Bean
+    SqlSessionFactory createSqlSessionFactory(@Autowired DataSource dataSource) throws Exception {
+        var sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSource);
+        var resolver = new PathMatchingResourcePatternResolver();
+        sqlSessionFactoryBean.setMapperLocations(resolver.getResources("classpath:mybatis/mapper/*.xml"));
+        Objects.requireNonNull(sqlSessionFactoryBean.getObject()).getConfiguration().setMapUnderscoreToCamelCase(true);
+        return sqlSessionFactoryBean.getObject();
     }
 
     @Bean

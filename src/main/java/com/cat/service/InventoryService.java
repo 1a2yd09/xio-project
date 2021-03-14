@@ -1,18 +1,18 @@
 package com.cat.service;
 
-import com.cat.dao.InventoryDao;
 import com.cat.entity.bean.Inventory;
+import com.cat.mapper.InventoryMapper;
 import com.cat.utils.BoardUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * @author CAT
  */
-@Component
+@Service
 public class InventoryService {
     @Autowired
-    InventoryDao inventoryDao;
+    InventoryMapper inventoryMapper;
 
     /**
      * 根据存货规格、材质、类型获取唯一的存货记录，不存在则返回 null。
@@ -23,7 +23,7 @@ public class InventoryService {
      * @return 存货
      */
     public Inventory getInventory(String specification, String material, String category) {
-        return this.inventoryDao.getInventories(material, category)
+        return this.inventoryMapper.getInventories(material, category)
                 .stream()
                 .filter(inventory -> BoardUtils.compareTwoSpecStr(inventory.getSpecification(), specification) == 0)
                 .findFirst()
@@ -39,7 +39,7 @@ public class InventoryService {
         Inventory existedInventory = this.getInventory(inventory.getSpecification(), inventory.getMaterial(), inventory.getCategory());
         if (existedInventory != null) {
             existedInventory.setQuantity(existedInventory.getQuantity() + inventory.getQuantity());
-            this.inventoryDao.updateInventoryQuantity(existedInventory);
+            this.inventoryMapper.updateInventoryQuantity(existedInventory);
         } else {
             this.insertInventory(inventory.getSpecification(), inventory.getMaterial(), inventory.getQuantity(), inventory.getCategory());
         }
@@ -54,7 +54,7 @@ public class InventoryService {
      * @param category      类型
      */
     public void insertInventory(String specification, String material, Integer quantity, String category) {
-        this.inventoryDao.insertInventory(specification, material, quantity, category);
+        this.inventoryMapper.insertInventory(specification, material, quantity, category);
     }
 
     /**
@@ -63,6 +63,6 @@ public class InventoryService {
      * @return 记录数量
      */
     public Integer getInventoryCount() {
-        return this.inventoryDao.getInventoryCount();
+        return this.inventoryMapper.getInventoryCount();
     }
 }

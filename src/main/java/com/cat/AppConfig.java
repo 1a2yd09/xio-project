@@ -38,7 +38,7 @@ public class AppConfig {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
         MainService mainService = context.getBean(MainService.class);
         try {
-//            mainService.start(OrderModule.BOTTOM_PLATFORM);
+            mainService.start(OrderModule.BOTTOM_PLATFORM);
             mainService.start(OrderModule.STRAIGHT_WEIGHT);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

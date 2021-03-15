@@ -95,4 +95,19 @@
         SELECT COUNT(*)
         FROM tb_completed_work_order;
     </select>
+
+    <update id="restoreDatabase">
+        TRUNCATE TABLE tb_completed_work_order;
+        TRUNCATE TABLE tb_cutting_signal;
+        TRUNCATE TABLE tb_inventory;
+        TRUNCATE TABLE tb_local_work_order;
+        TRUNCATE TABLE tb_machine_action;
+        TRUNCATE TABLE tb_process_control_signal;
+        TRUNCATE TABLE tb_processed_action;
+        TRUNCATE TABLE tb_stock_specification;
+        TRUNCATE TABLE tb_take_board_signal;
+        INSERT INTO tb_local_work_order
+        SELECT *
+        FROM tb_remote_work_order;
+    </update>
 </mapper>

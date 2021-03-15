@@ -1,23 +1,19 @@
 package com.cat;
 
-import com.cat.pojo.Inventory;
 import com.cat.enums.BoardCategory;
+import com.cat.pojo.Inventory;
 import com.cat.service.InventoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Transactional
-@Rollback
 class InventoryTest extends BaseTest {
     @Autowired
     InventoryService inventoryService;
 
     @Test
-    void testupdateInventoryQuantity() {
+    void testUpdateInventoryQuantity() {
         int retVal = inventoryService.getInventoryCount();
         assertEquals(0, retVal);
 

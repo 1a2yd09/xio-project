@@ -1,14 +1,14 @@
 package com.cat.service;
 
-import com.cat.pojo.Inventory;
-import com.cat.pojo.WorkOrder;
-import com.cat.pojo.OperatingParameter;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderModule;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.OrderState;
 import com.cat.mapper.InventoryMapper;
 import com.cat.mapper.OrderMapper;
+import com.cat.pojo.Inventory;
+import com.cat.pojo.OperatingParameter;
+import com.cat.pojo.WorkOrder;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class OrderService {
      */
     public List<WorkOrder> getPreprocessNotBottomOrders(LocalDate date) {
         List<WorkOrder> orders = this.getNotBottomOrders(date);
-        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(null, BoardCategory.STOCK.value)
+        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(new Inventory(BoardCategory.STOCK.value))
                 .stream()
                 .collect(Collectors.toMap(stock -> BoardUtil.getStandardSpecStr(stock.getSpecification()), Function.identity()));
 
@@ -160,7 +160,7 @@ public class OrderService {
      */
     public List<WorkOrder> getPreprocessProductionOrders() {
         List<WorkOrder> orders = this.getAllProductionOrders();
-        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(null, BoardCategory.STOCK.value)
+        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(new Inventory(BoardCategory.STOCK.value))
                 .stream()
                 .collect(Collectors.toMap(stock -> BoardUtil.getStandardSpecStr(stock.getSpecification()), Function.identity()));
 

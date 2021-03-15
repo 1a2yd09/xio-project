@@ -1,18 +1,15 @@
 package com.cat;
 
+import com.cat.enums.ForwardEdge;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.TakeBoardSignal;
-import com.cat.enums.ForwardEdge;
 import com.cat.service.SignalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-@Transactional
-@Rollback
 class SignalTest extends BaseTest {
     @Autowired
     SignalService signalService;

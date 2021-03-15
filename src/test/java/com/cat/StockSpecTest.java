@@ -5,16 +5,12 @@ import com.cat.service.BoardService;
 import com.cat.service.StockSpecService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Transactional
-@Rollback
 class StockSpecTest extends BaseTest {
     @Autowired
     StockSpecService stockSpecService;

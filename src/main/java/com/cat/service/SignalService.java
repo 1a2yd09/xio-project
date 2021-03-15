@@ -1,11 +1,11 @@
 package com.cat.service;
 
-import com.cat.pojo.WorkOrder;
-import com.cat.pojo.CuttingSignal;
-import com.cat.pojo.TakeBoardSignal;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
 import com.cat.mapper.SignalMapper;
+import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.TakeBoardSignal;
+import com.cat.pojo.WorkOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

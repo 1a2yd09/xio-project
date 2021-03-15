@@ -1,12 +1,9 @@
 package com.cat;
 
-import com.cat.pojo.WorkOrder;
-import com.cat.pojo.CutBoard;
-import com.cat.pojo.NormalBoard;
-import com.cat.pojo.OperatingParameter;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.OrderState;
+import com.cat.pojo.*;
 import com.cat.service.InventoryService;
 import com.cat.service.OrderService;
 import com.cat.service.ParameterService;
@@ -14,8 +11,6 @@ import com.cat.utils.OrderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -98,16 +93,14 @@ class OrderTest extends BaseTest {
     }
 
     @Test
-    @Rollback
-    @Transactional
     void testGetNotBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getOrderDate();
         // 获取未预处理的直梁工单，共82个
         List<WorkOrder> orders = orderService.getNotBottomOrders(date);
         assertEquals(82, orders.size());
-        inventoryService.insertInventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value);
-        inventoryService.insertInventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value);
+        inventoryService.insertInventory(new Inventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value));
+        inventoryService.insertInventory(new Inventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value));
         // 获取经过预处理的直梁工单，其中前8个工单有6个因为使用了已有的库存件作为成品，因此未完工的工单数量为76个
         orders = orderService.getPreprocessNotBottomOrders(date);
         assertEquals(76, orders.size());
@@ -116,8 +109,6 @@ class OrderTest extends BaseTest {
     }
 
     @Test
-    @Rollback
-    @Transactional
     void testAddOrderCompletedQuantity() {
         WorkOrder order = orderService.getOrderById(3098562);
         orderService.addOrderCompletedQuantity(order, Integer.parseInt(order.getProductQuantity()));

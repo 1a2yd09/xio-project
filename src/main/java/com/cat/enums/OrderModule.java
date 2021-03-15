@@ -18,11 +18,11 @@ public enum OrderModule {
      */
     WEIGHT("对重架工地模块"),
     /**
-     * 轿底平台
+     * 轿底平台工单集合，包含轿底吊顶工地模块
      */
     BOTTOM_PLATFORM("轿底平台"),
     /**
-     * 直梁对重
+     * 直梁对重工单集合，包含直梁工地模块和对重架工地模块
      */
     STRAIGHT_WEIGHT("直梁对重");
 

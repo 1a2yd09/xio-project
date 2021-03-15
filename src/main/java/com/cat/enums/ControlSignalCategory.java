@@ -5,11 +5,11 @@ package com.cat.enums;
  */
 public enum ControlSignalCategory {
     /**
-     * 启动信号值
+     * 流程启动
      */
     START(1),
     /**
-     * 暂停信号值
+     * 流程暂停
      */
     STOP(0);
 

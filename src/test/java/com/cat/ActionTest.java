@@ -1,27 +1,23 @@
 package com.cat;
 
-import com.cat.pojo.Inventory;
-import com.cat.pojo.MachineAction;
-import com.cat.pojo.WorkOrder;
-import com.cat.pojo.NormalBoard;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderState;
+import com.cat.pojo.Inventory;
+import com.cat.pojo.MachineAction;
+import com.cat.pojo.NormalBoard;
+import com.cat.pojo.WorkOrder;
 import com.cat.service.*;
 import com.cat.utils.OrderUtil;
 import com.cat.utils.SignalUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Transactional
-@Rollback
 class ActionTest extends BaseTest {
     @Autowired
     ActionService actionService;
@@ -92,7 +88,7 @@ class ActionTest extends BaseTest {
         NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         // 测试一，生成8个机器动作:
-        assertEquals(8, actionService.getMachineActionCount());
+        assertEquals(10, actionService.getMachineActionCount());
 
         List<MachineAction> actions = actionService.getAllMachineActions();
         actions.forEach(System.out::println);
@@ -120,7 +116,7 @@ class ActionTest extends BaseTest {
         inventory = inventoryService.getInventory(semiProduct.getStandardSpecStr(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getQuantity();
         // 测试四，该半成品的数目等于原来的数目加上上面生成的半成品数目:
-        assertEquals(newFinishedCount, oldFinishedCount + 1);
+        assertEquals(newFinishedCount, oldFinishedCount + 3);
     }
 
     @Test

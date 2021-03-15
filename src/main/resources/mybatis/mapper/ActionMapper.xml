@@ -8,8 +8,8 @@
     <insert id="insertMachineAction">
         INSERT INTO tb_machine_action (action_category, cut_distance, board_category, board_specification,
                                        board_material, order_id)
-        VALUES (#{actionCategory}, #{cutDistance}, #{boardCategory}, #{boardSpecification}, #{boardMaterial},
-                #{orderId})
+        VALUES (#{actionCategory}, #{cutDistance}, #{boardCategory}, #{boardSpecification},
+                #{boardMaterial}, #{orderId})
     </insert>
 
     <update id="truncateMachineAction">

@@ -91,4 +91,6 @@ public interface OrderMapper {
      * @return 工单个数
      */
     int getCompletedOrderCount();
+
+    void restoreDatabase();
 }

@@ -1,9 +1,8 @@
 package com.cat.service;
 
-import com.cat.pojo.Inventory;
 import com.cat.mapper.InventoryMapper;
+import com.cat.pojo.Inventory;
 import com.cat.utils.BoardUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,8 +10,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class InventoryService {
-    @Autowired
-    InventoryMapper inventoryMapper;
+    private final InventoryMapper inventoryMapper;
+
+    public InventoryService(InventoryMapper inventoryMapper) {
+        this.inventoryMapper = inventoryMapper;
+    }
 
     /**
      * 根据存货规格、材质、类型获取唯一的存货记录，不存在则返回 null。
@@ -23,7 +25,7 @@ public class InventoryService {
      * @return 存货
      */
     public Inventory getInventory(String specification, String material, String category) {
-        return this.inventoryMapper.getInventories(material, category)
+        return this.inventoryMapper.getInventories(new Inventory(material, category))
                 .stream()
                 .filter(inventory -> BoardUtil.compareTwoSpecStr(inventory.getSpecification(), specification) == 0)
                 .findFirst()
@@ -31,9 +33,9 @@ public class InventoryService {
     }
 
     /**
-     * 更新存货数量，如果不存在相应存货，则新增该存货记录。
+     * 更新存货数量，如果不存在相应存货记录，则新增该存货记录。
      *
-     * @param inventory 存货
+     * @param inventory 对象
      */
     public void updateInventoryQuantity(Inventory inventory) {
         Inventory existedInventory = this.getInventory(inventory.getSpecification(), inventory.getMaterial(), inventory.getCategory());
@@ -41,24 +43,21 @@ public class InventoryService {
             existedInventory.setQuantity(existedInventory.getQuantity() + inventory.getQuantity());
             this.inventoryMapper.updateInventoryQuantity(existedInventory);
         } else {
-            this.insertInventory(inventory.getSpecification(), inventory.getMaterial(), inventory.getQuantity(), inventory.getCategory());
+            this.insertInventory(inventory);
         }
     }
 
     /**
      * 新增存货记录。
      *
-     * @param specification 规格
-     * @param material      材质
-     * @param quantity      数量
-     * @param category      类型
+     * @param inventory 存货对象
      */
-    public void insertInventory(String specification, String material, Integer quantity, String category) {
-        this.inventoryMapper.insertInventory(specification, material, quantity, category);
+    public void insertInventory(Inventory inventory) {
+        this.inventoryMapper.insertInventory(inventory);
     }
 
     /**
-     * 查询存货表记录数量，包括数量为零的记录。
+     * 统计存货表记录数量，其中包括存货数量为零的记录。
      *
      * @return 记录数量
      */

@@ -1,11 +1,9 @@
 package com.cat.service;
 
-import com.cat.pojo.MachineAction;
 import com.cat.enums.ActionState;
 import com.cat.mapper.ActionMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.cat.pojo.MachineAction;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,12 +11,14 @@ import java.util.List;
 /**
  * @author CAT
  */
+@Slf4j
 @Service
 public class ActionService {
-    final Logger logger = LoggerFactory.getLogger(getClass());
+    private final ActionMapper actionMapper;
 
-    @Autowired
-    ActionMapper actionMapper;
+    public ActionService(ActionMapper actionMapper) {
+        this.actionMapper = actionMapper;
+    }
 
     /**
      * 等待所有机器动作都被处理完毕。
@@ -28,9 +28,9 @@ public class ActionService {
     public void waitingForAllMachineActionsCompleted() throws InterruptedException {
         // test:
         this.completedAllMachineActions();
-        logger.info("等待动作处理...");
+        log.info("等待动作全部执行...");
         TaskService.ACTION_DONE_MESSAGE_QUEUE.take();
-        logger.info("动作处理完毕...");
+        log.info("全部动作执行完毕...");
     }
 
     /**
@@ -44,7 +44,7 @@ public class ActionService {
     }
 
     /**
-     * 查询机器动作表记录数量。
+     * 统计机器动作表记录数量。
      *
      * @return 记录数量
      */
@@ -53,7 +53,7 @@ public class ActionService {
     }
 
     /**
-     * 查询已处理动作表记录数量。
+     * 统计已处理动作表记录数量。
      *
      * @return 记录数量
      */
@@ -62,7 +62,7 @@ public class ActionService {
     }
 
     /**
-     * 按照 ID 顺序获取当前机器动作表中的所有动作。
+     * 按照 ID 升序获取机器动作表中的所有动作记录。
      *
      * @return 机器动作集合
      */
@@ -71,7 +71,7 @@ public class ActionService {
     }
 
     /**
-     * 将当前机器动作表中的所有机器动作状态置为已完成。
+     * 将机器动作表中的所有机器动作记录状态置为已完成。
      */
     public void completedAllMachineActions() {
         this.actionMapper.completedAllMachineActions();

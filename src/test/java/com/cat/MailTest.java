@@ -1,7 +1,7 @@
 package com.cat;
 
-import com.cat.pojo.WorkOrder;
 import com.cat.pojo.OrderErrorMsg;
+import com.cat.pojo.WorkOrder;
 import com.cat.service.MailService;
 import com.cat.service.OrderService;
 import com.cat.utils.BoardUtil;
@@ -9,8 +9,6 @@ import com.cat.utils.ThreadUtil;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,8 +23,6 @@ class MailTest extends BaseTest {
 
     @Disabled("The mail function does not require repeated tests.")
     @Test
-    @Transactional
-    @Rollback
     void testSendMail() {
         // product: 2.5×309×1016
         WorkOrder order = orderService.getOrderById(3098528);

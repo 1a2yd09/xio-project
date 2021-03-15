@@ -1,23 +1,19 @@
 package com.cat;
 
-import com.cat.pojo.WorkOrder;
-import com.cat.pojo.NormalBoard;
 import com.cat.enums.BoardCategory;
+import com.cat.pojo.NormalBoard;
+import com.cat.pojo.WorkOrder;
 import com.cat.service.*;
 import com.cat.utils.OrderUtil;
 import com.cat.utils.SignalUtil;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Transactional
-@Rollback
 class NotBottomProcessTest extends BaseTest {
     @Autowired
     MainService mainService;

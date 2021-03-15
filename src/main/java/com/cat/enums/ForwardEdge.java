@@ -6,11 +6,11 @@ package com.cat.enums;
 
 public enum ForwardEdge {
     /**
-     * 短边朝前
+     * 朝前边为较短边
      */
     SHORT(0, "短边"),
     /**
-     * 长边朝前
+     * 朝前边为较长边
      */
     LONG(1, "长边");
 

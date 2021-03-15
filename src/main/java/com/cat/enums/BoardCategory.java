@@ -22,11 +22,11 @@ public enum BoardCategory {
      */
     STOCK("库存件"),
     /**
-     * 余料
+     * 余料板
      */
     REMAINING("余料板"),
     /**
-     * 废料
+     * 废料板
      */
     WASTE("废料板");
 

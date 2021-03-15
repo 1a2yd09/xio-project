@@ -6,7 +6,7 @@ package com.cat.enums;
 
 public enum OrderSortPattern {
     /**
-     * 按顺序号排序
+     * 按工单顺序号排序
      */
     BY_SEQ("顺序"),
     /**

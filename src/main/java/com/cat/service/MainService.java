@@ -1,19 +1,19 @@
 package com.cat.service;
 
-import com.cat.entity.Board;
-import com.cat.entity.BoardList;
-import com.cat.entity.bean.Inventory;
-import com.cat.entity.bean.MachineAction;
-import com.cat.entity.bean.WorkOrder;
-import com.cat.entity.board.CutBoard;
-import com.cat.entity.board.NormalBoard;
-import com.cat.entity.param.OperatingParameter;
-import com.cat.entity.param.StockSpecification;
-import com.cat.entity.signal.CuttingSignal;
+import com.cat.pojo.Board;
+import com.cat.pojo.BoardList;
+import com.cat.pojo.Inventory;
+import com.cat.pojo.MachineAction;
+import com.cat.pojo.WorkOrder;
+import com.cat.pojo.CutBoard;
+import com.cat.pojo.NormalBoard;
+import com.cat.pojo.OperatingParameter;
+import com.cat.pojo.StockSpecification;
+import com.cat.pojo.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderModule;
-import com.cat.utils.OrderUtils;
+import com.cat.utils.OrderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +78,7 @@ public class MainService {
                     }
                     this.processCompletedAction(BoardCategory.SEMI_PRODUCT, currentOrder);
                 } else {
-                    WorkOrder nextOrder = OrderUtils.getFakeOrder();
+                    WorkOrder nextOrder = OrderUtil.getFakeOrder();
                     if (i < orders.size() - 1) {
                         nextOrder = orders.get(i + 1);
                     }

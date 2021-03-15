@@ -1,7 +1,7 @@
-package com.cat.entity.board;
+package com.cat.pojo;
 
 import com.cat.enums.BoardCategory;
-import com.cat.utils.BoardUtils;
+import com.cat.utils.BoardUtil;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -30,7 +30,7 @@ public abstract class BaseBoard {
     }
 
     protected BaseBoard(String specification, String material, BoardCategory category) {
-        List<BigDecimal> list = BoardUtils.specStrToDecList(specification);
+        List<BigDecimal> list = BoardUtil.specStrToDecList(specification);
         this.height = list.get(0);
         this.width = list.get(1);
         this.length = list.get(2);
@@ -44,6 +44,6 @@ public abstract class BaseBoard {
      * @return 标准板材规格字符串
      */
     public String getStandardSpecStr() {
-        return BoardUtils.getStandardSpecStr(this.height, this.width, this.length);
+        return BoardUtil.getStandardSpecStr(this.height, this.width, this.length);
     }
 }

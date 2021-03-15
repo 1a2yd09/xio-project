@@ -1,4 +1,4 @@
-package com.cat.entity.signal;
+package com.cat.pojo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,6 +12,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class TakeBoardSignal extends BaseSignal {
-    private Integer orderId;
+public class ProcessControlSignal extends BaseSignal {
+    private Integer category;
 }

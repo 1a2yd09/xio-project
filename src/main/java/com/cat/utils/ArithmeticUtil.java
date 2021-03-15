@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 /**
  * @author CAT
  */
-public class Arith {
-    private Arith() {
+public class ArithmeticUtil {
+    private ArithmeticUtil() {
 
     }
 

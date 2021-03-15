@@ -1,9 +1,7 @@
 package com.cat;
 
-import com.cat.entity.signal.CuttingSignal;
-import com.cat.entity.signal.ProcessControlSignal;
-import com.cat.entity.signal.TakeBoardSignal;
-import com.cat.enums.ControlSignalCategory;
+import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.TakeBoardSignal;
 import com.cat.enums.ForwardEdge;
 import com.cat.service.SignalService;
 import org.junit.jupiter.api.Test;

@@ -3,9 +3,9 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cat.mapper.SignalMapper">
-    <resultMap id="controlSignalMap" type="com.cat.entity.signal.ProcessControlSignal"/>
-    <resultMap id="takeSignalMap" type="com.cat.entity.signal.TakeBoardSignal"/>
-    <resultMap id="cuttingSignalMap" type="com.cat.entity.signal.CuttingSignal"/>
+    <resultMap id="controlSignalMap" type="com.cat.pojo.ProcessControlSignal"/>
+    <resultMap id="takeSignalMap" type="com.cat.pojo.TakeBoardSignal"/>
+    <resultMap id="cuttingSignalMap" type="com.cat.pojo.CuttingSignal"/>
 
     <select id="getLatestNotProcessedControlSignal" resultMap="controlSignalMap">
         SELECT TOP 1 *

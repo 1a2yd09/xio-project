@@ -1,11 +1,11 @@
 package com.cat;
 
-import com.cat.entity.bean.WorkOrder;
-import com.cat.entity.board.NormalBoard;
+import com.cat.pojo.WorkOrder;
+import com.cat.pojo.NormalBoard;
 import com.cat.enums.BoardCategory;
 import com.cat.service.*;
-import com.cat.utils.OrderUtils;
-import com.cat.utils.SignalUtils;
+import com.cat.utils.OrderUtil;
+import com.cat.utils.SignalUtil;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ class NotBottomProcessTest extends BaseTest {
         // 该工单需求10个成品，但1次只能裁剪5个成品，因此不是最后一次:
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 裁剪长度(3400->3190)-旋转-裁剪成品(4个)-裁剪废料-送成品:
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(8, actionService.getMachineActionCount());
@@ -57,7 +57,7 @@ class NotBottomProcessTest extends BaseTest {
         // 该工单需求10个成品，但1次只能裁剪5个成品，因此不是最后一次:
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 裁剪长度(3400->3190)-旋转-裁剪成品(4个)-裁剪废料-送成品:
         actionService.getAllMachineActions().forEach(System.out::println);
     }
@@ -74,7 +74,7 @@ class NotBottomProcessTest extends BaseTest {
         WorkOrder nextOrder = orderService.getOrderById(3118526);
         // 成品需求量: 2
         // 成品板: 4.0×245×3130
-        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 裁剪长度-旋转-裁剪当前成品(1个)-旋转-裁剪长度-旋转-裁剪后续成品(2个)-送余料
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(9, actionService.getMachineActionCount());
@@ -93,7 +93,7 @@ class NotBottomProcessTest extends BaseTest {
         nextOrder.setProductQuantity("4");
         // 成品需求量: 2
         // 成品板: 4.0×245×3130
-        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 裁剪长度-旋转-裁剪当前成品(1个)-旋转-裁剪长度-旋转-裁剪后续成品(2个)-送余料
         actionService.getAllMachineActions().forEach(System.out::println);
     }
@@ -114,7 +114,7 @@ class NotBottomProcessTest extends BaseTest {
         nextOrder.setProductQuantity("2");
         // 成品需求量: 2
         // 成品板: 4.0×245×3130
-        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 裁剪长度-旋转-裁剪当前成品(1个)-旋转-裁剪长度-旋转-裁剪后续成品(2个)-送余料
         actionService.getAllMachineActions().forEach(System.out::println);
     }
@@ -133,7 +133,7 @@ class NotBottomProcessTest extends BaseTest {
         // 成品板: 4.0×245×3130
         // 替换后续工单的成品材质
         nextOrder.setMaterial("冷板");
-        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 裁剪长度-旋转-裁剪成品-送余料:
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(4, actionService.getMachineActionCount());
@@ -148,7 +148,7 @@ class NotBottomProcessTest extends BaseTest {
         order.setProductQuantity("1");
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 裁剪长度-旋转-裁剪-送余料:
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(4, actionService.getMachineActionCount());
@@ -167,7 +167,7 @@ class NotBottomProcessTest extends BaseTest {
         // 成品板: 4.0×245×3130
         // 替换后续工单的成品规格
         nextOrder.setProductSpecification("4.0×245×3200");
-        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁宽度-送板:
         assertEquals(4, actionService.getMachineActionCount());
@@ -185,7 +185,7 @@ class NotBottomProcessTest extends BaseTest {
         WorkOrder nextOrder = orderService.getOrderById(3118526);
         // 成品板: 4.0×245×3130
         // 替换后续工单的成品规格
-        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁宽度-送板:
     }
@@ -203,7 +203,7 @@ class NotBottomProcessTest extends BaseTest {
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         product.setLength(new BigDecimal("3200"));
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁库存件(1个)-旋转-裁剪长度-旋转-裁剪成品-送余料:
         assertEquals(8, actionService.getMachineActionCount());
@@ -222,7 +222,7 @@ class NotBottomProcessTest extends BaseTest {
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         product.setLength(new BigDecimal("3200"));
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁库存件(1个)-旋转-裁剪长度-旋转-裁剪成品-送余料:
     }
@@ -239,7 +239,7 @@ class NotBottomProcessTest extends BaseTest {
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         // 向规格表中写入一个和成品规格一致的库存件:
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁剪成品(1个)-裁剪库存件(3个)-裁剪废料-送库存:
         assertEquals(8, actionService.getMachineActionCount());
@@ -257,7 +257,7 @@ class NotBottomProcessTest extends BaseTest {
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
         // 向规格表中写入一个和成品规格一致的库存件:
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁剪成品(1个)-裁剪库存件(3个)-裁剪废料-送库存:
     }
@@ -269,7 +269,7 @@ class NotBottomProcessTest extends BaseTest {
         order.setCuttingSize("2.5×400×400");
         order.setProductSpecification("2.5×500×500");
         stockSpecService.insertStockSpec(new BigDecimal("2.5"), new BigDecimal("180"), new BigDecimal("180"));
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 长度-旋转-库存件-废料-库存件
         assertEquals(5, actionService.getMachineActionCount());
@@ -282,7 +282,7 @@ class NotBottomProcessTest extends BaseTest {
         order.setCuttingSize("2.5×150×150");
         order.setProductSpecification("2.5×500×500");
         stockSpecService.insertStockSpec(new BigDecimal("2.5"), new BigDecimal("180"), new BigDecimal("180"));
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 旋转-送板
         assertEquals(2, actionService.getMachineActionCount());

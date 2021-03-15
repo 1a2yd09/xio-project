@@ -1,4 +1,4 @@
-package com.cat.entity.signal;
+package com.cat.pojo;
 
 import lombok.Data;
 

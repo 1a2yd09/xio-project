@@ -1,6 +1,6 @@
 package com.cat;
 
-import com.cat.entity.param.StockSpecification;
+import com.cat.pojo.StockSpecification;
 import com.cat.service.BoardService;
 import com.cat.service.StockSpecService;
 import org.junit.jupiter.api.Test;

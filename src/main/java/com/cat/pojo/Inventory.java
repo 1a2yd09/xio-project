@@ -1,4 +1,4 @@
-package com.cat.entity.bean;
+package com.cat.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

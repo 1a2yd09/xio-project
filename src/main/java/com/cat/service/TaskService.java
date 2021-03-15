@@ -1,7 +1,7 @@
 package com.cat.service;
 
-import com.cat.entity.signal.CuttingSignal;
-import com.cat.entity.signal.ProcessControlSignal;
+import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.ProcessControlSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.mapper.ActionMapper;

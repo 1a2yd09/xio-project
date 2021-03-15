@@ -1,4 +1,4 @@
-package com.cat.entity.param;
+package com.cat.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

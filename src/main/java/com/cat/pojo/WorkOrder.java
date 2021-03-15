@@ -1,6 +1,6 @@
-package com.cat.entity.bean;
+package com.cat.pojo;
 
-import com.cat.utils.OrderUtils;
+import com.cat.utils.OrderUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -52,6 +52,6 @@ public class WorkOrder {
      * @return 成品未完成数目
      */
     public int getIncompleteQuantity() {
-        return OrderUtils.quantityPropStrToInt(this.productQuantity) - OrderUtils.quantityPropStrToInt(this.completedQuantity);
+        return OrderUtil.quantityPropStrToInt(this.productQuantity) - OrderUtil.quantityPropStrToInt(this.completedQuantity);
     }
 }

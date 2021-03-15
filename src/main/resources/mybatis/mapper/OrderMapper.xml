@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cat.mapper.OrderMapper">
-    <resultMap id="orderMap" type="com.cat.entity.bean.WorkOrder">
+    <resultMap id="orderMap" type="com.cat.pojo.WorkOrder">
         <result column="ZZTSCPCH" property="batchNumber"/>
         <result column="HTH" property="contractNumber"/>
         <result column="PLNBEZ" property="itemNumber"/>

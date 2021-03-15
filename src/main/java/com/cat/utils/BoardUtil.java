@@ -1,6 +1,6 @@
 package com.cat.utils;
 
-import com.cat.entity.board.NormalBoard;
+import com.cat.pojo.NormalBoard;
 import com.cat.enums.BoardCategory;
 
 import java.math.BigDecimal;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * @author CAT
  */
-public class BoardUtils {
+public class BoardUtil {
     /**
      * 夹钳宽度
      */
@@ -29,7 +29,7 @@ public class BoardUtils {
      */
     public static final int DEC_SCALE = 2;
 
-    private BoardUtils() {
+    private BoardUtil() {
     }
 
     /**
@@ -74,8 +74,8 @@ public class BoardUtils {
      * @return -1，1分别表示前者规格中的某个度量小于、大于后者规格中的对应度量，0表示两者规格相同
      */
     public static int compareTwoSpecStr(String sp1, String sp2) {
-        List<BigDecimal> decList1 = BoardUtils.specStrToDecList(sp1);
-        List<BigDecimal> decList2 = BoardUtils.specStrToDecList(sp2);
+        List<BigDecimal> decList1 = BoardUtil.specStrToDecList(sp1);
+        List<BigDecimal> decList2 = BoardUtil.specStrToDecList(sp2);
         for (int i = 0; i < decList1.size(); i++) {
             if (decList1.get(i).compareTo(decList2.get(i)) != 0) {
                 return decList1.get(i).compareTo(decList2.get(i));
@@ -92,16 +92,16 @@ public class BoardUtils {
      * @return 结果
      */
     public static boolean isFirstSpecGeSecondSpec(String firstSpec, String secondSpec) {
-        List<BigDecimal> decList1 = BoardUtils.specStrToDecList(firstSpec);
-        List<BigDecimal> decList2 = BoardUtils.specStrToDecList(secondSpec);
+        List<BigDecimal> decList1 = BoardUtil.specStrToDecList(firstSpec);
+        List<BigDecimal> decList2 = BoardUtil.specStrToDecList(secondSpec);
         BigDecimal cuttingWidth = decList1.get(1);
         BigDecimal cuttingLength = decList1.get(2);
         BigDecimal productWidth = decList2.get(1);
         BigDecimal productLength = decList2.get(2);
-        if (Arith.cmp(cuttingWidth, productWidth) >= 0 && Arith.cmp(cuttingLength, productLength) >= 0) {
+        if (ArithmeticUtil.cmp(cuttingWidth, productWidth) >= 0 && ArithmeticUtil.cmp(cuttingLength, productLength) >= 0) {
             return true;
         } else {
-            return Arith.cmp(cuttingWidth, productLength) >= 0 && Arith.cmp(cuttingLength, productWidth) >= 0;
+            return ArithmeticUtil.cmp(cuttingWidth, productLength) >= 0 && ArithmeticUtil.cmp(cuttingLength, productWidth) >= 0;
         }
     }
 
@@ -152,7 +152,7 @@ public class BoardUtils {
     }
 
     public static BigDecimal getAvailableWidth(BigDecimal cutBoardWidth, BigDecimal normalBoardWidth) {
-        return Arith.cmp(normalBoardWidth, CLAMP_DEPTH) >= 0 ? cutBoardWidth : cutBoardWidth.subtract(CLAMP_DEPTH);
+        return ArithmeticUtil.cmp(normalBoardWidth, CLAMP_DEPTH) >= 0 ? cutBoardWidth : cutBoardWidth.subtract(CLAMP_DEPTH);
     }
 
     public static boolean isAllowBackToFront(BigDecimal boardAllWidth, BigDecimal boardWidth) {

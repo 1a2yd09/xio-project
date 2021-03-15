@@ -1,4 +1,4 @@
-package com.cat.entity;
+package com.cat.pojo;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

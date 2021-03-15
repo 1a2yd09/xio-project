@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author CAT
  */
-public class Threads {
-    private Threads() {
+public class ThreadUtil {
+    private ThreadUtil() {
 
     }
 

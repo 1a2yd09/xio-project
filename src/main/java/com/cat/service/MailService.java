@@ -1,6 +1,6 @@
 package com.cat.service;
 
-import com.cat.entity.message.OrderErrorMsg;
+import com.cat.pojo.OrderErrorMsg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;

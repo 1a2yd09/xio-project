@@ -1,6 +1,6 @@
 package com.cat.mapper;
 
-import com.cat.entity.bean.Inventory;
+import com.cat.pojo.Inventory;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

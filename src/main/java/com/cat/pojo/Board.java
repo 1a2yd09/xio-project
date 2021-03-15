@@ -1,6 +1,5 @@
-package com.cat.entity;
+package com.cat.pojo;
 
-import com.cat.entity.board.NormalBoard;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

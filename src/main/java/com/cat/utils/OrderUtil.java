@@ -1,12 +1,12 @@
 package com.cat.utils;
 
-import com.cat.entity.bean.WorkOrder;
+import com.cat.pojo.WorkOrder;
 
 /**
  * @author CAT
  */
-public class OrderUtils {
-    private OrderUtils() {
+public class OrderUtil {
+    private OrderUtil() {
     }
 
     /**

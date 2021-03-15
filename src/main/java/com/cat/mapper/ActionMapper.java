@@ -1,6 +1,6 @@
 package com.cat.mapper;
 
-import com.cat.entity.bean.MachineAction;
+import com.cat.pojo.MachineAction;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

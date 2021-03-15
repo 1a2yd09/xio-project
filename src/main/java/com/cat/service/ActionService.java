@@ -1,6 +1,6 @@
 package com.cat.service;
 
-import com.cat.entity.bean.MachineAction;
+import com.cat.pojo.MachineAction;
 import com.cat.enums.ActionState;
 import com.cat.mapper.ActionMapper;
 import org.slf4j.Logger;

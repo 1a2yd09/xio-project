@@ -1,15 +1,15 @@
 package com.cat;
 
-import com.cat.entity.bean.Inventory;
-import com.cat.entity.bean.MachineAction;
-import com.cat.entity.bean.WorkOrder;
-import com.cat.entity.board.NormalBoard;
+import com.cat.pojo.Inventory;
+import com.cat.pojo.MachineAction;
+import com.cat.pojo.WorkOrder;
+import com.cat.pojo.NormalBoard;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderState;
 import com.cat.service.*;
-import com.cat.utils.OrderUtils;
-import com.cat.utils.SignalUtils;
+import com.cat.utils.OrderUtil;
+import com.cat.utils.SignalUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -47,7 +47,7 @@ class ActionTest extends BaseTest {
         NormalBoard stock = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.STOCK);
         stock.setLength(new BigDecimal(3300));
         stockSpecService.insertStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
-        mainService.processingNotBottomOrder(order, OrderUtils.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 修长度-旋转-进刀1个库存-旋转-修长度-旋转-裁剪成品(2个)-送余料:
         // 测试一，生成9个机器动作:
         assertEquals(11, actionService.getMachineActionCount());
@@ -67,7 +67,7 @@ class ActionTest extends BaseTest {
         Inventory inventory = inventoryService.getInventory(stock.getStandardSpecStr(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
 
-        mainService.processCompletedAction(BoardCategory.STOCK, order, OrderUtils.getFakeOrder());
+        mainService.processCompletedAction(BoardCategory.STOCK, order, OrderUtil.getFakeOrder());
 
         int newUnfinishedCount = order.getIncompleteQuantity();
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
@@ -90,7 +90,7 @@ class ActionTest extends BaseTest {
 
         WorkOrder order = orderService.getOrderById(3099510);
         NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         // 测试一，生成8个机器动作:
         assertEquals(8, actionService.getMachineActionCount());
 
@@ -126,7 +126,7 @@ class ActionTest extends BaseTest {
     @Test
     void testCompletedAllActions() {
         WorkOrder order = orderService.getOrderById(3098528);
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         assertFalse(actionService.isAllMachineActionsProcessed());
         actionService.completedMachineActionById(1);
         assertFalse(actionService.isAllMachineActionsProcessed());

@@ -1,6 +1,6 @@
 package com.cat.mapper;
 
-import com.cat.entity.param.StockSpecification;
+import com.cat.pojo.StockSpecification;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

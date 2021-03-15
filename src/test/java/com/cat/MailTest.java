@@ -1,11 +1,11 @@
 package com.cat;
 
-import com.cat.entity.bean.WorkOrder;
-import com.cat.entity.message.OrderErrorMsg;
+import com.cat.pojo.WorkOrder;
+import com.cat.pojo.OrderErrorMsg;
 import com.cat.service.MailService;
 import com.cat.service.OrderService;
-import com.cat.utils.BoardUtils;
-import com.cat.utils.Threads;
+import com.cat.utils.BoardUtil;
+import com.cat.utils.ThreadUtil;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +31,8 @@ class MailTest extends BaseTest {
         // product: 2.5×309×1016
         WorkOrder order = orderService.getOrderById(3098528);
         String fakeCuttingSize = "2.5×300×1000";
-        ExecutorService es = Threads.EMAIL_POOL;
-        if (!BoardUtils.isFirstSpecGeSecondSpec(fakeCuttingSize, order.getProductSpecification())) {
+        ExecutorService es = ThreadUtil.EMAIL_POOL;
+        if (!BoardUtil.isFirstSpecGeSecondSpec(fakeCuttingSize, order.getProductSpecification())) {
             OrderErrorMsg msg = OrderErrorMsg.getInstance(order.getId(), fakeCuttingSize, order.getProductSpecification());
             es.submit(() -> mailService.sendOrderErrorMail(msg));
         }

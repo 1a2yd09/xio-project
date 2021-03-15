@@ -1,16 +1,16 @@
 package com.cat.service;
 
-import com.cat.entity.bean.Inventory;
-import com.cat.entity.bean.WorkOrder;
-import com.cat.entity.param.OperatingParameter;
+import com.cat.pojo.Inventory;
+import com.cat.pojo.WorkOrder;
+import com.cat.pojo.OperatingParameter;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderModule;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.OrderState;
 import com.cat.mapper.InventoryMapper;
 import com.cat.mapper.OrderMapper;
-import com.cat.utils.BoardUtils;
-import com.cat.utils.OrderUtils;
+import com.cat.utils.BoardUtil;
+import com.cat.utils.OrderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +39,7 @@ public class OrderService {
      * @param quantity 新完工的成品数目
      */
     public void addOrderCompletedQuantity(WorkOrder order, int quantity) {
-        order.setCompletedQuantity(OrderUtils.addQuantityPropWithInt(order.getCompletedQuantity(), quantity));
+        order.setCompletedQuantity(OrderUtil.addQuantityPropWithInt(order.getCompletedQuantity(), quantity));
         this.orderMapper.updateOrderCompletedQuantity(order);
         this.updateOrderState(order, order.getIncompleteQuantity() == 0 ? OrderState.COMPLETED : OrderState.STARTED);
         if (OrderState.COMPLETED.value.equals(order.getOperationState())) {
@@ -58,10 +58,10 @@ public class OrderService {
         List<WorkOrder> orders = this.getNotBottomOrders(date);
         Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(null, BoardCategory.STOCK.value)
                 .stream()
-                .collect(Collectors.toMap(stock -> BoardUtils.getStandardSpecStr(stock.getSpecification()), Function.identity()));
+                .collect(Collectors.toMap(stock -> BoardUtil.getStandardSpecStr(stock.getSpecification()), Function.identity()));
 
         for (WorkOrder order : orders) {
-            Inventory stock = stockMap.get(BoardUtils.getStandardSpecStr(order.getProductSpecification()));
+            Inventory stock = stockMap.get(BoardUtil.getStandardSpecStr(order.getProductSpecification()));
             if (stock != null && stock.getMaterial().equals(order.getMaterial()) && stock.getQuantity() > 0) {
                 int usedStockQuantity = Math.min(order.getIncompleteQuantity(), stock.getQuantity());
                 // 使用库存件作为成品属于工单开工的行为之一:
@@ -86,7 +86,7 @@ public class OrderService {
         if (OrderSortPattern.BY_SPEC.value.equals(sortPattern)) {
             // 如果要求按照规格排序，指的是”依次“按照成品的厚度、宽度、长度降序排序，三者都相同则按工单 ID 升序排序:
             orders.sort((o1, o2) -> {
-                int retVal = BoardUtils.compareTwoSpecStr(o1.getProductSpecification(), o2.getProductSpecification());
+                int retVal = BoardUtil.compareTwoSpecStr(o1.getProductSpecification(), o2.getProductSpecification());
                 return retVal != 0 ? -retVal : o1.getId() - o2.getId();
             });
         } else {
@@ -162,10 +162,10 @@ public class OrderService {
         List<WorkOrder> orders = this.getAllProductionOrders();
         Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(null, BoardCategory.STOCK.value)
                 .stream()
-                .collect(Collectors.toMap(stock -> BoardUtils.getStandardSpecStr(stock.getSpecification()), Function.identity()));
+                .collect(Collectors.toMap(stock -> BoardUtil.getStandardSpecStr(stock.getSpecification()), Function.identity()));
 
         for (WorkOrder order : orders) {
-            Inventory stock = stockMap.get(BoardUtils.getStandardSpecStr(order.getProductSpecification()));
+            Inventory stock = stockMap.get(BoardUtil.getStandardSpecStr(order.getProductSpecification()));
             if (stock != null && stock.getMaterial().equals(order.getMaterial()) && stock.getQuantity() > 0) {
                 int usedStockQuantity = Math.min(order.getIncompleteQuantity(), stock.getQuantity());
                 // 使用库存件作为成品属于工单开工的行为之一:

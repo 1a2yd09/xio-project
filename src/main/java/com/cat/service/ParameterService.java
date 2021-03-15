@@ -1,8 +1,8 @@
 package com.cat.service;
 
-import com.cat.entity.param.OperatingParameter;
+import com.cat.pojo.OperatingParameter;
 import com.cat.mapper.ParameterMapper;
-import com.cat.utils.ParamUtils;
+import com.cat.utils.ParamUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class ParameterService {
      * @return 运行参数
      */
     public OperatingParameter getLatestOperatingParameter() {
-        return Objects.requireNonNullElseGet(this.parameterMapper.getLatestOperatingParameter(), ParamUtils::getDefaultParameter);
+        return Objects.requireNonNullElseGet(this.parameterMapper.getLatestOperatingParameter(), ParamUtil::getDefaultParameter);
     }
 
     /**

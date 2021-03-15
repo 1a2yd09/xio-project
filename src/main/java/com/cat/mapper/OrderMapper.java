@@ -1,6 +1,6 @@
 package com.cat.mapper;
 
-import com.cat.entity.bean.WorkOrder;
+import com.cat.pojo.WorkOrder;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

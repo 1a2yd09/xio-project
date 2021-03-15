@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cat.mapper.ParameterMapper">
-    <resultMap id="paramMap" type="com.cat.entity.param.OperatingParameter"/>
+    <resultMap id="paramMap" type="com.cat.pojo.OperatingParameter"/>
 
     <select id="getLatestOperatingParameter" resultMap="paramMap">
         SELECT TOP 1 *

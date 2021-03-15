@@ -1,8 +1,8 @@
 package com.cat.mapper;
 
-import com.cat.entity.signal.CuttingSignal;
-import com.cat.entity.signal.ProcessControlSignal;
-import com.cat.entity.signal.TakeBoardSignal;
+import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.ProcessControlSignal;
+import com.cat.pojo.TakeBoardSignal;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

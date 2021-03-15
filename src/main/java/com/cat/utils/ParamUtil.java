@@ -1,7 +1,7 @@
 package com.cat.utils;
 
-import com.cat.entity.param.OperatingParameter;
-import com.cat.entity.param.StockSpecification;
+import com.cat.pojo.OperatingParameter;
+import com.cat.pojo.StockSpecification;
 import com.cat.enums.OrderModule;
 import com.cat.enums.OrderSortPattern;
 
@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 /**
  * @author CAT
  */
-public class ParamUtils {
-    private ParamUtils() {
+public class ParamUtil {
+    private ParamUtil() {
     }
 
     /**

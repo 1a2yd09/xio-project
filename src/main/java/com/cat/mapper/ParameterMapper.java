@@ -1,6 +1,6 @@
 package com.cat.mapper;
 
-import com.cat.entity.param.OperatingParameter;
+import com.cat.pojo.OperatingParameter;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

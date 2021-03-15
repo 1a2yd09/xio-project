@@ -1,4 +1,4 @@
-package com.cat.entity.board;
+package com.cat.pojo;
 
 import com.cat.enums.BoardCategory;
 import com.cat.enums.ForwardEdge;

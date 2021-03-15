@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cat.mapper.ActionMapper">
-    <resultMap id="actionMap" type="com.cat.entity.bean.MachineAction"/>
+    <resultMap id="actionMap" type="com.cat.pojo.MachineAction"/>
 
     <insert id="insertMachineAction">
         INSERT INTO tb_machine_action (action_category, cut_distance, board_category, board_specification,

@@ -1,6 +1,6 @@
 package com.cat;
 
-import com.cat.entity.bean.Inventory;
+import com.cat.pojo.Inventory;
 import com.cat.enums.BoardCategory;
 import com.cat.service.InventoryService;
 import org.junit.jupiter.api.Test;

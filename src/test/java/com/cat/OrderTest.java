@@ -1,16 +1,16 @@
 package com.cat;
 
-import com.cat.entity.bean.WorkOrder;
-import com.cat.entity.board.CutBoard;
-import com.cat.entity.board.NormalBoard;
-import com.cat.entity.param.OperatingParameter;
+import com.cat.pojo.WorkOrder;
+import com.cat.pojo.CutBoard;
+import com.cat.pojo.NormalBoard;
+import com.cat.pojo.OperatingParameter;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.OrderState;
 import com.cat.service.InventoryService;
 import com.cat.service.OrderService;
 import com.cat.service.ParameterService;
-import com.cat.utils.OrderUtils;
+import com.cat.utils.OrderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +33,10 @@ class OrderTest extends BaseTest {
 
     @Test
     void testUtils() {
-        assertEquals(0, OrderUtils.quantityPropStrToInt("null"));
-        assertEquals(0, OrderUtils.quantityPropStrToInt(null));
-        assertEquals(3, OrderUtils.quantityPropStrToInt("3"));
-        assertEquals("7", OrderUtils.addQuantityPropWithInt("3", 4));
+        assertEquals(0, OrderUtil.quantityPropStrToInt("null"));
+        assertEquals(0, OrderUtil.quantityPropStrToInt(null));
+        assertEquals(3, OrderUtil.quantityPropStrToInt("3"));
+        assertEquals("7", OrderUtil.addQuantityPropWithInt("3", 4));
     }
 
     @Test

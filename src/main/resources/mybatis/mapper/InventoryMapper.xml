@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cat.mapper.InventoryMapper">
-    <resultMap id="inventoryMap" type="com.cat.entity.bean.Inventory"/>
+    <resultMap id="inventoryMap" type="com.cat.pojo.Inventory"/>
 
     <select id="getInventories" resultMap="inventoryMap">
         SELECT *

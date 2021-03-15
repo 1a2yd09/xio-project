@@ -1,11 +1,11 @@
 package com.cat;
 
-import com.cat.entity.bean.WorkOrder;
+import com.cat.pojo.WorkOrder;
 import com.cat.service.ActionService;
 import com.cat.service.MainService;
 import com.cat.service.OrderService;
 import com.cat.service.ParameterService;
-import com.cat.utils.SignalUtils;
+import com.cat.utils.SignalUtil;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ class BottomProcessTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3099510);
         // 由于成品总宽度小于夹钳宽度且需要修剪长度，因此将成品总宽度补齐至900
         // 半成品固定宽度192，(1250-900)/192=1个半成品，1250-192*1=1058，1058-121*2=816
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 旋转-裁剪半成品(1个)-旋转-裁剪长度(2504->2185)-旋转-裁剪成品(2个)-送余料
         assertEquals(8, actionService.getMachineActionCount());
@@ -50,7 +50,7 @@ class BottomProcessTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3099510);
         // 由于成品总宽度小于夹钳宽度且需要修剪长度，因此将成品总宽度补齐至900
         // 半成品固定宽度192，(1250-900)/192=1个半成品，1250-192*1=1058，1058-121*2=816
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 旋转-裁剪半成品(1个)-旋转-裁剪长度(2504->2185)-旋转-裁剪成品(2个)-送余料
     }
@@ -63,7 +63,7 @@ class BottomProcessTest extends BaseTest {
         // 下料板:2.5×1250×1589，成品板:2.5×1345.5×1189，需求1个成品板
         WorkOrder order = orderService.getOrderById(3098575);
         // 半成品固定宽度192，(1250-1189)/192=0个半成品，1250-1189=61
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度(1589->1345.5)-旋转-裁剪成品(1250->61)-送废料
         assertEquals(4, actionService.getMachineActionCount());
@@ -79,7 +79,7 @@ class BottomProcessTest extends BaseTest {
         order.setProductSpecification("2.5×121×2504");
         // 虽然成品总宽度小于夹钳宽度但是不需要修剪长度，因此不需要将成品总宽度补齐至900
         // 半成品固定宽度192，(1250-242)/192=5个半成品，1250-192*5=290，290-121*2=48
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 旋转-裁剪半成品(5个)-裁剪成品-送废料-送成品
         assertEquals(9, actionService.getMachineActionCount());
@@ -92,7 +92,7 @@ class BottomProcessTest extends BaseTest {
         order.setProductSpecification("2.5×121×2504");
         // 虽然成品总宽度小于夹钳宽度但是不需要修剪长度，因此不需要将成品总宽度补齐至900
         // 半成品固定宽度192，(1250-242)/192=5个半成品，1250-192*5=290，290-121*2=48
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 旋转-裁剪半成品(5个)-裁剪成品-送废料-送成品
     }
@@ -107,7 +107,7 @@ class BottomProcessTest extends BaseTest {
         order.setCuttingSize("2.5×1000×2504");
         // 虽然成品总宽度小于夹钳宽度但是不需要修剪长度，因此不需要将成品总宽度补齐至900
         // 半成品固定宽度192，(1000-900)/192=0个半成品
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁剪成品-裁剪成品-送余料
         assertEquals(5, actionService.getMachineActionCount());
@@ -124,7 +124,7 @@ class BottomProcessTest extends BaseTest {
         order.setCuttingSize("2.5×1000×2504");
         // 虽然成品总宽度小于夹钳宽度但是不需要修剪长度，因此不需要将成品总宽度补齐至900
         // 半成品固定宽度192，(1000-900)/192=0个半成品
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁剪成品-裁剪成品-送余料
     }
@@ -140,7 +140,7 @@ class BottomProcessTest extends BaseTest {
         order.setProductSpecification("2.5×240×2185");
         // 虽然成品总宽度小于夹钳宽度但是不需要修剪长度，因此不需要将成品总宽度补齐至900
         // 半成品固定宽度192，(1000-900)/192=0个半成品
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 裁剪长度-旋转-裁剪成品-裁剪成品-送余料
     }
@@ -151,7 +151,7 @@ class BottomProcessTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3098528);
         order.setCuttingSize("2.5×900×1100");
         order.setProductSpecification("2.5×1000×1000");
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtils.getDefaultCuttingSignal(order));
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         // 旋转-裁剪半成品(4个)-送余料
         assertEquals(6, actionService.getMachineActionCount());

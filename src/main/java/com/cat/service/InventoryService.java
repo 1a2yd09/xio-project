@@ -1,8 +1,8 @@
 package com.cat.service;
 
-import com.cat.entity.bean.Inventory;
+import com.cat.pojo.Inventory;
 import com.cat.mapper.InventoryMapper;
-import com.cat.utils.BoardUtils;
+import com.cat.utils.BoardUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class InventoryService {
     public Inventory getInventory(String specification, String material, String category) {
         return this.inventoryMapper.getInventories(material, category)
                 .stream()
-                .filter(inventory -> BoardUtils.compareTwoSpecStr(inventory.getSpecification(), specification) == 0)
+                .filter(inventory -> BoardUtil.compareTwoSpecStr(inventory.getSpecification(), specification) == 0)
                 .findFirst()
                 .orElse(null);
     }

@@ -1,6 +1,6 @@
 package com.cat.service;
 
-import com.cat.entity.param.StockSpecification;
+import com.cat.pojo.StockSpecification;
 import com.cat.mapper.StockSpecMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,5 @@
-package com.cat.entity.bean;
+package com.cat.pojo;
 
-import com.cat.entity.board.BaseBoard;
 import com.cat.enums.ActionCategory;
 import lombok.AllArgsConstructor;
 import lombok.Data;

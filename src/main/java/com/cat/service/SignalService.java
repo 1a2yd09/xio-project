@@ -1,8 +1,8 @@
 package com.cat.service;
 
-import com.cat.entity.bean.WorkOrder;
-import com.cat.entity.signal.CuttingSignal;
-import com.cat.entity.signal.TakeBoardSignal;
+import com.cat.pojo.WorkOrder;
+import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.TakeBoardSignal;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
 import com.cat.mapper.SignalMapper;

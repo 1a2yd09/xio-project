@@ -1,7 +1,7 @@
 package com.cat;
 
-import com.cat.pojo.NormalBoard;
 import com.cat.enums.BoardCategory;
+import com.cat.pojo.NormalBoard;
 import com.cat.service.BoardService;
 import com.cat.utils.BoardUtil;
 import org.junit.jupiter.api.Test;
@@ -72,11 +72,11 @@ class BoardTest extends BaseTest {
     @Test
     void testBoardQueue() {
         Queue<NormalBoard> queue = BoardUtil.getBoardLengthPriorityQueue();
-        NormalBoard board1 = new NormalBoard("2.5×800×1000", "镀锌板", BoardCategory.PRODUCT);
+        NormalBoard board1 = new NormalBoard("2.5×800×1000", "镀锌板", BoardCategory.PRODUCT, 10000);
         board1.setCutTimes(1);
-        NormalBoard board2 = new NormalBoard("2.5×1000×2000", "镀锌板", BoardCategory.PRODUCT);
+        NormalBoard board2 = new NormalBoard("2.5×1000×2000", "镀锌板", BoardCategory.PRODUCT, 10000);
         board2.setCutTimes(1);
-        NormalBoard board3 = new NormalBoard("2.5×1000×1600", "镀锌板", BoardCategory.PRODUCT);
+        NormalBoard board3 = new NormalBoard("2.5×1000×1600", "镀锌板", BoardCategory.PRODUCT, 10000);
         board3.setCutTimes(2);
         queue.add(board1);
         queue.add(board2);

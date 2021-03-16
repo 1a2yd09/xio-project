@@ -1,6 +1,6 @@
 package com.cat.service;
 
-import com.cat.pojo.OrderErrorMsg;
+import com.cat.pojo.OrderErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -28,7 +28,7 @@ public class MailService {
      *
      * @param msg 消息
      */
-    public void sendOrderErrorMail(OrderErrorMsg msg) {
+    public void sendOrderErrorMail(OrderErrorMessage msg) {
         try {
             MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");

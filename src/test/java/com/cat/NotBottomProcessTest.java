@@ -202,7 +202,7 @@ class NotBottomProcessTest extends BaseTest {
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
         // 向库存规格表中写入一个比成品长度更长的库存件:
-        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
         product.setLength(new BigDecimal("3200"));
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
         mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
@@ -221,7 +221,7 @@ class NotBottomProcessTest extends BaseTest {
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
         // 向库存规格表中写入一个比成品长度更长的库存件:
-        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
         product.setLength(new BigDecimal("3200"));
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
         mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
@@ -239,7 +239,7 @@ class NotBottomProcessTest extends BaseTest {
         order.setProductQuantity("1");
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
-        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
         // 向规格表中写入一个和成品规格一致的库存件:
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
         mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
@@ -257,7 +257,7 @@ class NotBottomProcessTest extends BaseTest {
         order.setProductQuantity("1");
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
-        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
         // 向规格表中写入一个和成品规格一致的库存件:
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
         mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));

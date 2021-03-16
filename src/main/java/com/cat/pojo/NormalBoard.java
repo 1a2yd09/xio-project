@@ -19,13 +19,13 @@ public class NormalBoard extends BaseBoard {
     public NormalBoard() {
     }
 
-    public NormalBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category) {
-        super(height, width, length, material, category);
+    public NormalBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category, Integer orderId) {
+        super(height, width, length, material, category, orderId);
         this.cutTimes = 0;
     }
 
-    public NormalBoard(String specification, String material, BoardCategory category) {
-        super(specification, material, category);
+    public NormalBoard(String specification, String material, BoardCategory category, Integer orderId) {
+        super(specification, material, category, orderId);
         this.cutTimes = 0;
     }
 

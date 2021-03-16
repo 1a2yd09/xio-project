@@ -1,16 +1,10 @@
 package com.cat.service;
 
-import com.cat.pojo.Board;
-import com.cat.pojo.BoardList;
-import com.cat.pojo.MachineAction;
-import com.cat.pojo.WorkOrder;
-import com.cat.pojo.CutBoard;
-import com.cat.pojo.NormalBoard;
-import com.cat.pojo.StockSpecification;
 import com.cat.enums.ActionCategory;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.ForwardEdge;
 import com.cat.mapper.ActionMapper;
+import com.cat.pojo.*;
 import com.cat.utils.ArithmeticUtil;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.ParamUtil;
@@ -67,20 +61,18 @@ public class BoardService {
      * @param currOrderId    当前工单 ID
      */
     public void newCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold, Integer currOrderId) {
-        List<Board> boards = boardList.getBoards();
-        NormalBoard lastNormalBoard = boards.get(boards.size() - 1).getNormalBoard();
+        List<NormalBoard> boards = boardList.getBoards();
+        NormalBoard lastNormalBoard = boards.get(boards.size() - 1);
         if (BoardUtil.isAllowBackToFront(lastNormalBoard.getNormalBoardAllWidth(), lastNormalBoard.getWidth())) {
             NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, boardList.getBoardAllWidth(), wasteThreshold);
             this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, currOrderId);
-            for (Board board : boards) {
-                Integer orderId = board.getOrderId();
-                NormalBoard normalBoard = board.getNormalBoard();
-                if (normalBoard.getCutTimes() > 0) {
-                    extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
-                    this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, orderId);
+            for (NormalBoard board : boards) {
+                if (board.getCutTimes() > 0) {
+                    extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, board.getLength(), wasteThreshold);
+                    this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, board.getOrderId());
                 }
-                for (int i = 0; i < normalBoard.getCutTimes(); i++) {
-                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, normalBoard, orderId);
+                for (int i = 0; i < board.getCutTimes(); i++) {
+                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, board, board.getOrderId());
                 }
             }
         } else {
@@ -97,20 +89,18 @@ public class BoardService {
      * @param currOrderId    当前工单 ID
      */
     public void newestCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold, Integer currOrderId) {
-        for (Board board : boardList.getBoards()) {
-            Integer orderId = board.getOrderId();
-            NormalBoard normalBoard = board.getNormalBoard();
-            if (normalBoard.getCutTimes() > 0) {
-                NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, normalBoard.getLength(), wasteThreshold);
-                this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, orderId);
+        for (NormalBoard board : boardList.getBoards()) {
+            if (board.getCutTimes() > 0) {
+                NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.SHORT, board.getLength(), wasteThreshold);
+                this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard, board.getOrderId());
             }
-            for (int i = 0; i < normalBoard.getCutTimes(); i++) {
-                BigDecimal remainingWidth = ArithmeticUtil.sub(cutBoard.getWidth(), normalBoard.getWidth());
+            for (int i = 0; i < board.getCutTimes(); i++) {
+                BigDecimal remainingWidth = ArithmeticUtil.sub(cutBoard.getWidth(), board.getWidth());
                 if (remainingWidth.compareTo(BoardUtil.CLAMP_DEPTH) <= 0) {
-                    NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, normalBoard.getWidth(), wasteThreshold);
-                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, orderId);
+                    NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, board.getWidth(), wasteThreshold);
+                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard, board.getOrderId());
                 }
-                this.cuttingBoard(cutBoard, ForwardEdge.LONG, normalBoard, orderId);
+                this.cuttingBoard(cutBoard, ForwardEdge.LONG, board, board.getOrderId());
             }
         }
         if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
@@ -127,8 +117,8 @@ public class BoardService {
      * @param forwardEdge 朝向
      * @return 下料板
      */
-    public CutBoard getCutBoard(String cuttingSize, String material, Integer forwardEdge) {
-        return new CutBoard(cuttingSize, material, forwardEdge == 1 ? ForwardEdge.LONG : ForwardEdge.SHORT);
+    public CutBoard getCutBoard(String cuttingSize, String material, Integer orderId, Integer forwardEdge) {
+        return new CutBoard(cuttingSize, material, orderId, forwardEdge == 1 ? ForwardEdge.LONG : ForwardEdge.SHORT);
     }
 
     /**
@@ -140,8 +130,8 @@ public class BoardService {
      * @param orderIncompleteQuantity 工单未完成数目
      * @return 成品板
      */
-    public NormalBoard getStandardProduct(String specification, String material, BigDecimal cutBoardWidth, Integer orderIncompleteQuantity) {
-        NormalBoard product = new NormalBoard(specification, material, BoardCategory.PRODUCT);
+    public NormalBoard getStandardProduct(String specification, String material, BigDecimal cutBoardWidth, Integer orderIncompleteQuantity, Integer orderId) {
+        NormalBoard product = new NormalBoard(specification, material, BoardCategory.PRODUCT, orderId);
         if (product.getWidth().compareTo(cutBoardWidth) > 0) {
             // 如果成品板宽度大于下料板宽度，则需要交换成品板的宽度和长度，不然会导致后续裁剪逻辑出错:
             BigDecimal tmp = product.getWidth();
@@ -162,7 +152,7 @@ public class BoardService {
      * @return 半成品
      */
     public NormalBoard getSemiProduct(CutBoard cutBoard, BigDecimal fixedWidth, NormalBoard product) {
-        NormalBoard semiProduct = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), cutBoard.getMaterial(), BoardCategory.SEMI_PRODUCT);
+        NormalBoard semiProduct = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), cutBoard.getMaterial(), BoardCategory.SEMI_PRODUCT, cutBoard.getOrderId());
         if (semiProduct.getWidth().compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal productAllWidth = ArithmeticUtil.mul(product.getWidth(), product.getCutTimes());
             productAllWidth = ArithmeticUtil.cmp(product.getWidth(), BoardUtil.CLAMP_DEPTH) >= 0 ? productAllWidth : productAllWidth.add(BoardUtil.CLAMP_DEPTH);
@@ -187,7 +177,7 @@ public class BoardService {
                 .filter(spec -> spec.getHeight().compareTo(cutBoard.getHeight()) == 0)
                 .findFirst()
                 .orElse(ParamUtil.getDefaultStockSpec());
-        NormalBoard stock = new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), cutBoard.getMaterial(), BoardCategory.STOCK);
+        NormalBoard stock = new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), cutBoard.getMaterial(), BoardCategory.STOCK, cutBoard.getOrderId());
         if (stock.getWidth().compareTo(BigDecimal.ZERO) > 0 && cutBoard.getLength().compareTo(stock.getLength()) > 0) {
             BigDecimal productAllWidth = ArithmeticUtil.mul(product.getWidth(), product.getCutTimes());
             BigDecimal remainingWidth = ArithmeticUtil.sub(cutBoard.getWidth(), productAllWidth);
@@ -241,7 +231,7 @@ public class BoardService {
      * @return 后续成品
      */
     public NormalBoard getNextProduct(WorkOrder nextOrder, CutBoard currCutBoard, NormalBoard currProduct) {
-        NormalBoard nextProduct = new NormalBoard(nextOrder.getProductSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT);
+        NormalBoard nextProduct = new NormalBoard(nextOrder.getProductSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT, nextOrder.getId());
         if (currProduct.getMaterial().equals(nextProduct.getMaterial())) {
             BigDecimal remainingWidth = ArithmeticUtil.sub(currCutBoard.getWidth(), ArithmeticUtil.mul(currProduct.getWidth(), currProduct.getCutTimes()));
             if (BoardUtil.isAllowCutting(remainingWidth, currProduct.getLength(), nextProduct.getLength())) {

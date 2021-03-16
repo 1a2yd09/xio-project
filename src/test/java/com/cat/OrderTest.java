@@ -41,8 +41,8 @@ class OrderTest extends BaseTest {
         List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
         assertEquals(677, orders.size());
         for (WorkOrder order : orders) {
-            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), order.getId());
+            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
                 System.out.println(order);
             }
@@ -56,8 +56,8 @@ class OrderTest extends BaseTest {
         List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
         assertEquals(677, orders.size());
         for (WorkOrder order : orders) {
-            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), order.getId());
+            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
             if (cutBoard.getWidth().compareTo(new BigDecimal(900)) < 0 || board.getLength().compareTo(new BigDecimal(900)) < 0) {
                 System.out.println(order);
             }
@@ -70,8 +70,8 @@ class OrderTest extends BaseTest {
         List<WorkOrder> orders = orderService.getNotBottomOrders(op.getOrderDate());
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
-            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), order.getId());
+            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
             if (board.getWidth().compareTo(cutBoard.getWidth()) > 0) {
                 System.out.println(order);
             }
@@ -84,8 +84,8 @@ class OrderTest extends BaseTest {
         List<WorkOrder> orders = orderService.getNotBottomOrders(op.getOrderDate());
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
-            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial());
-            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT);
+            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), order.getId());
+            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
             if (board.getLength().compareTo(new BigDecimal(900)) < 0 || cutBoard.getWidth().compareTo(new BigDecimal(900)) < 0) {
                 System.out.println(order);
             }

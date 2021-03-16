@@ -1,18 +1,9 @@
 package com.cat.service;
 
-import com.cat.pojo.Board;
-import com.cat.pojo.BoardList;
-import com.cat.pojo.Inventory;
-import com.cat.pojo.MachineAction;
-import com.cat.pojo.WorkOrder;
-import com.cat.pojo.CutBoard;
-import com.cat.pojo.NormalBoard;
-import com.cat.pojo.OperatingParameter;
-import com.cat.pojo.StockSpecification;
-import com.cat.pojo.CuttingSignal;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderModule;
+import com.cat.pojo.*;
 import com.cat.utils.OrderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,11 +82,6 @@ public class MainService {
                     }
                     this.processCompletedAction(BoardCategory.STOCK, currentOrder, nextOrder);
                 }
-
-//                if (signalService.isReceivedNewProcessControlSignal(ControlSignalCategory.STOP)) {
-//                    logger.info("接收到新的流程中止信号...");
-//                    return;
-//                }
             }
         }
     }
@@ -108,16 +94,16 @@ public class MainService {
      * @param cuttingSignal 下料信号
      */
     public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
-        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge());
+        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         logger.info("下料板信息: {}", cutBoard);
-        NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity());
+        NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         logger.info("成品板信息: {}", productBoard);
         NormalBoard semiProductBoard = this.boardService.getSemiProduct(cutBoard, parameter.getFixedWidth(), productBoard);
         logger.info("半成品信息: {}", semiProductBoard);
 
         BoardList boardList = new BoardList();
-        boardList.addBoard(new Board(order.getId(), semiProductBoard));
-        boardList.addBoard(new Board(order.getId(), productBoard));
+        boardList.addBoard(semiProductBoard);
+        boardList.addBoard(productBoard);
 
         this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold(), order.getId());
     }
@@ -133,9 +119,9 @@ public class MainService {
      */
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
         Integer currOrderId = order.getId();
-        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge());
+        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         logger.info("下料板信息: {}", cutBoard);
-        NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity());
+        NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         logger.info("成品板信息: {}", productBoard);
 
         BoardList boardList = new BoardList();
@@ -144,25 +130,25 @@ public class MainService {
             NormalBoard nextProduct = this.boardService.getNextProduct(nextOrder, cutBoard, productBoard);
             logger.info("后续成品板信息: {}", nextProduct);
             if (nextProduct.getCutTimes() > 0) {
-                boardList.addBoard(new Board(currOrderId, productBoard));
-                boardList.addBoard(new Board(nextOrder.getId(), nextProduct));
+                boardList.addBoard(productBoard);
+                boardList.addBoard(nextProduct);
             } else {
                 NormalBoard stockBoard = this.boardService.getMatchStock(specs, cutBoard, productBoard);
                 logger.info("库存件信息: {}", stockBoard);
                 if (stockBoard.getCutTimes() > 0) {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
-                        boardList.addBoard(new Board(currOrderId, productBoard));
-                        boardList.addBoard(new Board(currOrderId, stockBoard));
+                        boardList.addBoard(productBoard);
+                        boardList.addBoard(stockBoard);
                     } else {
-                        boardList.addBoard(new Board(currOrderId, stockBoard));
-                        boardList.addBoard(new Board(currOrderId, productBoard));
+                        boardList.addBoard(stockBoard);
+                        boardList.addBoard(productBoard);
                     }
                 } else {
-                    boardList.addBoard(new Board(currOrderId, productBoard));
+                    boardList.addBoard(productBoard);
                 }
             }
         } else {
-            boardList.addBoard(new Board(currOrderId, productBoard));
+            boardList.addBoard(productBoard);
         }
 
         this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold(), currOrderId);

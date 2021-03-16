@@ -1,6 +1,6 @@
 package com.cat;
 
-import com.cat.pojo.OrderErrorMsg;
+import com.cat.pojo.OrderErrorMessage;
 import com.cat.pojo.WorkOrder;
 import com.cat.service.MailService;
 import com.cat.service.OrderService;
@@ -29,7 +29,7 @@ class MailTest extends BaseTest {
         String fakeCuttingSize = "2.5×300×1000";
         ExecutorService es = ThreadUtil.EMAIL_POOL;
         if (!BoardUtil.isFirstSpecGeSecondSpec(fakeCuttingSize, order.getProductSpecification())) {
-            OrderErrorMsg msg = OrderErrorMsg.getInstance(order.getId(), fakeCuttingSize, order.getProductSpecification());
+            OrderErrorMessage msg = OrderErrorMessage.getInstance(order.getId(), fakeCuttingSize, order.getProductSpecification());
             es.submit(() -> mailService.sendOrderErrorMail(msg));
         }
         try {

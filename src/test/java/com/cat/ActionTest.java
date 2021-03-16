@@ -40,7 +40,7 @@ class ActionTest extends BaseTest {
         // 库存件: 4.0×245×3300
 
         WorkOrder order = orderService.getOrderById(3098562);
-        NormalBoard stock = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.STOCK);
+        NormalBoard stock = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.STOCK, order.getId());
         stock.setLength(new BigDecimal(3300));
         stockSpecService.insertStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
         mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
@@ -85,7 +85,7 @@ class ActionTest extends BaseTest {
         // 半成品 2.5×192×2504:
 
         WorkOrder order = orderService.getOrderById(3099510);
-        NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT);
+        NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT, order.getId());
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         // 测试一，生成8个机器动作:
         assertEquals(10, actionService.getMachineActionCount());

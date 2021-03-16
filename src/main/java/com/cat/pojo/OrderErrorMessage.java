@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * @author CAT
  */
 @Data
-public class OrderErrorMsg {
+public class OrderErrorMessage {
     private Integer orderId;
     private String cuttingSize;
     private String productSpecification;
@@ -22,8 +22,8 @@ public class OrderErrorMsg {
      * @param productSpecification 成品规格
      * @return 消息对象
      */
-    public static OrderErrorMsg getInstance(Integer orderId, String cuttingSize, String productSpecification) {
-        OrderErrorMsg msg = new OrderErrorMsg();
+    public static OrderErrorMessage getInstance(Integer orderId, String cuttingSize, String productSpecification) {
+        OrderErrorMessage msg = new OrderErrorMessage();
         msg.setOrderId(orderId);
         msg.setCuttingSize(cuttingSize);
         msg.setProductSpecification(productSpecification);

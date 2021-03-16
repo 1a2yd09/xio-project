@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BoardList {
-    private final List<Board> boards;
+    private final List<NormalBoard> boards;
     private BigDecimal boardAllWidth;
 
     public BoardList() {
@@ -13,7 +13,7 @@ public class BoardList {
         this.boardAllWidth = BigDecimal.ZERO;
     }
 
-    public List<Board> getBoards() {
+    public List<NormalBoard> getBoards() {
         return boards;
     }
 
@@ -26,8 +26,8 @@ public class BoardList {
      *
      * @param board 板材对象
      */
-    public void addBoard(Board board) {
+    public void addBoard(NormalBoard board) {
         this.boards.add(board);
-        this.boardAllWidth = this.boardAllWidth.add(board.getNormalBoard().getNormalBoardAllWidth());
+        this.boardAllWidth = this.boardAllWidth.add(board.getNormalBoardAllWidth());
     }
 }

@@ -15,13 +15,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Disabled("The mail function does not require repeated tests.")
 class MailTest extends BaseTest {
     @Autowired
     MailService mailService;
     @Autowired
     OrderService orderService;
 
-    @Disabled("The mail function does not require repeated tests.")
     @Test
     void testSendMail() {
         // product: 2.5×309×1016

@@ -30,6 +30,7 @@ class NotBottomProcessTest extends BaseTest {
     /**
      * 不是最后一次
      */
+    @Disabled("Deprecated")
     @Test
     void test1() {
         WorkOrder order = orderService.getOrderById(3098562);
@@ -61,6 +62,7 @@ class NotBottomProcessTest extends BaseTest {
     /**
      * 是最后一次-剩余板材可复用于后续成品(材质相同、剩余宽度大于900且当前成品长度大于等于后续成品长度)
      */
+    @Disabled("Deprecated")
     @Test
     void test2() {
         WorkOrder order = orderService.getOrderById(3098562);
@@ -118,6 +120,7 @@ class NotBottomProcessTest extends BaseTest {
     /**
      * 是最后一次-不可复用(材质不对)-不可库存件(规格表为空)
      */
+    @Disabled("Deprecated")
     @Test
     void test3() {
         WorkOrder order = orderService.getOrderById(3098562);
@@ -138,6 +141,7 @@ class NotBottomProcessTest extends BaseTest {
     /**
      * 是最后一次-不可复用(无后续工单)-不可库存件(规格表为空)
      */
+    @Disabled("Deprecated")
     @Test
     void test4() {
         WorkOrder order = orderService.getOrderById(3098562);
@@ -153,6 +157,7 @@ class NotBottomProcessTest extends BaseTest {
     /**
      * 是最后一次-不可复用(规格不对)-不可库存件(规格表为空)
      */
+    @Disabled("Deprecated")
     @Test
     void test5() {
         WorkOrder order = orderService.getOrderById(3098562);
@@ -189,6 +194,7 @@ class NotBottomProcessTest extends BaseTest {
     /**
      * 是最后一次-不可复用(无后续工单)-能库存-库存先(由于成品总宽度小于900，因此对宽度进行补齐)
      */
+    @Disabled("Deprecated")
     @Test
     void test6() {
         WorkOrder order = orderService.getOrderById(3098562);
@@ -226,6 +232,7 @@ class NotBottomProcessTest extends BaseTest {
     /**
      * 是最后一次-不可复用(无后续工单)-能库存-成品先
      */
+    @Disabled("Deprecated")
     @Test
     void test7() {
         WorkOrder order = orderService.getOrderById(3098562);

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled("Not for now")
 class MainTest extends BaseTest {
     @Autowired
     MainService mainService;
@@ -35,7 +36,6 @@ class MainTest extends BaseTest {
         assertEquals(759, orderService.getCompletedOrderCount());
     }
 
-    @Disabled("Not for now")
     @Test
     void testNoRollbackStart() throws InterruptedException {
         assertEquals(759, orderService.getAllProductionOrders().size());

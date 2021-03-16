@@ -25,6 +25,7 @@ class BottomProcessTest extends BaseTest {
     /**
      * 成品规格符合标准，即成品规格宽度是小于长度的。
      */
+    @Disabled("Deprecated")
     @Test
     void test1() {
         // 下料板:2.5×1250×2504，成品板:2.5×121×2185，需求2个成品板
@@ -54,6 +55,7 @@ class BottomProcessTest extends BaseTest {
     /**
      * 成品规格不符合标准，即成品规格宽度是大于长度的。
      */
+    @Disabled("Deprecated")
     @Test
     void test2() {
         // 下料板:2.5×1250×1589，成品板:2.5×1345.5×1189，需求1个成品板
@@ -68,6 +70,7 @@ class BottomProcessTest extends BaseTest {
     /**
      * 成品规格符合标准，即成品规格宽度是小于长度的，但是没有补齐操作。
      */
+    @Disabled("Deprecated")
     @Test
     void test3() {
         // 下料板:2.5×1250×2504，成品板:2.5×121×2185，需求2个成品板
@@ -96,6 +99,7 @@ class BottomProcessTest extends BaseTest {
     /**
      * 成品规格符合标准，即成品规格宽度是小于长度的，有补齐操作，但是没有半成品生成。
      */
+    @Disabled("Deprecated")
     @Test
     void test4() {
         // 下料板:2.5×1250×2504，成品板:2.5×121×2185，需求2个成品板

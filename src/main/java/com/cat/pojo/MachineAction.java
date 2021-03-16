@@ -31,17 +31,16 @@ public class MachineAction {
      * @param actionCategory 动作类型
      * @param dis            进刀距离
      * @param baseBoard      板材对象
-     * @param orderId        工单 ID
      * @return 机器动作对象
      */
-    public static MachineAction of(ActionCategory actionCategory, BigDecimal dis, BaseBoard baseBoard, Integer orderId) {
+    public static MachineAction of(ActionCategory actionCategory, BigDecimal dis, BaseBoard baseBoard) {
         MachineAction action = new MachineAction();
         action.setActionCategory(actionCategory.value);
         action.setCutDistance(dis);
         action.setBoardCategory(baseBoard.getCategory().value);
         action.setBoardSpecification(baseBoard.getStandardSpecStr());
         action.setBoardMaterial(baseBoard.getMaterial());
-        action.setOrderId(orderId);
+        action.setOrderId(baseBoard.getOrderId());
         return action;
     }
 }

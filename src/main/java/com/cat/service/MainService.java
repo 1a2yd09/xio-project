@@ -94,7 +94,7 @@ public class MainService {
      * @param cuttingSignal 下料信号
      */
     public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
-        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
+        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), order.getId(), cuttingSignal.getForwardEdge());
         logger.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         logger.info("成品板信息: {}", productBoard);
@@ -105,7 +105,7 @@ public class MainService {
         boardList.addBoard(semiProductBoard);
         boardList.addBoard(productBoard);
 
-        this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold(), order.getId());
+        this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold());
     }
 
     /**
@@ -118,8 +118,7 @@ public class MainService {
      * @param cuttingSignal 下料信号
      */
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
-        Integer currOrderId = order.getId();
-        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
+        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), order.getId(), cuttingSignal.getForwardEdge());
         logger.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         logger.info("成品板信息: {}", productBoard);
@@ -151,7 +150,7 @@ public class MainService {
             boardList.addBoard(productBoard);
         }
 
-        this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold(), currOrderId);
+        this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold());
     }
 
     /**

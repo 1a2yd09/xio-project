@@ -91,4 +91,15 @@ class NotBottomProcessTest extends BaseTest {
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(10, actionService.getAllMachineActions().size());
     }
+
+    @Test
+    void test7() {
+        WorkOrder order = orderService.getOrderById(3098562);
+        order.setProductQuantity("1");
+        NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
+        stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), new BigDecimal(3180));
+        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(13, actionService.getAllMachineActions().size());
+    }
 }

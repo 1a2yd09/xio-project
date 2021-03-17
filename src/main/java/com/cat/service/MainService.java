@@ -6,8 +6,7 @@ import com.cat.enums.OrderModule;
 import com.cat.pojo.*;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +17,9 @@ import java.util.Map;
 /**
  * @author CAT
  */
+@Slf4j
 @Service
 public class MainService {
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     ProcessBoardService processBoardService;
     @Autowired
@@ -47,19 +45,19 @@ public class MainService {
         this.signalService.waitingForNewProcessStartSignal();
 
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
-        logger.info("流程运行参数: {}", param);
+        log.info("流程运行参数: {}", param);
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-        logger.info("流程库存件规格列表: {}", specs);
+        log.info("流程库存件规格列表: {}", specs);
         List<WorkOrder> orders = this.orderService.getProductionOrders(orderModule, param);
-        logger.info("{}模块工单数量为: {}", orderModule, orders.size());
+        log.info("{}模块工单数量为: {}", orderModule, orders.size());
 
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder currentOrder = orders.get(i);
-            logger.info("当前工单信息: {}", currentOrder);
+            log.info("当前工单信息: {}", currentOrder);
             while (currentOrder.getIncompleteQuantity() != 0) {
                 this.signalService.insertTakeBoardSignal(currentOrder.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currentOrder);
-                logger.info("下料信号内容: {}", cuttingSignal);
+                log.info("下料信号内容: {}", cuttingSignal);
 
                 if (OrderModule.BOTTOM_PLATFORM == orderModule) {
                     this.processingBottomOrder(currentOrder, param, cuttingSignal);
@@ -68,14 +66,14 @@ public class MainService {
                     if (i < orders.size() - 1) {
                         nextOrder = orders.get(i + 1);
                     }
-                    logger.info("后续工单信息: {}", nextOrder);
+                    log.info("后续工单信息: {}", nextOrder);
                     this.processingNotBottomOrder(currentOrder, nextOrder, param, specs, cuttingSignal);
                 }
 
                 List<MachineAction> actions = this.actionService.getAllMachineActions();
-                logger.info("机器动作列表:");
+                log.info("机器动作列表:");
                 for (MachineAction action : actions) {
-                    logger.info("{}", action);
+                    log.info("{}", action);
                 }
                 this.processCompletedAction();
             }
@@ -91,11 +89,11 @@ public class MainService {
      */
     public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
-        logger.info("下料板信息: {}", cutBoard);
+        log.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
-        logger.info("成品板信息: {}", productBoard);
+        log.info("成品板信息: {}", productBoard);
         NormalBoard semiProductBoard = BoardUtil.getSemiProduct(cutBoard, parameter.getFixedWidth(), productBoard);
-        logger.info("半成品信息: {}", semiProductBoard);
+        log.info("半成品信息: {}", semiProductBoard);
 
         BoardList boardList = new BoardList();
         boardList.addBoard(semiProductBoard);
@@ -115,21 +113,21 @@ public class MainService {
      */
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
-        logger.info("下料板信息: {}", cutBoard);
+        log.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
-        logger.info("成品板信息: {}", productBoard);
+        log.info("成品板信息: {}", productBoard);
 
         BoardList boardList = new BoardList();
 
         if (productBoard.getCutTimes() == order.getIncompleteQuantity()) {
             NormalBoard nextProduct = BoardUtil.getNextProduct(nextOrder, cutBoard, productBoard);
-            logger.info("后续成品板信息: {}", nextProduct);
+            log.info("后续成品板信息: {}", nextProduct);
             if (nextProduct.getCutTimes() > 0) {
                 boardList.addBoard(productBoard);
                 boardList.addBoard(nextProduct);
             } else {
                 NormalBoard stockBoard = BoardUtil.getMatchStock(specs, cutBoard, productBoard);
-                logger.info("库存件信息: {}", stockBoard);
+                log.info("库存件信息: {}", stockBoard);
                 if (stockBoard.getCutTimes() > 0) {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
                         boardList.addBoard(productBoard);

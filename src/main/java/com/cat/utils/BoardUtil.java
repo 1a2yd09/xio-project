@@ -78,8 +78,8 @@ public class BoardUtil {
      * @return -1，1分别表示前者规格中的某个度量小于、大于后者规格中的对应度量，0表示两者规格相同
      */
     public static int compareTwoSpecStr(String sp1, String sp2) {
-        List<BigDecimal> decList1 = BoardUtil.specStrToDecList(sp1);
-        List<BigDecimal> decList2 = BoardUtil.specStrToDecList(sp2);
+        List<BigDecimal> decList1 = specStrToDecList(sp1);
+        List<BigDecimal> decList2 = specStrToDecList(sp2);
         for (int i = 0; i < decList1.size(); i++) {
             if (decList1.get(i).compareTo(decList2.get(i)) != 0) {
                 return decList1.get(i).compareTo(decList2.get(i));
@@ -96,8 +96,8 @@ public class BoardUtil {
      * @return 结果
      */
     public static boolean isFirstSpecGeSecondSpec(String firstSpec, String secondSpec) {
-        List<BigDecimal> decList1 = BoardUtil.specStrToDecList(firstSpec);
-        List<BigDecimal> decList2 = BoardUtil.specStrToDecList(secondSpec);
+        List<BigDecimal> decList1 = specStrToDecList(firstSpec);
+        List<BigDecimal> decList2 = specStrToDecList(secondSpec);
         BigDecimal cuttingWidth = decList1.get(1);
         BigDecimal cuttingLength = decList1.get(2);
         BigDecimal productWidth = decList2.get(1);
@@ -253,11 +253,11 @@ public class BoardUtil {
             BigDecimal productAllWidth = DecimalUtil.mul(product.getWidth(), product.getCutTimes());
             BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), productAllWidth);
             if (product.getLength().compareTo(stock.getLength()) >= 0) {
-                if (BoardUtil.isAllowCutting(remainingWidth, product.getLength(), stock.getLength())) {
-                    stock.setCutTimes(DecimalUtil.div(BoardUtil.getAvailableWidth(remainingWidth, stock.getWidth()), stock.getWidth()));
+                if (isAllowCutting(remainingWidth, product.getLength(), stock.getLength())) {
+                    stock.setCutTimes(DecimalUtil.div(getAvailableWidth(remainingWidth, stock.getWidth()), stock.getWidth()));
                 }
             } else {
-                productAllWidth = BoardUtil.getPostProductAllWidth(product, stock.getLength());
+                productAllWidth = getPostProductAllWidth(product, stock.getLength());
                 remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), productAllWidth);
                 stock.setCutTimes(DecimalUtil.div(remainingWidth, stock.getWidth()));
             }
@@ -286,7 +286,7 @@ public class BoardUtil {
             extraBoard.setWidth(DecimalUtil.sub(cutBoard.getLength(), targetMeasure));
         }
         extraBoard.setMaterial(cutBoard.getMaterial());
-        extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
+        extraBoard.setCategory(calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
         extraBoard.setOrderId(cutBoard.getOrderId());
         // 额外板材裁剪次数取决于目标度量和下料板对应度量的差值:
         extraBoard.setCutTimes(extraBoard.getWidth().compareTo(BigDecimal.ZERO) > 0 ? 1 : 0);
@@ -305,8 +305,8 @@ public class BoardUtil {
         NormalBoard nextProduct = new NormalBoard(nextOrder.getProductSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT, nextOrder.getId());
         if (currProduct.getMaterial().equals(nextProduct.getMaterial())) {
             BigDecimal remainingWidth = DecimalUtil.sub(currCutBoard.getWidth(), DecimalUtil.mul(currProduct.getWidth(), currProduct.getCutTimes()));
-            if (BoardUtil.isAllowCutting(remainingWidth, currProduct.getLength(), nextProduct.getLength())) {
-                nextProduct.setCutTimes(Math.min(DecimalUtil.div(BoardUtil.getAvailableWidth(remainingWidth, nextProduct.getWidth()), nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));
+            if (isAllowCutting(remainingWidth, currProduct.getLength(), nextProduct.getLength())) {
+                nextProduct.setCutTimes(Math.min(DecimalUtil.div(getAvailableWidth(remainingWidth, nextProduct.getWidth()), nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));
             }
         }
         return nextProduct;

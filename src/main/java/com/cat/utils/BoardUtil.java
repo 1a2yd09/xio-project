@@ -102,10 +102,10 @@ public class BoardUtil {
         BigDecimal cuttingLength = decList1.get(2);
         BigDecimal productWidth = decList2.get(1);
         BigDecimal productLength = decList2.get(2);
-        if (ArithmeticUtil.cmp(cuttingWidth, productWidth) >= 0 && ArithmeticUtil.cmp(cuttingLength, productLength) >= 0) {
+        if (DecimalUtil.cmp(cuttingWidth, productWidth) >= 0 && DecimalUtil.cmp(cuttingLength, productLength) >= 0) {
             return true;
         } else {
-            return ArithmeticUtil.cmp(cuttingWidth, productLength) >= 0 && ArithmeticUtil.cmp(cuttingLength, productWidth) >= 0;
+            return DecimalUtil.cmp(cuttingWidth, productLength) >= 0 && DecimalUtil.cmp(cuttingLength, productWidth) >= 0;
         }
     }
 
@@ -128,16 +128,18 @@ public class BoardUtil {
     /**
      * 当后续裁剪板材为成品时，如果成品总宽度小于夹钳宽度且需修剪长度，则必须保证留有夹钳宽度大小的剩余宽度供裁剪成品。
      *
-     * @param productAllWidth 成品所需总宽度
-     * @param productLength   成品长度
-     * @param preLength       预先板材长度
+     * @param product   成品对象
+     * @param preLength 预先板材长度
      * @return 保证成品板裁剪的总宽度
      */
-    public static BigDecimal processPostProductAllWidth(BigDecimal productAllWidth, BigDecimal productLength, BigDecimal preLength) {
-        if (productAllWidth.compareTo(CLAMP_WIDTH) < 0 && productLength.compareTo(preLength) < 0) {
+    public static BigDecimal getPostProductAllWidth(NormalBoard product, BigDecimal preLength) {
+        BigDecimal allWidth = product.getAllWidth();
+        // 如果成品个数是在扣除夹钳深度后得到的个数，那么计算总宽度时需要加上夹钳深度，可以理解为原料板最后有夹钳深度的板材无法使用，在其之前的就是成品板材。
+        allWidth = product.getWidth().compareTo(CLAMP_DEPTH) >= 0 ? allWidth : allWidth.add(CLAMP_DEPTH);
+        if (allWidth.compareTo(CLAMP_WIDTH) < 0 && product.getLength().compareTo(preLength) < 0) {
             return CLAMP_WIDTH;
         }
-        return productAllWidth;
+        return allWidth;
     }
 
     /**
@@ -155,12 +157,30 @@ public class BoardUtil {
         return remainingWidth.compareTo(CLAMP_WIDTH) >= 0 && productLength.compareTo(postLength) >= 0;
     }
 
+    /**
+     * 获取原料板可用宽度，所谓可用宽度是指给定原料板和加工板的宽度，是否需要扣除夹钳深度。
+     *
+     * @param cutBoardWidth    原料板宽度
+     * @param normalBoardWidth 加工板宽度
+     * @return 原料板可用宽度
+     */
     public static BigDecimal getAvailableWidth(BigDecimal cutBoardWidth, BigDecimal normalBoardWidth) {
-        return ArithmeticUtil.cmp(normalBoardWidth, CLAMP_DEPTH) >= 0 ? cutBoardWidth : cutBoardWidth.subtract(CLAMP_DEPTH);
+        // 如果加工板宽度大于夹钳深度，那么整个原料板宽度都可以被用来裁剪加工板，如果余料小于夹钳深度，那就先把余料出掉；
+        // 否则，原料板可用宽度必须扣除夹钳深度，防止夹钳深度不够余料或板材本身的裁剪。
+        return DecimalUtil.cmp(normalBoardWidth, CLAMP_DEPTH) >= 0 ? cutBoardWidth : cutBoardWidth.subtract(CLAMP_DEPTH);
     }
 
-    public static boolean isAllowBackToFront(BigDecimal boardAllWidth, BigDecimal boardWidth) {
-        return boardAllWidth.compareTo(CLAMP_WIDTH) >= 0 && boardWidth.compareTo(CLAMP_DEPTH) >= 0;
+    /**
+     * 是否允许从后向前紧挨着排板裁剪，这取决于最后一类板材的宽度及其所需总宽度。
+     *
+     * @param normalBoard 板材对象
+     * @return 是否允许从后向前紧挨着排板裁剪
+     */
+    public static boolean isAllowBackToFront(NormalBoard normalBoard) {
+        // 如果说最后一类板材宽度总宽大于宽度阈值并且宽度大于深度阈值，那就允许从后向前紧挨着排板，因为既不需要预留空间也不用担心深度问题。
+        // 如果只是前者不满足，那为了充分利用板材，就在中间将补齐的原料给出去。
+        // 如果只是后者不满足，那就按照从前向后紧挨着的方式进行排板。
+        return normalBoard.getAllWidth().compareTo(CLAMP_WIDTH) >= 0 && normalBoard.getWidth().compareTo(CLAMP_DEPTH) >= 0;
     }
 
     /**
@@ -193,7 +213,7 @@ public class BoardUtil {
             product.setLength(tmp);
         }
         // 成品板的裁剪次数取决于最大裁剪次数以及工单未完成数目中的最小值:
-        product.setCutTimes(Math.min(ArithmeticUtil.div(BoardUtil.getAvailableWidth(cutBoardWidth, product.getWidth()), product.getWidth()), orderIncompleteQuantity));
+        product.setCutTimes(Math.min(DecimalUtil.div(getAvailableWidth(cutBoardWidth, product.getWidth()), product.getWidth()), orderIncompleteQuantity));
         return product;
     }
 
@@ -207,13 +227,10 @@ public class BoardUtil {
      */
     public static NormalBoard getSemiProduct(CutBoard cutBoard, BigDecimal fixedWidth, NormalBoard product) {
         NormalBoard semiProduct = new NormalBoard(cutBoard.getHeight(), fixedWidth, cutBoard.getLength(), cutBoard.getMaterial(), BoardCategory.SEMI_PRODUCT, cutBoard.getOrderId());
-        if (semiProduct.getWidth().compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal productAllWidth = ArithmeticUtil.mul(product.getWidth(), product.getCutTimes());
-            productAllWidth = ArithmeticUtil.cmp(product.getWidth(), BoardUtil.CLAMP_DEPTH) >= 0 ? productAllWidth : productAllWidth.add(BoardUtil.CLAMP_DEPTH);
-            productAllWidth = BoardUtil.processPostProductAllWidth(productAllWidth, product.getLength(), semiProduct.getLength());
-            BigDecimal remainingWidth = ArithmeticUtil.sub(cutBoard.getWidth(), productAllWidth);
+        if (DecimalUtil.cmp(semiProduct.getWidth(), BigDecimal.ZERO) > 0) {
+            BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), getPostProductAllWidth(product, semiProduct.getLength()));
             // 半成品的裁剪次数取决于下料板裁剪成品后的剩余宽度以及半成品自身宽度:
-            semiProduct.setCutTimes(ArithmeticUtil.div(remainingWidth, semiProduct.getWidth()));
+            semiProduct.setCutTimes(DecimalUtil.div(remainingWidth, semiProduct.getWidth()));
         }
         return semiProduct;
     }
@@ -233,17 +250,16 @@ public class BoardUtil {
                 .orElse(ParamUtil.getDefaultStockSpec());
         NormalBoard stock = new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), cutBoard.getMaterial(), BoardCategory.STOCK, cutBoard.getOrderId());
         if (stock.getWidth().compareTo(BigDecimal.ZERO) > 0 && cutBoard.getLength().compareTo(stock.getLength()) > 0) {
-            BigDecimal productAllWidth = ArithmeticUtil.mul(product.getWidth(), product.getCutTimes());
-            BigDecimal remainingWidth = ArithmeticUtil.sub(cutBoard.getWidth(), productAllWidth);
+            BigDecimal productAllWidth = DecimalUtil.mul(product.getWidth(), product.getCutTimes());
+            BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), productAllWidth);
             if (product.getLength().compareTo(stock.getLength()) >= 0) {
                 if (BoardUtil.isAllowCutting(remainingWidth, product.getLength(), stock.getLength())) {
-                    stock.setCutTimes(ArithmeticUtil.div(BoardUtil.getAvailableWidth(remainingWidth, stock.getWidth()), stock.getWidth()));
+                    stock.setCutTimes(DecimalUtil.div(BoardUtil.getAvailableWidth(remainingWidth, stock.getWidth()), stock.getWidth()));
                 }
             } else {
-                productAllWidth = ArithmeticUtil.cmp(product.getWidth(), BoardUtil.CLAMP_DEPTH) >= 0 ? productAllWidth : productAllWidth.add(BoardUtil.CLAMP_DEPTH);
-                productAllWidth = BoardUtil.processPostProductAllWidth(productAllWidth, product.getLength(), stock.getLength());
-                remainingWidth = ArithmeticUtil.sub(cutBoard.getWidth(), productAllWidth);
-                stock.setCutTimes(ArithmeticUtil.div(remainingWidth, stock.getWidth()));
+                productAllWidth = BoardUtil.getPostProductAllWidth(product, stock.getLength());
+                remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), productAllWidth);
+                stock.setCutTimes(DecimalUtil.div(remainingWidth, stock.getWidth()));
             }
         }
         return stock;
@@ -264,10 +280,10 @@ public class BoardUtil {
         // 以进刀出去的边作为较长边:
         if (forwardEdge == ForwardEdge.LONG) {
             extraBoard.setLength(cutBoard.getLength());
-            extraBoard.setWidth(ArithmeticUtil.sub(cutBoard.getWidth(), targetMeasure));
+            extraBoard.setWidth(DecimalUtil.sub(cutBoard.getWidth(), targetMeasure));
         } else {
             extraBoard.setLength(cutBoard.getWidth());
-            extraBoard.setWidth(ArithmeticUtil.sub(cutBoard.getLength(), targetMeasure));
+            extraBoard.setWidth(DecimalUtil.sub(cutBoard.getLength(), targetMeasure));
         }
         extraBoard.setMaterial(cutBoard.getMaterial());
         extraBoard.setCategory(BoardUtil.calBoardCategory(extraBoard.getWidth(), extraBoard.getLength(), wasteThreshold));
@@ -288,9 +304,9 @@ public class BoardUtil {
     public static NormalBoard getNextProduct(WorkOrder nextOrder, CutBoard currCutBoard, NormalBoard currProduct) {
         NormalBoard nextProduct = new NormalBoard(nextOrder.getProductSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT, nextOrder.getId());
         if (currProduct.getMaterial().equals(nextProduct.getMaterial())) {
-            BigDecimal remainingWidth = ArithmeticUtil.sub(currCutBoard.getWidth(), ArithmeticUtil.mul(currProduct.getWidth(), currProduct.getCutTimes()));
+            BigDecimal remainingWidth = DecimalUtil.sub(currCutBoard.getWidth(), DecimalUtil.mul(currProduct.getWidth(), currProduct.getCutTimes()));
             if (BoardUtil.isAllowCutting(remainingWidth, currProduct.getLength(), nextProduct.getLength())) {
-                nextProduct.setCutTimes(Math.min(ArithmeticUtil.div(BoardUtil.getAvailableWidth(remainingWidth, nextProduct.getWidth()), nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));
+                nextProduct.setCutTimes(Math.min(DecimalUtil.div(BoardUtil.getAvailableWidth(remainingWidth, nextProduct.getWidth()), nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));
             }
         }
         return nextProduct;

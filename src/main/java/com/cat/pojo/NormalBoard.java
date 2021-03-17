@@ -1,6 +1,7 @@
 package com.cat.pojo;
 
 import com.cat.enums.BoardCategory;
+import com.cat.utils.DecimalUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -33,6 +34,6 @@ public class NormalBoard extends BaseBoard {
      * @return 总宽度
      */
     public BigDecimal getAllWidth() {
-        return this.getWidth().multiply(BigDecimal.valueOf(this.cutTimes));
+        return DecimalUtil.mul(this.getWidth(), this.cutTimes);
     }
 }

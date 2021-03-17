@@ -9,7 +9,7 @@ import com.cat.utils.SignalUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BottomProcessTest extends BaseTest {
     @Autowired
@@ -23,38 +23,48 @@ class BottomProcessTest extends BaseTest {
 
     @Test
     void test1() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3099510);
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(10, actionService.getAllMachineActions().size());
     }
 
     @Test
     void test2() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3099510);
         order.setProductSpecification("2.5×121×2504");
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(7, actionService.getAllMachineActions().size());
     }
 
     @Test
     void test3() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3099510);
         order.setProductQuantity("8");
         order.setCuttingSize("2.5×1000×2504");
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(9, actionService.getAllMachineActions().size());
     }
 
     @Test
     void test4() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3099510);
         order.setProductQuantity("8");
         order.setProductSpecification("2.5×240×2185");
         mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(7, actionService.getAllMachineActions().size());
+    }
+
+    @Test
+    void test5() {
+        WorkOrder order = orderService.getOrderById(3099510);
+        order.setProductQuantity("15");
+        order.setProductSpecification("2.5×100×2185");
+        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(13, actionService.getAllMachineActions().size());
     }
 }

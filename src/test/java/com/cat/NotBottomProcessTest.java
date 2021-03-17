@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NotBottomProcessTest extends BaseTest {
     @Autowired
@@ -27,27 +27,26 @@ class NotBottomProcessTest extends BaseTest {
 
     @Test
     void test1() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3098562);
         order.setProductQuantity("10");
         mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(10, actionService.getAllMachineActions().size());
     }
 
     @Test
     void test2() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3098562);
         order.setProductQuantity("1");
         WorkOrder nextOrder = orderService.getOrderById(3118526);
         nextOrder.setProductQuantity("4");
         mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(13, actionService.getAllMachineActions().size());
     }
 
     @Test
     void test3() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3098562);
         order.setCuttingSize("4×1300×3500");
         order.setProductQuantity("3");
@@ -57,21 +56,21 @@ class NotBottomProcessTest extends BaseTest {
         nextOrder.setProductQuantity("2");
         mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(11, actionService.getAllMachineActions().size());
     }
 
     @Test
     void test4() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3098562);
         order.setProductQuantity("2");
         WorkOrder nextOrder = orderService.getOrderById(3118526);
         mainService.processingNotBottomOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(10, actionService.getAllMachineActions().size());
     }
 
     @Test
     void test5() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3098562);
         order.setProductQuantity("1");
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
@@ -79,16 +78,17 @@ class NotBottomProcessTest extends BaseTest {
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
         mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(10, actionService.getAllMachineActions().size());
     }
 
     @Test
     void test6() {
-        assertTrue(true);
         WorkOrder order = orderService.getOrderById(3098562);
         order.setProductQuantity("1");
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
         mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
+        assertEquals(10, actionService.getAllMachineActions().size());
     }
 }

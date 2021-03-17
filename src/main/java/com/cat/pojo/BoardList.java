@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author CAT
+ */
 public class BoardList {
     private final List<NormalBoard> boards;
     private BigDecimal boardAllWidth;
@@ -21,13 +24,19 @@ public class BoardList {
         return boardAllWidth;
     }
 
+    public NormalBoard getLastBoard() {
+        return this.boards.get(this.boards.size() - 1);
+    }
+
     /**
      * 添加板材对象至板材列表。
      *
      * @param board 板材对象
      */
     public void addBoard(NormalBoard board) {
-        this.boards.add(board);
-        this.boardAllWidth = this.boardAllWidth.add(board.getAllWidth());
+        if (board.getCutTimes() > 0) {
+            this.boards.add(board);
+            this.boardAllWidth = this.boardAllWidth.add(board.getAllWidth());
+        }
     }
 }

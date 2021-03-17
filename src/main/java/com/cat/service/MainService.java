@@ -101,7 +101,7 @@ public class MainService {
         boardList.addBoard(semiProductBoard);
         boardList.addBoard(productBoard);
 
-        this.processBoardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold());
+        this.processBoardService.cutting(cutBoard, boardList, parameter.getWasteThreshold());
     }
 
     /**
@@ -146,7 +146,7 @@ public class MainService {
             boardList.addBoard(productBoard);
         }
 
-        this.processBoardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold());
+        this.processBoardService.cutting(cutBoard, boardList, parameter.getWasteThreshold());
     }
 
     /**

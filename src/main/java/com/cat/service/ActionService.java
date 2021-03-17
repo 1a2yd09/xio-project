@@ -3,6 +3,7 @@ package com.cat.service;
 import com.cat.enums.ActionState;
 import com.cat.mapper.ActionMapper;
 import com.cat.pojo.MachineAction;
+import com.cat.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class ActionService {
         // test:
         this.completedAllMachineActions();
         log.info("等待动作全部执行...");
-        TaskService.ACTION_DONE_MESSAGE_QUEUE.take();
+        ThreadUtil.getActionProcessedMessageQueue().take();
         log.info("全部动作执行完毕...");
     }
 

@@ -6,6 +6,7 @@ import com.cat.mapper.SignalMapper;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.TakeBoardSignal;
 import com.cat.pojo.WorkOrder;
+import com.cat.utils.ThreadUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class SignalService {
         // test:
         this.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
         logger.info("等待下料信号...");
-        CuttingSignal signal = TaskService.CUTTING_MESSAGE_QUEUE.take();
+        CuttingSignal signal = ThreadUtil.getCuttingMessageQueue().take();
         logger.info("获取到新的下料信号...");
         return signal;
     }
@@ -46,7 +47,7 @@ public class SignalService {
         // test:
         this.insertProcessControlSignal(ControlSignalCategory.START);
         logger.info("等待流程启动信号...");
-        TaskService.START_CONTROL_MESSAGE_QUEUE.take();
+        ThreadUtil.getStartControlMessageQueue().take();
         logger.info("获取到新的流程启动信号...");
     }
 

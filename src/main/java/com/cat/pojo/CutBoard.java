@@ -13,15 +13,13 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class CutBoard extends BaseBoard {
-    private ForwardEdge forwardEdge;
-
+    private ForwardEdge forwardEdge = ForwardEdge.SHORT;
 
     public CutBoard(String specification, String material, Integer orderId) {
         super(specification, material, BoardCategory.CUTTING, orderId);
-        this.forwardEdge = ForwardEdge.SHORT;
     }
 
-    public CutBoard(String specification, String material, Integer orderId, ForwardEdge forwardEdge) {
+    public CutBoard(String specification, String material, ForwardEdge forwardEdge, Integer orderId) {
         super(specification, material, BoardCategory.CUTTING, orderId);
         this.forwardEdge = forwardEdge;
     }

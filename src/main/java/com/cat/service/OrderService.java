@@ -134,6 +134,16 @@ public class OrderService {
     }
 
     /**
+     * 根据工单 ID 获取指定完成工单，不存在指定 ID 工单时将返回 null。
+     *
+     * @param id 工单 ID
+     * @return 工单
+     */
+    public WorkOrder getCompletedOrderById(Integer id) {
+        return this.orderMapper.getCompletedOrderById(id);
+    }
+
+    /**
      * 更新工单运行状态。
      *
      * @param order 工单

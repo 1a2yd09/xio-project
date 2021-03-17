@@ -61,7 +61,7 @@ public class BoardService {
     public void newCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
         List<NormalBoard> boards = boardList.getBoards();
         NormalBoard lastNormalBoard = boards.get(boards.size() - 1);
-        if (BoardUtil.isAllowBackToFront(lastNormalBoard.getNormalBoardAllWidth(), lastNormalBoard.getWidth())) {
+        if (BoardUtil.isAllowBackToFront(lastNormalBoard.getAllWidth(), lastNormalBoard.getWidth())) {
             NormalBoard extraBoard = this.getExtraBoard(cutBoard, ForwardEdge.LONG, boardList.getBoardAllWidth(), wasteThreshold);
             this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
             for (NormalBoard board : boards) {
@@ -114,8 +114,8 @@ public class BoardService {
      * @param forwardEdge 朝向
      * @return 下料板
      */
-    public CutBoard getCutBoard(String cuttingSize, String material, Integer orderId, Integer forwardEdge) {
-        return new CutBoard(cuttingSize, material, orderId, forwardEdge == 1 ? ForwardEdge.LONG : ForwardEdge.SHORT);
+    public CutBoard getCutBoard(String cuttingSize, String material, Integer forwardEdge, Integer orderId) {
+        return new CutBoard(cuttingSize, material, forwardEdge == 1 ? ForwardEdge.LONG : ForwardEdge.SHORT, orderId);
     }
 
     /**

@@ -44,6 +44,14 @@ public class ActionService {
     }
 
     /**
+     * 转移当前动作表中的所有动作至已处理动作表中，清空当前动作表。
+     */
+    public void transferAllActions() {
+        this.transferAllMachineActions();
+        this.truncateMachineAction();
+    }
+
+    /**
      * 统计机器动作表记录数量。
      *
      * @return 记录数量

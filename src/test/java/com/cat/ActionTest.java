@@ -60,18 +60,19 @@ class ActionTest extends BaseTest {
         }
 
         int oldUnfinishedCount = order.getIncompleteQuantity();
-        Inventory inventory = inventoryService.getInventory(stock.getStandardSpecStr(), stock.getMaterial(), stock.getCategory().value);
+        Inventory inventory = inventoryService.getInventory(stock.getStandardSpec(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
 
-        mainService.processCompletedAction(BoardCategory.STOCK, order, OrderUtil.getFakeOrder());
+        mainService.processCompletedAction();
 
+        order = this.orderService.getCompletedOrderById(3098562);
         int newUnfinishedCount = order.getIncompleteQuantity();
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
         // 测试三，达到了工单所需的数目，因此工单状态应为已完工:
         assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
 
-        inventory = inventoryService.getInventory(stock.getStandardSpecStr(), stock.getMaterial(), stock.getCategory().value);
+        inventory = inventoryService.getInventory(stock.getStandardSpec(), stock.getMaterial(), stock.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getQuantity();
         // 测试四，该库存件的数目等于原来的数目加上上面生成的库存件数目:
         assertEquals(newFinishedCount, oldFinishedCount + 3);
@@ -102,18 +103,19 @@ class ActionTest extends BaseTest {
         }
 
         int oldUnfinishedCount = order.getIncompleteQuantity();
-        Inventory inventory = inventoryService.getInventory(semiProduct.getStandardSpecStr(), semiProduct.getMaterial(), semiProduct.getCategory().value);
+        Inventory inventory = inventoryService.getInventory(semiProduct.getStandardSpec(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
 
-        mainService.processCompletedAction(BoardCategory.SEMI_PRODUCT, order);
+        mainService.processCompletedAction();
 
+        order = this.orderService.getCompletedOrderById(3099510);
         int newUnfinishedCount = order.getIncompleteQuantity();
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
         assertEquals(newUnfinishedCount, oldUnfinishedCount - 2);
         // 测试三，达到了工单所需的数目，因此工单状态应为已完工:
         assertEquals(order.getOperationState(), OrderState.COMPLETED.value);
 
-        inventory = inventoryService.getInventory(semiProduct.getStandardSpecStr(), semiProduct.getMaterial(), semiProduct.getCategory().value);
+        inventory = inventoryService.getInventory(semiProduct.getStandardSpec(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int newFinishedCount = inventory == null ? 0 : inventory.getQuantity();
         // 测试四，该半成品的数目等于原来的数目加上上面生成的半成品数目:
         assertEquals(newFinishedCount, oldFinishedCount + 3);

@@ -62,12 +62,6 @@ public class MainService {
 
                 if (OrderModule.BOTTOM_PLATFORM == orderModule) {
                     this.processingBottomOrder(currentOrder, param, cuttingSignal);
-                    List<MachineAction> actions = this.actionService.getAllMachineActions();
-                    logger.info("机器动作列表:");
-                    for (MachineAction action : actions) {
-                        logger.info("{}", action);
-                    }
-                    this.processCompletedAction(BoardCategory.SEMI_PRODUCT, currentOrder);
                 } else {
                     WorkOrder nextOrder = OrderUtil.getFakeOrder();
                     if (i < orders.size() - 1) {
@@ -75,13 +69,14 @@ public class MainService {
                     }
                     logger.info("后续工单信息: {}", nextOrder);
                     this.processingNotBottomOrder(currentOrder, nextOrder, param, specs, cuttingSignal);
-                    List<MachineAction> actions = this.actionService.getAllMachineActions();
-                    logger.info("机器动作列表:");
-                    for (MachineAction action : actions) {
-                        logger.info("{}", action);
-                    }
-                    this.processCompletedAction(BoardCategory.STOCK, currentOrder, nextOrder);
                 }
+
+                List<MachineAction> actions = this.actionService.getAllMachineActions();
+                logger.info("机器动作列表:");
+                for (MachineAction action : actions) {
+                    logger.info("{}", action);
+                }
+                this.processCompletedAction();
             }
         }
     }
@@ -94,7 +89,7 @@ public class MainService {
      * @param cuttingSignal 下料信号
      */
     public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
-        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), order.getId(), cuttingSignal.getForwardEdge());
+        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         logger.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         logger.info("成品板信息: {}", productBoard);
@@ -118,7 +113,7 @@ public class MainService {
      * @param cuttingSignal 下料信号
      */
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
-        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), order.getId(), cuttingSignal.getForwardEdge());
+        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         logger.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         logger.info("成品板信息: {}", productBoard);
@@ -155,45 +150,43 @@ public class MainService {
 
     /**
      * 处理一组被机器处理完毕的动作。
-     *
-     * @param inventoryCategory 存货类型
-     * @param orders            工单列表
      */
-    public void processCompletedAction(BoardCategory inventoryCategory, WorkOrder... orders) throws InterruptedException {
+    public void processCompletedAction() throws InterruptedException {
         this.actionService.waitingForAllMachineActionsCompleted();
 
-        Map<Integer, Integer> map = new HashMap<>(orders.length);
-        for (WorkOrder order : orders) {
-            map.put(order.getId(), 0);
-        }
+        Map<Integer, Integer> map = new HashMap<>(2);
         Inventory inventory = null;
         int inventoryCount = 0;
 
         for (MachineAction action : this.actionService.getAllMachineActions()) {
             // 只处理动作状态为已完成的动作:
             if (ActionState.COMPLETED.value.equals(action.getState())) {
-                String boardCategory = action.getBoardCategory();
-                if (BoardCategory.PRODUCT.value.equals(boardCategory)) {
-                    Integer orderId = action.getOrderId();
-                    map.put(orderId, map.get(orderId) + 1);
-                } else if (inventoryCategory.value.equals(boardCategory)) {
-                    if (inventory == null) {
-                        inventory = new Inventory(action.getBoardSpecification(), action.getBoardMaterial(), inventoryCategory.value);
-                    }
-                    inventoryCount++;
+                BoardCategory bc = BoardCategory.get(action.getBoardCategory());
+                switch (bc) {
+                    case PRODUCT:
+                        map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+                        break;
+                    case STOCK:
+                    case SEMI_PRODUCT:
+                        if (inventory == null) {
+                            inventory = new Inventory(action.getBoardSpecification(), action.getBoardMaterial(), bc.value);
+                        }
+                        inventoryCount++;
+                        break;
+                    default:
+                        break;
                 }
             }
         }
 
-        for (WorkOrder order : orders) {
-            this.orderService.addOrderCompletedQuantity(order, map.get(order.getId()));
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            this.orderService.addOrderCompletedQuantity(this.orderService.getOrderById(entry.getKey()), entry.getValue());
         }
         if (inventory != null) {
             inventory.setQuantity(inventoryCount);
             this.inventoryService.updateInventoryQuantity(inventory);
         }
 
-        this.actionService.transferAllMachineActions();
-        this.actionService.truncateMachineAction();
+        this.actionService.transferAllActions();
     }
 }

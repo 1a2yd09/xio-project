@@ -38,7 +38,7 @@ public class MachineAction {
         action.setActionCategory(actionCategory.value);
         action.setCutDistance(dis);
         action.setBoardCategory(baseBoard.getCategory().value);
-        action.setBoardSpecification(baseBoard.getStandardSpecStr());
+        action.setBoardSpecification(baseBoard.getStandardSpec());
         action.setBoardMaterial(baseBoard.getMaterial());
         action.setOrderId(baseBoard.getOrderId());
         return action;

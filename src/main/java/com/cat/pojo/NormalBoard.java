@@ -14,19 +14,17 @@ import java.math.BigDecimal;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class NormalBoard extends BaseBoard {
-    private Integer cutTimes;
+    private Integer cutTimes = 0;
 
     public NormalBoard() {
     }
 
     public NormalBoard(BigDecimal height, BigDecimal width, BigDecimal length, String material, BoardCategory category, Integer orderId) {
         super(height, width, length, material, category, orderId);
-        this.cutTimes = 0;
     }
 
     public NormalBoard(String specification, String material, BoardCategory category, Integer orderId) {
         super(specification, material, category, orderId);
-        this.cutTimes = 0;
     }
 
     /**
@@ -34,7 +32,7 @@ public class NormalBoard extends BaseBoard {
      *
      * @return 总宽度
      */
-    public BigDecimal getNormalBoardAllWidth() {
+    public BigDecimal getAllWidth() {
         return this.getWidth().multiply(BigDecimal.valueOf(this.cutTimes));
     }
 }

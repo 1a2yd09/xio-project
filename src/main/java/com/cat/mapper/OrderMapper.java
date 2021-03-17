@@ -32,6 +32,14 @@ public interface OrderMapper {
     WorkOrder getOrderById(@Param("id") Integer id);
 
     /**
+     * 根据工单 ID 获取指定完成工单，不存在指定 ID 工单时将返回 null。
+     *
+     * @param id 工单 ID
+     * @return 工单对象
+     */
+    WorkOrder getCompletedOrderById(@Param("id") Integer id);
+
+    /**
      * 根据工单模块和工单日期获取对重直梁工单集合。
      *
      * @param siteModule 工单模块
@@ -92,5 +100,8 @@ public interface OrderMapper {
      */
     int getCompletedOrderCount();
 
+    /**
+     * 还原数据库。
+     */
     void restoreDatabase();
 }

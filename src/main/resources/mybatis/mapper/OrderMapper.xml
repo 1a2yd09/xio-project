@@ -47,6 +47,12 @@
         WHERE bid = #{id}
     </select>
 
+    <select id="getCompletedOrderById" resultMap="orderMap">
+        SELECT *
+        FROM tb_completed_work_order
+        WHERE bid = #{id}
+    </select>
+
     <select id="getNotBottomOrders" resultMap="orderMap">
         SELECT *
         FROM tb_local_work_order

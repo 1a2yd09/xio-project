@@ -28,6 +28,6 @@ public class BoardList {
      */
     public void addBoard(NormalBoard board) {
         this.boards.add(board);
-        this.boardAllWidth = this.boardAllWidth.add(board.getNormalBoardAllWidth());
+        this.boardAllWidth = this.boardAllWidth.add(board.getAllWidth());
     }
 }

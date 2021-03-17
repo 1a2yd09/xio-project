@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled("Not for now")
+@Disabled("TODO")
 class MainTest extends BaseTest {
     @Autowired
     MainService mainService;
@@ -31,19 +31,6 @@ class MainTest extends BaseTest {
         mainService.start(OrderModule.BOTTOM_PLATFORM);
         parameterService.insertOperatingParameter(ParamUtil.getCommonParameter(OrderSortPattern.BY_SEQ, OrderModule.STRAIGHT_WEIGHT));
         mainService.start(OrderModule.STRAIGHT_WEIGHT);
-        assertEquals(5353, actionService.getProcessedActionCount());
-        assertEquals(0, orderService.getAllProductionOrders().size());
-        assertEquals(759, orderService.getCompletedOrderCount());
-    }
-
-    @Test
-    void testNoRollbackStart() throws InterruptedException {
-        assertEquals(759, orderService.getAllProductionOrders().size());
-        parameterService.insertOperatingParameter(ParamUtil.getCommonParameter(OrderSortPattern.BY_SEQ, OrderModule.BOTTOM_PLATFORM));
-        mainService.start(OrderModule.BOTTOM_PLATFORM);
-        parameterService.insertOperatingParameter(ParamUtil.getCommonParameter(OrderSortPattern.BY_SEQ, OrderModule.STRAIGHT_WEIGHT));
-        mainService.start(OrderModule.STRAIGHT_WEIGHT);
-        assertEquals(5353, actionService.getProcessedActionCount());
         assertEquals(0, orderService.getAllProductionOrders().size());
         assertEquals(759, orderService.getCompletedOrderCount());
     }

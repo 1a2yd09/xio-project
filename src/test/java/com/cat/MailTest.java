@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Disabled("The mail function does not require repeated tests.")
+@Disabled("TODO")
 class MailTest extends BaseTest {
     @Autowired
     MailService mailService;

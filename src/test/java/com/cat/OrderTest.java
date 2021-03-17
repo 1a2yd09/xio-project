@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -50,21 +49,6 @@ class OrderTest extends BaseTest {
     }
 
     @Test
-    void testGetAllWidthBottomOrder() {
-        OperatingParameter op = parameterService.getLatestOperatingParameter();
-        LocalDate date = op.getOrderDate();
-        List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
-        assertEquals(677, orders.size());
-        for (WorkOrder order : orders) {
-            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), order.getId());
-            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
-            if (cutBoard.getWidth().compareTo(new BigDecimal(900)) < 0 || board.getLength().compareTo(new BigDecimal(900)) < 0) {
-                System.out.println(order);
-            }
-        }
-    }
-
-    @Test
     void testGetAllWidthBetterNotBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         List<WorkOrder> orders = orderService.getNotBottomOrders(op.getOrderDate());
@@ -79,29 +63,15 @@ class OrderTest extends BaseTest {
     }
 
     @Test
-    void testGetAllWidthNotBottomOrder() {
-        OperatingParameter op = parameterService.getLatestOperatingParameter();
-        List<WorkOrder> orders = orderService.getNotBottomOrders(op.getOrderDate());
-        assertEquals(82, orders.size());
-        for (WorkOrder order : orders) {
-            CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), order.getId());
-            NormalBoard board = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
-            if (board.getLength().compareTo(new BigDecimal(900)) < 0 || cutBoard.getWidth().compareTo(new BigDecimal(900)) < 0) {
-                System.out.println(order);
-            }
-        }
-    }
-
-    @Test
     void testGetNotBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getOrderDate();
-        // 获取未预处理的直梁工单，共82个
+        // 获取未预处理的直梁工单，共82个:
         List<WorkOrder> orders = orderService.getNotBottomOrders(date);
         assertEquals(82, orders.size());
         inventoryService.insertInventory(new Inventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value));
         inventoryService.insertInventory(new Inventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value));
-        // 获取经过预处理的直梁工单，其中前8个工单有6个因为使用了已有的库存件作为成品，因此未完工的工单数量为76个
+        // 获取经过预处理的直梁工单，其中前8个工单有6个因为使用了已有的库存件作为成品，因此未完工的工单数量变为76个:
         orders = orderService.getPreprocessNotBottomOrders(date);
         assertEquals(76, orders.size());
         orders = orderService.getNotBottomOrders(date);

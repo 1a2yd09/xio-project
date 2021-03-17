@@ -1,8 +1,7 @@
 package com.cat.service;
 
-import com.cat.pojo.StockSpecification;
 import com.cat.mapper.StockSpecMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.cat.pojo.StockSpecification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -13,8 +12,11 @@ import java.util.List;
  */
 @Service
 public class StockSpecService {
-    @Autowired
-    StockSpecMapper stockSpecMapper;
+    private final StockSpecMapper stockSpecMapper;
+
+    public StockSpecService(StockSpecMapper stockSpecMapper) {
+        this.stockSpecMapper = stockSpecMapper;
+    }
 
     /**
      * 根据厚度对库存规格进行分组，每个分组中仅有对应厚度中最新被写入的规格。

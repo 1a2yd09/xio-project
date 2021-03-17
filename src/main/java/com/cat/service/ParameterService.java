@@ -1,9 +1,8 @@
 package com.cat.service;
 
-import com.cat.pojo.OperatingParameter;
 import com.cat.mapper.ParameterMapper;
+import com.cat.pojo.OperatingParameter;
 import com.cat.utils.ParamUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -13,8 +12,11 @@ import java.util.Objects;
  */
 @Service
 public class ParameterService {
-    @Autowired
-    ParameterMapper parameterMapper;
+    private final ParameterMapper parameterMapper;
+
+    public ParameterService(ParameterMapper parameterMapper) {
+        this.parameterMapper = parameterMapper;
+    }
 
     /**
      * 查询最新的运行参数。

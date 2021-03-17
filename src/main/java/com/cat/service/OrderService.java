@@ -11,7 +11,6 @@ import com.cat.pojo.OperatingParameter;
 import com.cat.pojo.WorkOrder;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -27,10 +26,13 @@ import java.util.stream.Collectors;
  */
 @Service
 public class OrderService {
-    @Autowired
-    InventoryMapper inventoryMapper;
-    @Autowired
-    OrderMapper orderMapper;
+    private final InventoryMapper inventoryMapper;
+    private final OrderMapper orderMapper;
+
+    public OrderService(InventoryMapper inventoryMapper, OrderMapper orderMapper) {
+        this.inventoryMapper = inventoryMapper;
+        this.orderMapper = orderMapper;
+    }
 
     /**
      * 增加工单的已完工数目并更新工单状态，如果更新后工单状态为已完工，则将工单从生产工单表迁移至完工工单表。

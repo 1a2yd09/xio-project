@@ -1,7 +1,6 @@
 package com.cat.service;
 
 import com.cat.pojo.OrderErrorMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,8 +19,11 @@ public class MailService {
     @Value("${smtp.to}")
     String to;
 
-    @Autowired
-    JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
+
+    public MailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
     /**
      * 发送工单无法处理邮件。

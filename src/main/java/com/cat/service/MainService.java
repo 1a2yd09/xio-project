@@ -4,6 +4,7 @@ import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderModule;
 import com.cat.pojo.*;
+import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class MainService {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    BoardService boardService;
+    ProcessBoardService processBoardService;
     @Autowired
     ParameterService parameterService;
     @Autowired
@@ -89,18 +90,18 @@ public class MainService {
      * @param cuttingSignal 下料信号
      */
     public void processingBottomOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
-        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
+        CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         logger.info("下料板信息: {}", cutBoard);
-        NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
+        NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         logger.info("成品板信息: {}", productBoard);
-        NormalBoard semiProductBoard = this.boardService.getSemiProduct(cutBoard, parameter.getFixedWidth(), productBoard);
+        NormalBoard semiProductBoard = BoardUtil.getSemiProduct(cutBoard, parameter.getFixedWidth(), productBoard);
         logger.info("半成品信息: {}", semiProductBoard);
 
         BoardList boardList = new BoardList();
         boardList.addBoard(semiProductBoard);
         boardList.addBoard(productBoard);
 
-        this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold());
+        this.processBoardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold());
     }
 
     /**
@@ -113,21 +114,21 @@ public class MainService {
      * @param cuttingSignal 下料信号
      */
     public void processingNotBottomOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
-        CutBoard cutBoard = this.boardService.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
+        CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         logger.info("下料板信息: {}", cutBoard);
-        NormalBoard productBoard = this.boardService.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
+        NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         logger.info("成品板信息: {}", productBoard);
 
         BoardList boardList = new BoardList();
 
         if (productBoard.getCutTimes() == order.getIncompleteQuantity()) {
-            NormalBoard nextProduct = this.boardService.getNextProduct(nextOrder, cutBoard, productBoard);
+            NormalBoard nextProduct = BoardUtil.getNextProduct(nextOrder, cutBoard, productBoard);
             logger.info("后续成品板信息: {}", nextProduct);
             if (nextProduct.getCutTimes() > 0) {
                 boardList.addBoard(productBoard);
                 boardList.addBoard(nextProduct);
             } else {
-                NormalBoard stockBoard = this.boardService.getMatchStock(specs, cutBoard, productBoard);
+                NormalBoard stockBoard = BoardUtil.getMatchStock(specs, cutBoard, productBoard);
                 logger.info("库存件信息: {}", stockBoard);
                 if (stockBoard.getCutTimes() > 0) {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
@@ -145,7 +146,7 @@ public class MainService {
             boardList.addBoard(productBoard);
         }
 
-        this.boardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold());
+        this.processBoardService.newCutting(cutBoard, boardList, parameter.getWasteThreshold());
     }
 
     /**

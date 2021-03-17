@@ -7,26 +7,29 @@ import com.cat.mapper.SignalMapper;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.ProcessControlSignal;
 import com.cat.utils.ThreadUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author CAT
+ */
+@Slf4j
 @Service
 public class TaskService {
-    final Logger logger = LoggerFactory.getLogger(getClass());
+    private final SignalMapper signalMapper;
+    private final ActionMapper actionMapper;
 
-    @Autowired
-    SignalMapper signalMapper;
-    @Autowired
-    ActionMapper actionMapper;
+    public TaskService(SignalMapper signalMapper, ActionMapper actionMapper) {
+        this.signalMapper = signalMapper;
+        this.actionMapper = actionMapper;
+    }
 
     @Scheduled(initialDelay = 1_000, fixedDelay = 1_000)
     public void checkNewControlMessage() throws InterruptedException {
         ProcessControlSignal signal = this.signalMapper.getLatestNotProcessedControlSignal();
         if (signal != null) {
-            logger.info("检测到新的控制信号写入...");
+            log.info("检测到新的流程控制信号到达...");
             signal.setProcessed(Boolean.TRUE);
             this.signalMapper.updateControlSignal(signal);
             if (ControlSignalCategory.START.value.equals(signal.getCategory())) {
@@ -43,7 +46,7 @@ public class TaskService {
         if (signal != null) {
             signal.setProcessed(Boolean.TRUE);
             this.signalMapper.updateCuttingSignal(signal);
-            logger.info("检测到新的下料信号写入...");
+            log.info("检测到新的下料信号到达...");
             ThreadUtil.getCuttingMessageQueue().put(signal);
         }
     }
@@ -52,7 +55,7 @@ public class TaskService {
     public void checkNewActionDoneMessage() throws InterruptedException {
         String state = actionMapper.getFinalMachineActionState();
         if (state != null && !ActionState.INCOMPLETE.value.equals(state)) {
-            logger.info("监控到所有动作都被处理完毕...");
+            log.info("检测到所有动作都被处理完毕...");
             ThreadUtil.getActionProcessedMessageQueue().put(state);
         }
     }

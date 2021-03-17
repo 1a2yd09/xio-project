@@ -1,7 +1,7 @@
 package com.cat;
 
 import com.cat.pojo.StockSpecification;
-import com.cat.service.BoardService;
+import com.cat.service.ProcessBoardService;
 import com.cat.service.StockSpecService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ class StockSpecTest extends BaseTest {
     @Autowired
     StockSpecService stockSpecService;
     @Autowired
-    BoardService boardService;
+    ProcessBoardService processBoardService;
 
     @Test
     void testSpecification() {

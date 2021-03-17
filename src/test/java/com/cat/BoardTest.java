@@ -2,7 +2,7 @@ package com.cat;
 
 import com.cat.enums.BoardCategory;
 import com.cat.pojo.NormalBoard;
-import com.cat.service.BoardService;
+import com.cat.service.ProcessBoardService;
 import com.cat.utils.BoardUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BoardTest extends BaseTest {
     @Autowired
-    BoardService boardService;
+    ProcessBoardService processBoardService;
 
     @Test
     void testCompareTwoSpecStr() {

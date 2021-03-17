@@ -1,8 +1,8 @@
 package com.cat.utils;
 
-import com.cat.pojo.WorkOrder;
-import com.cat.pojo.CuttingSignal;
 import com.cat.enums.ForwardEdge;
+import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.WorkOrder;
 
 /**
  * @author CAT

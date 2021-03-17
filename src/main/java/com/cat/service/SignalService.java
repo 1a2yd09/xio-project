@@ -7,20 +7,20 @@ import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.TakeBoardSignal;
 import com.cat.pojo.WorkOrder;
 import com.cat.utils.ThreadUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
  * @author CAT
  */
+@Slf4j
 @Service
 public class SignalService {
-    final Logger logger = LoggerFactory.getLogger(getClass());
+    private final SignalMapper signalMapper;
 
-    @Autowired
-    SignalMapper signalMapper;
+    public SignalService(SignalMapper signalMapper) {
+        this.signalMapper = signalMapper;
+    }
 
     /**
      * 接收新的下料信号。
@@ -32,9 +32,9 @@ public class SignalService {
     public CuttingSignal receiveNewCuttingSignal(WorkOrder order) throws InterruptedException {
         // test:
         this.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
-        logger.info("等待下料信号...");
+        log.info("等待下料信号...");
         CuttingSignal signal = ThreadUtil.getCuttingMessageQueue().take();
-        logger.info("获取到新的下料信号...");
+        log.info("获取到新的下料信号...");
         return signal;
     }
 
@@ -46,9 +46,9 @@ public class SignalService {
     public void waitingForNewProcessStartSignal() throws InterruptedException {
         // test:
         this.insertProcessControlSignal(ControlSignalCategory.START);
-        logger.info("等待流程启动信号...");
+        log.info("等待流程启动信号...");
         ThreadUtil.getStartControlMessageQueue().take();
-        logger.info("获取到新的流程启动信号...");
+        log.info("获取到新的流程启动信号...");
     }
 
     /**

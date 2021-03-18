@@ -25,8 +25,9 @@ public class InventoryService {
      * @return 存货
      */
     public Inventory getInventory(String specification, String material, String category) {
-        return this.inventoryMapper.getInventories(new Inventory(material, category))
+        return this.inventoryMapper.getInventories(category)
                 .stream()
+                .filter(inventory -> material.equals(inventory.getMaterial()))
                 .filter(inventory -> BoardUtil.compareTwoSpecStr(inventory.getSpecification(), specification) == 0)
                 .findFirst()
                 .orElse(null);

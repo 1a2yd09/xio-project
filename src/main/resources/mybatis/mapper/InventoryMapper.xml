@@ -9,9 +9,6 @@
         SELECT *
         FROM tb_inventory
         WHERE category = #{category}
-        <if test="material != null">
-            AND material = #{material}
-        </if>
     </select>
 
     <insert id="insertInventory">

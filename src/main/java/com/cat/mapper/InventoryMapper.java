@@ -2,6 +2,7 @@ package com.cat.mapper;
 
 import com.cat.pojo.Inventory;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -11,12 +12,12 @@ import java.util.List;
 @Mapper
 public interface InventoryMapper {
     /**
-     * 根据存货类型获取存货集合，或根据存货类型以及存货材质获取存货集合。
+     * 根据存货类型获取存货集合。
      *
-     * @param inventory 存货对象
+     * @param category 存货类型
      * @return 存货集合
      */
-    List<Inventory> getInventories(Inventory inventory);
+    List<Inventory> getInventories(@Param("category") String category);
 
     /**
      * 新增存货记录。

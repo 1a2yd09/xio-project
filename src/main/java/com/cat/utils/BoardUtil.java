@@ -250,15 +250,15 @@ public class BoardUtil {
                 .orElse(ParamUtil.getDefaultStockSpec());
         NormalBoard stock = new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), cutBoard.getMaterial(), BoardCategory.STOCK, cutBoard.getOrderId());
         if (stock.getWidth().compareTo(BigDecimal.ZERO) > 0 && cutBoard.getLength().compareTo(stock.getLength()) > 0) {
-            BigDecimal productAllWidth = DecimalUtil.mul(product.getWidth(), product.getCutTimes());
-            BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), productAllWidth);
             if (product.getLength().compareTo(stock.getLength()) >= 0) {
+                BigDecimal productAllWidth = product.getAllWidth();
+                BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), productAllWidth);
                 if (isAllowCutting(remainingWidth, product.getLength(), stock.getLength())) {
                     stock.setCutTimes(DecimalUtil.div(getAvailableWidth(remainingWidth, stock.getWidth()), stock.getWidth()));
                 }
             } else {
-                productAllWidth = getPostProductAllWidth(product, stock.getLength());
-                remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), productAllWidth);
+                BigDecimal productAllWidth = getPostProductAllWidth(product, stock.getLength());
+                BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), productAllWidth);
                 stock.setCutTimes(DecimalUtil.div(remainingWidth, stock.getWidth()));
             }
         }
@@ -296,16 +296,16 @@ public class BoardUtil {
     /**
      * 获取后续成品。
      *
-     * @param nextOrder    后续工单
-     * @param currCutBoard 当前下料板
-     * @param currProduct  当前成品板
+     * @param nextOrder 后续工单
+     * @param cutBoard  原料板
+     * @param product   当前工单成品板
      * @return 后续成品
      */
-    public static NormalBoard getNextProduct(WorkOrder nextOrder, CutBoard currCutBoard, NormalBoard currProduct) {
+    public static NormalBoard getNextProduct(WorkOrder nextOrder, CutBoard cutBoard, NormalBoard product) {
         NormalBoard nextProduct = new NormalBoard(nextOrder.getProductSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT, nextOrder.getId());
-        if (currProduct.getMaterial().equals(nextProduct.getMaterial())) {
-            BigDecimal remainingWidth = DecimalUtil.sub(currCutBoard.getWidth(), DecimalUtil.mul(currProduct.getWidth(), currProduct.getCutTimes()));
-            if (isAllowCutting(remainingWidth, currProduct.getLength(), nextProduct.getLength())) {
+        if (product.getMaterial().equals(nextProduct.getMaterial())) {
+            BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), product.getAllWidth());
+            if (isAllowCutting(remainingWidth, product.getLength(), nextProduct.getLength())) {
                 nextProduct.setCutTimes(Math.min(DecimalUtil.div(getAvailableWidth(remainingWidth, nextProduct.getWidth()), nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));
             }
         }

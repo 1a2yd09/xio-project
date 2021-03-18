@@ -58,7 +58,7 @@ public class OrderService {
      */
     public List<WorkOrder> getPreprocessNotBottomOrders(LocalDate date) {
         List<WorkOrder> orders = this.getNotBottomOrders(date);
-        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(new Inventory(BoardCategory.STOCK.value))
+        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(BoardCategory.STOCK.value)
                 .stream()
                 .collect(Collectors.toMap(stock -> BoardUtil.getStandardSpecStr(stock.getSpecification()), Function.identity()));
 
@@ -172,7 +172,7 @@ public class OrderService {
      */
     public List<WorkOrder> getPreprocessProductionOrders() {
         List<WorkOrder> orders = this.getAllProductionOrders();
-        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(new Inventory(BoardCategory.STOCK.value))
+        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(BoardCategory.STOCK.value)
                 .stream()
                 .collect(Collectors.toMap(stock -> BoardUtil.getStandardSpecStr(stock.getSpecification()), Function.identity()));
 

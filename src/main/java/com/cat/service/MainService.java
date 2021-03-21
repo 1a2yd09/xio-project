@@ -38,44 +38,66 @@ public class MainService {
     /**
      * 主流程。
      *
-     * @param orderModule 工单模块
      * @throws InterruptedException 等待过程被中断
      */
-    public void start(OrderModule orderModule) throws InterruptedException {
+    public void start() throws InterruptedException {
         this.signalService.waitingForNewProcessStartSignal();
-
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
-        log.info("流程运行参数: {}", param);
-        List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-        log.info("流程库存件规格列表: {}", specs);
-        List<WorkOrder> orders = this.orderService.getProductionOrders(orderModule, param);
-        log.info("{}模块工单数量为: {}", orderModule, orders.size());
+        OrderModule module = OrderModule.get(param.getOrderModule());
+        switch (module) {
+            case BOTTOM_PLATFORM:
+                this.bottom(param);
+                break;
+            case STRAIGHT_WEIGHT:
+                this.notBottom(param);
+                break;
+            default:
+                log.info("TODO.");
+                break;
+        }
+    }
 
-        for (int i = 0; i < orders.size(); i++) {
-            WorkOrder currentOrder = orders.get(i);
-            log.info("当前工单信息: {}", currentOrder);
-            while (currentOrder.getIncompleteQuantity() != 0) {
-                this.signalService.insertTakeBoardSignal(currentOrder.getId());
-                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currentOrder);
-                log.info("下料信号内容: {}", cuttingSignal);
-
-                if (OrderModule.BOTTOM_PLATFORM == orderModule) {
-                    this.processingBottomOrder(currentOrder, param, cuttingSignal);
-                } else {
-                    WorkOrder nextOrder = OrderUtil.getFakeOrder();
-                    if (i < orders.size() - 1) {
-                        nextOrder = orders.get(i + 1);
-                    }
-                    log.info("后续工单信息: {}", nextOrder);
-                    this.processingNotBottomOrder(currentOrder, nextOrder, param, specs, cuttingSignal);
-                }
-
+    public void bottom(OperatingParameter param) throws InterruptedException {
+        List<WorkOrder> orders = this.orderService.getBottomOrders(param.getSortPattern(), param.getOrderDate());
+        log.info("轿底平台模块工单数量: {}", orders.size());
+        for (WorkOrder order : orders) {
+            log.info("当前工单: {}", order);
+            while (order.getIncompleteQuantity() != 0) {
+                this.signalService.insertTakeBoardSignal(order.getId());
+                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
+                log.info("下料信号: {}", cuttingSignal);
+                this.processingBottomOrder(order, param, cuttingSignal);
                 List<MachineAction> actions = this.actionService.getAllMachineActions();
                 log.info("机器动作列表:");
                 for (MachineAction action : actions) {
                     log.info("{}", action);
                 }
-                this.processCompletedAction();
+                this.processCompletedAction(order);
+            }
+        }
+    }
+
+    public void notBottom(OperatingParameter param) throws InterruptedException {
+        List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
+        log.info("库存件规格集合: {}", specs);
+        List<WorkOrder> orders = this.orderService.getPreprocessNotBottomOrders(param.getOrderDate());
+        log.info("直梁对重模块工单数量: {}", orders.size());
+        for (int i = 0; i < orders.size(); i++) {
+            WorkOrder currOrder = orders.get(i);
+            log.info("当前工单: {}", currOrder);
+            while (currOrder.getIncompleteQuantity() != 0) {
+                this.signalService.insertTakeBoardSignal(currOrder.getId());
+                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
+                log.info("下料信号: {}", cuttingSignal);
+                WorkOrder nextOrder = i < orders.size() - 1 ? orders.get(i + 1) : OrderUtil.getFakeOrder();
+                log.info("后续工单: {}", nextOrder);
+                this.processingNotBottomOrder(currOrder, nextOrder, param, specs, cuttingSignal);
+                List<MachineAction> actions = this.actionService.getAllMachineActions();
+                log.info("机器动作列表:");
+                for (MachineAction action : actions) {
+                    log.info("{}", action);
+                }
+                this.processCompletedAction(currOrder, nextOrder);
             }
         }
     }
@@ -150,10 +172,13 @@ public class MainService {
     /**
      * 处理一组被机器处理完毕的动作。
      */
-    public void processCompletedAction() throws InterruptedException {
+    public void processCompletedAction(WorkOrder... orders) throws InterruptedException {
         this.actionService.waitingForAllMachineActionsCompleted();
 
         Map<Integer, Integer> map = new HashMap<>(2);
+        for (WorkOrder order : orders) {
+            map.put(order.getId(), 0);
+        }
         Inventory inventory = null;
         int inventoryCount = 0;
 
@@ -163,7 +188,7 @@ public class MainService {
                 BoardCategory bc = BoardCategory.get(action.getBoardCategory());
                 switch (bc) {
                     case PRODUCT:
-                        map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+                        map.put(action.getOrderId(), map.get(action.getOrderId()) + 1);
                         break;
                     case STOCK:
                     case SEMI_PRODUCT:
@@ -178,8 +203,8 @@ public class MainService {
             }
         }
 
-        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            this.orderService.addOrderCompletedQuantity(this.orderService.getOrderById(entry.getKey()), entry.getValue());
+        for (WorkOrder order : orders) {
+            this.orderService.addOrderCompletedQuantity(order, map.get(order.getId()));
         }
         if (inventory != null) {
             inventory.setQuantity(inventoryCount);

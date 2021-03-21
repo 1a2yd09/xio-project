@@ -1,5 +1,8 @@
 package com.cat.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author CAT
  */
@@ -26,9 +29,19 @@ public enum OrderModule {
      */
     STRAIGHT_WEIGHT("直梁对重");
 
+    private static final Map<String, OrderModule> LOOKUP = new HashMap<>(2);
     public final String value;
 
     OrderModule(String value) {
         this.value = value;
+    }
+
+    static {
+        LOOKUP.put(BOTTOM_PLATFORM.value, BOTTOM_PLATFORM);
+        LOOKUP.put(STRAIGHT_WEIGHT.value, STRAIGHT_WEIGHT);
+    }
+
+    public static OrderModule get(String value) {
+        return LOOKUP.get(value);
     }
 }

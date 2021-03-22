@@ -73,6 +73,10 @@ public class MainService {
                     log.info("{}", action);
                 }
                 this.processCompletedAction(order);
+                if (this.signalService.checkingForNewProcessStopSignal()) {
+                    log.info("收到流程停止信号...");
+                    return;
+                }
             }
         }
     }
@@ -98,6 +102,10 @@ public class MainService {
                     log.info("{}", action);
                 }
                 this.processCompletedAction(currOrder, nextOrder);
+                if (this.signalService.checkingForNewProcessStopSignal()) {
+                    log.info("收到流程停止信号...");
+                    return;
+                }
             }
         }
     }

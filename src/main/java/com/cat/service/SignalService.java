@@ -52,6 +52,17 @@ public class SignalService {
     }
 
     /**
+     * 是否有新的流程停止信号。
+     *
+     * @return true 表示有新的流程停止信号
+     */
+    public boolean checkingForNewProcessStopSignal() {
+        log.info("检查流程停止信号...");
+        Integer flag = ThreadUtil.getStopControlMessageQueue().poll();
+        return flag != null;
+    }
+
+    /**
      * 新增流程控制信号。
      *
      * @param signalCategory 控制信号枚举类型

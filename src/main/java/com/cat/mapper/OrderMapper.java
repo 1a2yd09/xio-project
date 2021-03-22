@@ -4,8 +4,8 @@ import com.cat.pojo.WorkOrder;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
@@ -42,20 +42,18 @@ public interface OrderMapper {
     /**
      * 根据工单模块和工单日期获取对重直梁工单集合。
      *
-     * @param siteModule 工单模块
-     * @param date       工单日期
+     * @param paramMap 参数集合
      * @return 工单集合
      */
-    List<WorkOrder> getNotBottomOrders(@Param("siteModule") String siteModule, @Param("date") LocalDateTime date);
+    List<WorkOrder> getNotBottomOrders(Map<String, String> paramMap);
 
     /**
      * 根据工单模块和工单日期获取轿底工单集合。
      *
-     * @param siteModule 工单模块
-     * @param date       工单日期
+     * @param paramMap 参数集合
      * @return 工单集合
      */
-    List<WorkOrder> getBottomOrders(@Param("siteModule") String siteModule, @Param("date") LocalDateTime date);
+    List<WorkOrder> getBottomOrders(Map<String, String> paramMap);
 
     /**
      * 获取当前生产工单表中的全体工单集合。

@@ -196,7 +196,7 @@ public class MainService {
                 BoardCategory bc = BoardCategory.get(action.getBoardCategory());
                 switch (bc) {
                     case PRODUCT:
-                        map.put(action.getOrderId(), map.get(action.getOrderId()) + 1);
+                        map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
                         break;
                     case STOCK:
                     case SEMI_PRODUCT:

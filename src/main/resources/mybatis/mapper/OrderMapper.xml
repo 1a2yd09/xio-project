@@ -56,14 +56,14 @@
     <select id="getNotBottomOrders" resultMap="orderMap">
         SELECT *
         FROM tb_local_work_order
-        WHERE GDMK != #{siteModule}
+        WHERE GDMK IN (#{module1}, #{module2})
           AND jhwgrq = #{date}
     </select>
 
     <select id="getBottomOrders" resultMap="orderMap">
         SELECT *
         FROM tb_local_work_order
-        WHERE GDMK = #{siteModule}
+        WHERE GDMK IN (#{module1})
           AND jhwgrq = #{date}
     </select>
 

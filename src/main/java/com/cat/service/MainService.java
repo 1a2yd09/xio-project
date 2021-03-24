@@ -43,17 +43,11 @@ public class MainService {
     public void start() throws InterruptedException {
         this.signalService.waitingForNewProcessStartSignal();
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
-        OrderModule module = OrderModule.get(param.getOrderModule());
-        switch (module) {
-            case BOTTOM_PLATFORM:
-                this.bottom(param);
-                break;
-            case STRAIGHT_WEIGHT:
-                this.notBottom(param);
-                break;
-            default:
-                log.info("TODO.");
-                break;
+        String module = param.getOrderModule();
+        if (OrderModule.BOTTOM_PLATFORM.value.equals(module)) {
+            this.bottom(param);
+        } else if (OrderModule.STRAIGHT_WEIGHT.value.equals(module)) {
+            this.notBottom(param);
         }
     }
 

@@ -193,20 +193,14 @@ public class MainService {
         for (MachineAction action : this.actionService.getAllMachineActions()) {
             // 只处理动作状态为已完成的动作:
             if (ActionState.COMPLETED.value.equals(action.getState())) {
-                BoardCategory bc = BoardCategory.get(action.getBoardCategory());
-                switch (bc) {
-                    case PRODUCT:
-                        map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
-                        break;
-                    case STOCK:
-                    case SEMI_PRODUCT:
-                        if (inventory == null) {
-                            inventory = new Inventory(action.getBoardSpecification(), action.getBoardMaterial(), bc.value);
-                        }
-                        inventoryCount++;
-                        break;
-                    default:
-                        break;
+                String bc = action.getBoardCategory();
+                if (BoardCategory.PRODUCT.value.equals(bc)) {
+                    map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+                } else if (BoardCategory.STOCK.value.equals(bc) || BoardCategory.SEMI_PRODUCT.value.equals(bc)) {
+                    if (inventory == null) {
+                        inventory = new Inventory(action.getBoardSpecification(), action.getBoardMaterial(), bc);
+                    }
+                    inventoryCount++;
                 }
             }
         }

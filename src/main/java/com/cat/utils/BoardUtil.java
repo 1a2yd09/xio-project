@@ -75,7 +75,7 @@ public class BoardUtil {
      *
      * @param sp1 规格1
      * @param sp2 规格2
-     * @return -1，1分别表示前者规格中的某个度量小于、大于后者规格中的对应度量，0表示两者规格相同
+     * @return -1，1分别表示前者规格中的某个维度度量小于、大于后者规格中的对应维度度量，0表示两者规格相同
      */
     public static int compareTwoSpecStr(String sp1, String sp2) {
         List<BigDecimal> decList1 = specStrToDecList(sp1);

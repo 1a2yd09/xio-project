@@ -7,7 +7,6 @@ import com.cat.enums.OrderState;
 import com.cat.mapper.InventoryMapper;
 import com.cat.mapper.OrderMapper;
 import com.cat.pojo.Inventory;
-import com.cat.pojo.OperatingParameter;
 import com.cat.pojo.WorkOrder;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
@@ -42,10 +41,10 @@ public class OrderService {
     public void addOrderCompletedQuantity(WorkOrder order, int quantity) {
         order.setCompletedQuantity(OrderUtil.addQuantityPropWithInt(order.getCompletedQuantity(), quantity));
         this.orderMapper.updateOrderCompletedQuantity(order);
-        this.updateOrderState(order, order.getIncompleteQuantity() == 0 ? OrderState.COMPLETED : OrderState.STARTED);
+        order.setOperationState(order.getIncompleteQuantity() == 0 ? OrderState.COMPLETED.value : OrderState.STARTED.value);
+        this.orderMapper.updateOrderState(order);
         if (OrderState.COMPLETED.value.equals(order.getOperationState())) {
             this.transferWorkOrderToCompleted(order.getId());
-            this.deleteOrderById(order.getId());
         }
     }
 
@@ -93,22 +92,18 @@ public class OrderService {
                 int retVal = BoardUtil.compareTwoSpecStr(o1.getProductSpecification(), o2.getProductSpecification());
                 return retVal != 0 ? -retVal : o1.getId() - o2.getId();
             });
-        } else {
+        } else if (OrderSortPattern.BY_SEQ.value.equals(sortPattern)) {
             orders.sort((o1, o2) -> {
                 Integer sn1 = Integer.parseInt(o1.getSequenceNumber());
                 Integer sn2 = Integer.parseInt(o2.getSequenceNumber());
-                if (!sn1.equals(sn2)) {
-                    return sn1.compareTo(sn2);
-                } else {
-                    return o1.getId() - o2.getId();
-                }
+                return sn1.equals(sn2) ? o1.getId() - o2.getId() : sn1.compareTo(sn2);
             });
         }
         return orders;
     }
 
     /**
-     * 根据计划完工日期获取对重直梁工单集合（按顺序号升序排序）。
+     * 根据计划完工日期获取对重直梁工单集合。
      *
      * @param date 计划完工日期
      * @return 对重直梁工单集合
@@ -122,11 +117,7 @@ public class OrderService {
         orders.sort((o1, o2) -> {
             Integer sn1 = Integer.parseInt(o1.getSequenceNumber());
             Integer sn2 = Integer.parseInt(o2.getSequenceNumber());
-            if (!sn1.equals(sn2)) {
-                return sn1.compareTo(sn2);
-            } else {
-                return o1.getId() - o2.getId();
-            }
+            return sn1.equals(sn2) ? o1.getId() - o2.getId() : sn1.compareTo(sn2);
         });
         return orders;
     }
@@ -152,17 +143,6 @@ public class OrderService {
     }
 
     /**
-     * 更新工单运行状态。
-     *
-     * @param order 工单
-     * @param state 状态
-     */
-    public void updateOrderState(WorkOrder order, OrderState state) {
-        order.setOperationState(state.value);
-        this.orderMapper.updateOrderState(order);
-    }
-
-    /**
      * 获取当前生产工单表中的全体工单。
      *
      * @return 全体生产工单
@@ -172,36 +152,13 @@ public class OrderService {
     }
 
     /**
-     * 根据工单模块和运行参数获取指定的生产工单。
-     *
-     * @param orderModule 工单模块
-     * @param param       运行参数
-     * @return 生产工单列表
-     */
-    public List<WorkOrder> getProductionOrders(OrderModule orderModule, OperatingParameter param) {
-        if (OrderModule.BOTTOM_PLATFORM == orderModule) {
-            return this.getBottomOrders(param.getSortPattern(), param.getOrderDate());
-        } else {
-            return this.getPreprocessNotBottomOrders(param.getOrderDate());
-        }
-    }
-
-    /**
-     * 根据工单 ID 从工单表中删除对应工单。
-     *
-     * @param id 工单 ID。
-     */
-    public void deleteOrderById(Integer id) {
-        this.orderMapper.deleteOrderById(id);
-    }
-
-    /**
      * 根据工单 ID 将已完工工单迁移至完工工单表中。
      *
      * @param id 工单 ID
      */
     public void transferWorkOrderToCompleted(Integer id) {
         this.orderMapper.transferWorkOrderToCompleted(id);
+        this.orderMapper.deleteOrderById(id);
     }
 
     /**

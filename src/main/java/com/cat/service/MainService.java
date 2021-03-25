@@ -177,7 +177,7 @@ public class MainService {
     public void processCompletedAction(WorkOrder... orders) throws InterruptedException {
         this.actionService.waitingForAllMachineActionsCompleted();
 
-        Map<Integer, Integer> map = new HashMap<>(2);
+        Map<Integer, Integer> map = new HashMap<>(4);
         for (WorkOrder order : orders) {
             map.put(order.getId(), 0);
         }
@@ -192,7 +192,7 @@ public class MainService {
                     map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
                 } else if (BoardCategory.STOCK.value.equals(bc) || BoardCategory.SEMI_PRODUCT.value.equals(bc)) {
                     if (inventory == null) {
-                        inventory = new Inventory(action.getBoardSpecification(), action.getBoardMaterial(), bc);
+                        inventory = new Inventory(BoardUtil.getStandardSpecStr(action.getBoardSpecification()), action.getBoardMaterial(), bc);
                     }
                     inventoryCount++;
                 }

@@ -82,7 +82,7 @@ public class OrderService {
      * @return 轿底工单集合
      */
     public List<WorkOrder> getBottomOrders(String sortPattern, LocalDate date) {
-        Map<String, String> paramMap = new HashMap<>(2);
+        Map<String, String> paramMap = new HashMap<>(4);
         paramMap.put("module1", OrderModule.BOTTOM.value);
         paramMap.put("date", date.toString());
         List<WorkOrder> orders = this.orderMapper.getBottomOrders(paramMap);
@@ -109,7 +109,7 @@ public class OrderService {
      * @return 对重直梁工单集合
      */
     public List<WorkOrder> getNotBottomOrders(LocalDate date) {
-        Map<String, String> paramMap = new HashMap<>(3);
+        Map<String, String> paramMap = new HashMap<>(5);
         paramMap.put("module1", OrderModule.STRAIGHT.value);
         paramMap.put("module2", OrderModule.WEIGHT.value);
         paramMap.put("date", date.toString());

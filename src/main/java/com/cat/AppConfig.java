@@ -30,6 +30,7 @@ import java.util.Properties;
 @ComponentScan
 @MapperScan("com.cat.mapper")
 @EnableScheduling
+@EnableAspectJAutoProxy
 @EnableTransactionManagement
 @PropertySource({"classpath:jdbc.properties", "classpath:smtp.properties"})
 public class AppConfig {

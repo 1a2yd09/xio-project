@@ -13,7 +13,6 @@ import com.cat.utils.OrderUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -54,8 +53,8 @@ public class OrderService {
      * @param date 计划完工日期
      * @return 预处理的对重直梁工单集合
      */
-    public List<WorkOrder> getPreprocessNotBottomOrders(LocalDate date) {
-        List<WorkOrder> orders = this.getNotBottomOrders(date);
+    public List<WorkOrder> getPreprocessNotBottomOrders(OrderSortPattern sortPattern, LocalDate date) {
+        List<WorkOrder> orders = this.getNotBottomOrders(sortPattern, date);
         Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(BoardCategory.STOCK.value)
                 .stream()
                 .collect(Collectors.toMap(stock -> BoardUtil.getStandardSpecStr(stock.getSpecification()), Function.identity()));
@@ -81,24 +80,12 @@ public class OrderService {
      * @param date        计划完工日期
      * @return 轿底工单集合
      */
-    public List<WorkOrder> getBottomOrders(String sortPattern, LocalDate date) {
-        Map<String, String> paramMap = new HashMap<>(4);
-        paramMap.put("module1", OrderModule.BOTTOM.value);
-        paramMap.put("date", date.toString());
-        List<WorkOrder> orders = this.orderMapper.getBottomOrders(paramMap);
-        if (OrderSortPattern.BY_SPEC.value.equals(sortPattern)) {
-            // 如果要求按照规格排序，指的是”依次“按照成品的厚度、宽度、长度降序排序，三者都相同则按工单 ID 升序排序:
-            orders.sort((o1, o2) -> {
-                int retVal = BoardUtil.compareTwoSpecStr(o1.getProductSpecification(), o2.getProductSpecification());
-                return retVal != 0 ? -retVal : o1.getId() - o2.getId();
-            });
-        } else if (OrderSortPattern.BY_SEQ.value.equals(sortPattern)) {
-            orders.sort((o1, o2) -> {
-                Integer sn1 = Integer.parseInt(o1.getSequenceNumber());
-                Integer sn2 = Integer.parseInt(o2.getSequenceNumber());
-                return sn1.equals(sn2) ? o1.getId() - o2.getId() : sn1.compareTo(sn2);
-            });
-        }
+    public List<WorkOrder> getBottomOrders(OrderSortPattern sortPattern, LocalDate date) {
+        List<WorkOrder> orders = this.orderMapper.getBottomOrders(Map.of(
+                "module1", OrderModule.BOTTOM.getName(),
+                "date", date.toString()
+        ));
+        OrderUtil.sortOrderList(orders, sortPattern);
         return orders;
     }
 
@@ -108,17 +95,13 @@ public class OrderService {
      * @param date 计划完工日期
      * @return 对重直梁工单集合
      */
-    public List<WorkOrder> getNotBottomOrders(LocalDate date) {
-        Map<String, String> paramMap = new HashMap<>(5);
-        paramMap.put("module1", OrderModule.STRAIGHT.value);
-        paramMap.put("module2", OrderModule.WEIGHT.value);
-        paramMap.put("date", date.toString());
-        List<WorkOrder> orders = this.orderMapper.getNotBottomOrders(paramMap);
-        orders.sort((o1, o2) -> {
-            Integer sn1 = Integer.parseInt(o1.getSequenceNumber());
-            Integer sn2 = Integer.parseInt(o2.getSequenceNumber());
-            return sn1.equals(sn2) ? o1.getId() - o2.getId() : sn1.compareTo(sn2);
-        });
+    public List<WorkOrder> getNotBottomOrders(OrderSortPattern sortPattern, LocalDate date) {
+        List<WorkOrder> orders = this.orderMapper.getNotBottomOrders(Map.of(
+                "module1", OrderModule.STRAIGHT.getName(),
+                "module2", OrderModule.WEIGHT.getName(),
+                "date", date.toString()
+        ));
+        OrderUtil.sortOrderList(orders, sortPattern);
         return orders;
     }
 

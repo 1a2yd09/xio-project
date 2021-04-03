@@ -1,9 +1,16 @@
 package com.cat.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author CAT
  */
-
+@AllArgsConstructor
+@Getter
 public enum OrderModule {
     /**
      * 轿底吊顶工地模块
@@ -26,9 +33,17 @@ public enum OrderModule {
      */
     STRAIGHT_WEIGHT("直梁对重");
 
-    public final String value;
+    private final String name;
 
-    OrderModule(String value) {
-        this.value = value;
+    private static final Map<String, OrderModule> LOOKUP = new HashMap<>(7);
+
+    static {
+        for (OrderModule orderModule : OrderModule.values()) {
+            LOOKUP.put(orderModule.name, orderModule);
+        }
+    }
+
+    public static OrderModule get(String name) {
+        return LOOKUP.get(name);
     }
 }

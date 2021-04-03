@@ -1,22 +1,45 @@
 package com.cat.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author CAT
  */
-
+@AllArgsConstructor
+@Getter
 public enum OrderSortPattern {
     /**
-     * 按工单顺序号排序
+     * 按批次号排序后再按顺序号排序
      */
-    BY_SEQ("顺序"),
+    PCH_SEQ("批次顺序"),
+    /**
+     * 按批次号排序后再按成品规格排序
+     */
+    PCH_SPEC("批次规格"),
+    /**
+     * 按顺序号排序
+     */
+    SEQ("顺序"),
     /**
      * 按成品规格排序
      */
-    BY_SPEC("规格");
+    SPEC("规格");
 
-    public final String value;
+    private final String name;
 
-    OrderSortPattern(String value) {
-        this.value = value;
+    private static final Map<String, OrderSortPattern> LOOKUP = new HashMap<>(6);
+
+    static {
+        for (OrderSortPattern sortPattern : OrderSortPattern.values()) {
+            LOOKUP.put(sortPattern.name, sortPattern);
+        }
+    }
+
+    public static OrderSortPattern get(String name) {
+        return LOOKUP.get(name);
     }
 }

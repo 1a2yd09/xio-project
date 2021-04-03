@@ -3,6 +3,7 @@ package com.cat.service;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderModule;
+import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.*;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
@@ -43,16 +44,16 @@ public class MainService {
     public void start() throws InterruptedException {
         this.signalService.waitingForNewProcessStartSignal();
         OperatingParameter param = this.parameterService.getLatestOperatingParameter();
-        String module = param.getOrderModule();
-        if (OrderModule.BOTTOM_PLATFORM.value.equals(module)) {
+        OrderModule orderModule = OrderModule.get(param.getOrderModule());
+        if (orderModule == OrderModule.BOTTOM_PLATFORM) {
             this.bottom(param);
-        } else if (OrderModule.STRAIGHT_WEIGHT.value.equals(module)) {
+        } else if (orderModule == OrderModule.STRAIGHT_WEIGHT) {
             this.notBottom(param);
         }
     }
 
     public void bottom(OperatingParameter param) throws InterruptedException {
-        List<WorkOrder> orders = this.orderService.getBottomOrders(param.getSortPattern(), param.getOrderDate());
+        List<WorkOrder> orders = this.orderService.getBottomOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
         log.info("轿底平台模块工单数量: {}", orders.size());
         for (WorkOrder order : orders) {
             log.info("当前工单: {}", order);
@@ -78,7 +79,7 @@ public class MainService {
     public void notBottom(OperatingParameter param) throws InterruptedException {
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
         log.info("库存件规格集合: {}", specs);
-        List<WorkOrder> orders = this.orderService.getPreprocessNotBottomOrders(param.getOrderDate());
+        List<WorkOrder> orders = this.orderService.getPreprocessNotBottomOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
         log.info("直梁对重模块工单数量: {}", orders.size());
         for (int i = 0; i < orders.size(); i++) {
             WorkOrder currOrder = orders.get(i);

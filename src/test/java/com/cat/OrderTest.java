@@ -8,6 +8,7 @@ import com.cat.service.InventoryService;
 import com.cat.service.OrderService;
 import com.cat.service.ParameterService;
 import com.cat.utils.OrderUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,7 +38,7 @@ class OrderTest extends BaseTest {
     void testGetAllWidthBetterBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getOrderDate();
-        List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, date);
+        List<WorkOrder> orders = orderService.getBottomOrders(OrderSortPattern.SPEC, date);
         assertEquals(677, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), order.getId());
@@ -51,7 +52,7 @@ class OrderTest extends BaseTest {
     @Test
     void testGetAllWidthBetterNotBottomOrder() {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
-        List<WorkOrder> orders = orderService.getNotBottomOrders(op.getOrderDate());
+        List<WorkOrder> orders = orderService.getNotBottomOrders(OrderSortPattern.get(op.getSortPattern()), op.getOrderDate());
         assertEquals(82, orders.size());
         for (WorkOrder order : orders) {
             CutBoard cutBoard = new CutBoard(order.getCuttingSize(), order.getMaterial(), order.getId());
@@ -67,14 +68,14 @@ class OrderTest extends BaseTest {
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         LocalDate date = op.getOrderDate();
         // 获取未预处理的直梁工单，共82个:
-        List<WorkOrder> orders = orderService.getNotBottomOrders(date);
+        List<WorkOrder> orders = orderService.getNotBottomOrders(OrderSortPattern.get(op.getSortPattern()), date);
         assertEquals(82, orders.size());
         inventoryService.insertInventory(new Inventory("4.00×245.00×3190.00", "热板", 7, BoardCategory.STOCK.value));
         inventoryService.insertInventory(new Inventory("4.00×245.00×3150.00", "热板", 7, BoardCategory.STOCK.value));
         // 获取经过预处理的直梁工单，其中前8个工单有6个因为使用了已有的库存件作为成品，因此未完工的工单数量变为76个:
-        orders = orderService.getPreprocessNotBottomOrders(date);
+        orders = orderService.getPreprocessNotBottomOrders(OrderSortPattern.get(op.getSortPattern()), date);
         assertEquals(76, orders.size());
-        orders = orderService.getNotBottomOrders(date);
+        orders = orderService.getNotBottomOrders(OrderSortPattern.get(op.getSortPattern()), date);
         orders.forEach(System.out::println);
     }
 
@@ -89,7 +90,14 @@ class OrderTest extends BaseTest {
     @Test
     void testGetOrder() {
         assertTrue(true);
-        System.out.println(this.orderService.getNotBottomOrders(LocalDate.of(2019, 11, 13)).size());
-        System.out.println(this.orderService.getBottomOrders(OrderSortPattern.BY_SPEC.value, LocalDate.of(2019, 11, 13)).size());
+        System.out.println(this.orderService.getNotBottomOrders(OrderSortPattern.SEQ, LocalDate.of(2019, 11, 13)).size());
+        System.out.println(this.orderService.getBottomOrders(OrderSortPattern.SPEC, LocalDate.of(2019, 11, 13)).size());
+    }
+
+    @Disabled("TODO")
+    @Test
+    void testPrintOrder() {
+        assertTrue(true);
+        this.orderService.getNotBottomOrders(OrderSortPattern.PCH_SEQ, LocalDate.of(2019, 11, 13)).forEach(System.out::println);
     }
 }

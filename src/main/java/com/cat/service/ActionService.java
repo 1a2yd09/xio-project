@@ -23,14 +23,19 @@ public class ActionService {
 
     /**
      * 等待所有机器动作都被处理完毕。
-     *
-     * @throws InterruptedException 等待过程被中断
      */
-    public void waitingForAllMachineActionsCompleted() throws InterruptedException {
+    public void waitingForAllMachineActionsCompleted() {
         // test:
         this.completedAllMachineActions();
         log.info("等待动作全部执行...");
-        ThreadUtil.getActionProcessedMessageQueue().take();
+        while (true) {
+            try {
+                ThreadUtil.getActionProcessedMessageQueue().take();
+                break;
+            } catch (Exception e) {
+                log.warn("interrupted!", e);
+            }
+        }
         log.info("全部动作执行完毕...");
     }
 

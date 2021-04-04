@@ -7,6 +7,7 @@ import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.*;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
+import com.cat.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,21 +39,31 @@ public class MainService {
 
     /**
      * 主流程。
-     *
-     * @throws InterruptedException 等待过程被中断
      */
-    public void start() throws InterruptedException {
-        this.signalService.waitingForNewProcessStartSignal();
-        OperatingParameter param = this.parameterService.getLatestOperatingParameter();
-        OrderModule orderModule = OrderModule.get(param.getOrderModule());
-        if (orderModule == OrderModule.BOTTOM_PLATFORM) {
-            this.bottom(param);
-        } else if (orderModule == OrderModule.STRAIGHT_WEIGHT) {
-            this.notBottom(param);
+    public void start() {
+        ThreadUtil.getWorkThreadRunning().set(true);
+        try {
+            // while 循环:
+            this.signalService.waitingForNewProcessStartSignal();
+            OperatingParameter param = this.parameterService.getLatestOperatingParameter();
+            OrderModule orderModule = OrderModule.get(param.getOrderModule());
+            switch (orderModule) {
+                case BOTTOM_PLATFORM:
+                    this.bottom(param);
+                    break;
+                case STRAIGHT_WEIGHT:
+                    this.notBottom(param);
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            ThreadUtil.getWorkThreadRunning().set(false);
+            log.error(e.getMessage(), e);
         }
     }
 
-    public void bottom(OperatingParameter param) throws InterruptedException {
+    private void bottom(OperatingParameter param) {
         List<WorkOrder> orders = this.orderService.getBottomOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
         log.info("轿底平台模块工单数量: {}", orders.size());
         for (WorkOrder order : orders) {
@@ -76,7 +87,7 @@ public class MainService {
         }
     }
 
-    public void notBottom(OperatingParameter param) throws InterruptedException {
+    private void notBottom(OperatingParameter param) {
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
         log.info("库存件规格集合: {}", specs);
         List<WorkOrder> orders = this.orderService.getPreprocessNotBottomOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
@@ -175,7 +186,7 @@ public class MainService {
     /**
      * 处理一组被机器处理完毕的动作。
      */
-    public void processCompletedAction(WorkOrder... orders) throws InterruptedException {
+    public void processCompletedAction(WorkOrder... orders) {
         this.actionService.waitingForAllMachineActionsCompleted();
 
         Map<Integer, Integer> map = new HashMap<>(4);

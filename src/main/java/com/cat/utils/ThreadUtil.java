@@ -4,6 +4,7 @@ import com.cat.pojo.CuttingSignal;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author CAT
@@ -17,6 +18,7 @@ public class ThreadUtil {
     private static final BlockingQueue<Integer> STOP_CONTROL_MESSAGE_QUEUE = new SynchronousQueue<>();
     private static final BlockingQueue<CuttingSignal> CUTTING_MESSAGE_QUEUE = new SynchronousQueue<>();
     private static final BlockingQueue<String> ACTION_PROCESSED_MESSAGE_QUEUE = new SynchronousQueue<>();
+    private static final AtomicBoolean WORK_THREAD_RUNNING = new AtomicBoolean(false);
 
     public static BlockingQueue<Integer> getStartControlMessageQueue() {
         return START_CONTROL_MESSAGE_QUEUE;
@@ -32,5 +34,9 @@ public class ThreadUtil {
 
     public static BlockingQueue<String> getActionProcessedMessageQueue() {
         return ACTION_PROCESSED_MESSAGE_QUEUE;
+    }
+
+    public static AtomicBoolean getWorkThreadRunning() {
+        return WORK_THREAD_RUNNING;
     }
 }

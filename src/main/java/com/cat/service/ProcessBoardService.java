@@ -46,7 +46,7 @@ public class ProcessBoardService {
      * @param boardList      目标板材列表
      * @param wasteThreshold 废料阈值
      */
-    public void backToFrontCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
+    private void backToFrontCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
         NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, boardList.getBoardAllWidth(), wasteThreshold);
         this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
         for (NormalBoard board : boardList.getBoards()) {
@@ -65,7 +65,7 @@ public class ProcessBoardService {
      * @param boardList      目标板材列表
      * @param wasteThreshold 废料阈值
      */
-    public void frontToBackCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
+    private void frontToBackCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
         for (NormalBoard board : boardList.getBoards()) {
             NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.SHORT, board.getLength(), wasteThreshold);
             this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard);
@@ -92,7 +92,7 @@ public class ProcessBoardService {
      * @param forwardEdge 朝向
      * @param targetBoard 目标板材
      */
-    public void cuttingBoard(CutBoard cutBoard, ForwardEdge forwardEdge, NormalBoard targetBoard) {
+    private void cuttingBoard(CutBoard cutBoard, ForwardEdge forwardEdge, NormalBoard targetBoard) {
         if (targetBoard.getCutTimes() > 0) {
             if (cutBoard.getForwardEdge() != forwardEdge) {
                 cutBoard.setForwardEdge(forwardEdge);

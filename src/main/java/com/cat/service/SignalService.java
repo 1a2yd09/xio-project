@@ -27,27 +27,39 @@ public class SignalService {
      *
      * @param order 工单
      * @return 下料信号
-     * @throws InterruptedException 接收过程被中断
      */
-    public CuttingSignal receiveNewCuttingSignal(WorkOrder order) throws InterruptedException {
+    public CuttingSignal receiveNewCuttingSignal(WorkOrder order) {
         // test:
         this.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
         log.info("等待下料信号...");
-        CuttingSignal signal = ThreadUtil.getCuttingMessageQueue().take();
+        CuttingSignal signal;
+        while (true) {
+            try {
+                signal = ThreadUtil.getCuttingMessageQueue().take();
+                break;
+            } catch (Exception e) {
+                log.warn("interrupted!", e);
+            }
+        }
         log.info("获取到新的下料信号...");
         return signal;
     }
 
     /**
      * 等待新的流程启动信号。
-     *
-     * @throws InterruptedException 等待过程被中断
      */
-    public void waitingForNewProcessStartSignal() throws InterruptedException {
+    public void waitingForNewProcessStartSignal() {
         // test:
         this.insertProcessControlSignal(ControlSignalCategory.START);
         log.info("等待流程启动信号...");
-        ThreadUtil.getStartControlMessageQueue().take();
+        while (true) {
+            try {
+                ThreadUtil.getStartControlMessageQueue().take();
+                break;
+            } catch (Exception e) {
+                log.warn("interrupted!", e);
+            }
+        }
         log.info("获取到新的流程启动信号...");
     }
 

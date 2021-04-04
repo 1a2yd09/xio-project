@@ -1,6 +1,5 @@
 package com.cat;
 
-import com.cat.service.MainService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -8,14 +7,11 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -29,19 +25,11 @@ import java.util.Properties;
 @Configuration
 @ComponentScan
 @MapperScan("com.cat.mapper")
-@EnableScheduling
-@EnableAspectJAutoProxy
 @EnableTransactionManagement
 @PropertySource({"classpath:jdbc.properties", "classpath:smtp.properties"})
 public class AppConfig {
     public static void main(String[] args) {
-        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        MainService mainService = context.getBean(MainService.class);
-        try {
-            mainService.start();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        new AnnotationConfigApplicationContext(AppConfig.class);
     }
 
     @Bean
@@ -49,11 +37,6 @@ public class AppConfig {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(jdbcUrl);
         return new HikariDataSource(config);
-    }
-
-    @Bean
-    JdbcTemplate createJdbcTemplate(@Autowired DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
     }
 
     @Bean

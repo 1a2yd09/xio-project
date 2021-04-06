@@ -1,6 +1,8 @@
 package com.cat.service;
 
-import com.cat.pojo.ErrorMessage;
+import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.WorkOrder;
+import com.cat.pojo.message.OrderMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -8,6 +10,10 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author CAT
@@ -21,8 +27,13 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
+    private final ExecutorService mailPool;
+
     public MailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
+        this.mailPool = new ThreadPoolExecutor(5, 5, 0L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(5),
+                r -> new Thread(r, "mail-pool-thread"));
     }
 
     /**
@@ -30,19 +41,21 @@ public class MailService {
      *
      * @param msg 消息
      */
-    public void sendOrderErrorMail(ErrorMessage msg) {
+    public void sendWorkErrorMail(OrderMessage msg) {
         try {
             MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
             helper.setFrom(this.from);
             helper.setTo(this.to);
-            helper.setSubject("Work order processing blocked");
+            helper.setSubject("Work thread throw exception!");
             String text = "<p>OrderId: %d.</p><p>CuttingSize: %s.</p><p>ProductSpecification: %s.</p><p>Send at: %s.</p>";
-            String html = String.format(text, msg.getOrderId(), msg.getCuttingSize(), msg.getProductSpecification(), msg.getCreatedAt());
+            WorkOrder order = msg.getOrder();
+            CuttingSignal signal = msg.getSignal();
+            String html = String.format(text, order.getId(), signal.getCuttingSize(), order.getProductSpecification(), msg.getCreatedAt());
             helper.setText(html, true);
 
-            mailSender.send(mimeMessage);
+            this.mailPool.execute(() -> mailSender.send(mimeMessage));
         } catch (MessagingException e) {
             e.printStackTrace();
         }

@@ -5,6 +5,7 @@ import com.cat.enums.BoardCategory;
 import com.cat.enums.OrderModule;
 import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.*;
+import com.cat.pojo.message.OrderMessage;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
 import com.cat.utils.ThreadUtil;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author CAT
@@ -36,12 +38,16 @@ public class MainService {
     InventoryService inventoryService;
     @Autowired
     StockSpecService stockSpecService;
+    @Autowired
+    MailService mailService;
+
+    private static final AtomicReference<OrderMessage> CURRENT_ORDER = new AtomicReference<>(null);
 
     /**
      * 主流程。
      */
     public void start() {
-        ThreadUtil.getWorkThreadRunning().set(true);
+        ThreadUtil.WORK_THREAD_RUNNING.set(true);
         try {
             // while 循环:
             this.signalService.waitingForNewProcessStartSignal();
@@ -58,8 +64,12 @@ public class MainService {
                     break;
             }
         } catch (Exception e) {
-            ThreadUtil.getWorkThreadRunning().set(false);
+            // 写异常日志到文件
             log.error(e.getMessage(), e);
+            // 发异常邮件
+            this.mailService.sendWorkErrorMail(CURRENT_ORDER.get());
+            // 标记异常工单
+            ThreadUtil.WORK_THREAD_RUNNING.set(false);
         }
     }
 
@@ -71,6 +81,7 @@ public class MainService {
             while (order.getIncompleteQuantity() != 0) {
                 this.signalService.insertTakeBoardSignal(order.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
+                CURRENT_ORDER.set(OrderMessage.of(order, cuttingSignal));
                 log.info("下料信号: {}", cuttingSignal);
                 this.processingBottomOrder(order, param, cuttingSignal);
                 List<MachineAction> actions = this.actionService.getAllMachineActions();
@@ -98,6 +109,7 @@ public class MainService {
             while (currOrder.getIncompleteQuantity() != 0) {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
+                CURRENT_ORDER.set(OrderMessage.of(currOrder, cuttingSignal));
                 log.info("下料信号: {}", cuttingSignal);
                 WorkOrder nextOrder = i < orders.size() - 1 ? orders.get(i + 1) : OrderUtil.getFakeOrder();
                 log.info("后续工单: {}", nextOrder);

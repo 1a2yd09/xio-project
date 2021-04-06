@@ -66,7 +66,7 @@ public class TaskService {
 
     @Scheduled(initialDelay = 7_000, fixedDelay = 3_000)
     public void checkMainThreadState() {
-        boolean workThreadRunning = ThreadUtil.getWorkThreadRunning().get();
+        boolean workThreadRunning = ThreadUtil.WORK_THREAD_RUNNING.get();
         log.info("工作流程是否正常: {}", workThreadRunning);
         if (!workThreadRunning) {
             log.info("提交新的工作任务至线程池");

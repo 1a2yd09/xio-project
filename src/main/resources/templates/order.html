@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>完成情况</title>
-    <script src="/static/js/echarts.min.js"></script>
-    <script src="/static/js/jquery-3.6.0.min.js"></script>
+    <title>工单完成近况</title>
+    <script th:src="@{echarts.min.js}"></script>
+    <script th:src="@{jquery.min.js}"></script>
 </head>
 <body>
+<div>
+    <button type="button" onclick="location.reload()">刷新</button>
+</div>
 <div id="main" style="width: 1200px; height: 800px; margin: auto;"></div>
 <script type="text/javascript">
     const myChart = echarts.init(document.getElementById('main'));
 
     const option = {
         title: {
-            text: '工单完成情况'
+            text: '工单完成近况'
         },
         tooltip: {},
         legend: {
@@ -44,13 +47,11 @@
     $.ajax({
         type: 'post',
         async: true,
-        url: 'http://localhost:8090/echarts',
+        url: '/echarts',
         dataType: 'json',
         success: function (data) {
             for (let i = 0; i < data.length; i++) {
                 dates.push(data[i].date);
-            }
-            for (let i = 0; i < data.length; i++) {
                 counts.push(data[i].count);
             }
             myChart.setOption({
@@ -61,7 +62,7 @@
                     data: counts
                 }]
             })
-        }
+        },
     })
 </script>
 </body>

@@ -12,7 +12,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  */
 @Configuration
 @EnableScheduling
-@Profile({"production"})
+@Profile({"production", "test"})
 public class ScheduledTaskConfiguration implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {

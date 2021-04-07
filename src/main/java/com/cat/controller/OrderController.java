@@ -22,8 +22,8 @@ public class OrderController {
     }
 
     @GetMapping("/order")
-    public String hello() {
-        return "order.html";
+    public String order() {
+        return "order";
     }
 
     @PostMapping("/echarts")

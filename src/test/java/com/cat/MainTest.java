@@ -25,7 +25,7 @@ class MainTest extends BaseTest {
     OrderService orderService;
 
     @Test
-    void testStart() throws InterruptedException {
+    void testStart() {
         assertEquals(759, orderService.getAllProductionOrders().size());
         parameterService.insertOperatingParameter(ParamUtil.getCommonParameter(OrderSortPattern.SEQ, OrderModule.BOTTOM_PLATFORM));
         mainService.start();

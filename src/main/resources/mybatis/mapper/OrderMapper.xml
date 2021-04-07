@@ -116,4 +116,18 @@
         SELECT *
         FROM tb_remote_work_order;
     </update>
+
+    <select id="getCompletedOrderCountByDate" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM tb_completed_work_order
+        WHERE jhwgrq = #{date}
+    </select>
+
+    <select id="getCompletedOrderCountByRange" resultType="java.lang.Integer">
+        SELECT COUNT(*) AS order_count
+        FROM tb_local_work_order
+        WHERE jhwgrq BETWEEN #{start} AND #{end}
+        GROUP BY jhwgrq
+        ORDER BY jhwgrq DESC;
+    </select>
 </mapper>

@@ -8,11 +8,13 @@ import com.cat.mapper.InventoryMapper;
 import com.cat.mapper.OrderMapper;
 import com.cat.pojo.Inventory;
 import com.cat.pojo.WorkOrder;
+import com.cat.pojo.dto.OrderCount;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -103,6 +105,16 @@ public class OrderService {
         ));
         OrderUtil.sortOrderList(orders, sortPattern);
         return orders;
+    }
+
+    public List<OrderCount> getCompletedOrderCountByRange(int range) {
+        LocalDate now = LocalDate.now();
+        List<OrderCount> result = new ArrayList<>(range);
+        for (int i = 0; i < range; i++) {
+            LocalDate date = now.minusDays(i);
+            result.add(new OrderCount(date.toString(), this.orderMapper.getCompletedOrderCountByDate(date)));
+        }
+        return result;
     }
 
     /**

@@ -4,6 +4,7 @@ import com.cat.pojo.WorkOrder;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -102,4 +103,21 @@ public interface OrderMapper {
      * 还原数据库。
      */
     void restoreDatabase();
+
+    /**
+     * 根据具体日期获取当日完成工单数量。
+     *
+     * @param date 日期
+     * @return 数量
+     */
+    int getCompletedOrderCountByDate(@Param("date") LocalDate date);
+
+    /**
+     * 获取日期区间内，每个日期的工单完成数量集合。
+     *
+     * @param start 起始日期
+     * @param end   结束日期
+     * @return 完成数量集合
+     */
+    List<Integer> getCompletedOrderCountByRange(@Param("start") LocalDate start, @Param("end") LocalDate end);
 }

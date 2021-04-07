@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>完成情况</title>
+    <script src="/static/js/echarts.min.js"></script>
+    <script src="/static/js/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div id="main" style="width: 1200px; height: 800px; margin: auto;"></div>
+<script type="text/javascript">
+    const myChart = echarts.init(document.getElementById('main'));
+
+    const option = {
+        title: {
+            text: '工单完成情况'
+        },
+        tooltip: {},
+        legend: {
+            data: ['数量']
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: {},
+        series: [{
+            name: '数量',
+            type: 'bar',
+            data: [],
+            showBackground: true,
+            backgroundStyle: {
+                color: 'rgba(180, 180, 180, 0.2)'
+            }
+        }]
+    };
+
+    myChart.setOption(option);
+
+    const dates = [];
+    const counts = [];
+
+    $.ajax({
+        type: 'post',
+        async: true,
+        url: 'http://localhost:8090/echarts',
+        dataType: 'json',
+        success: function (data) {
+            for (let i = 0; i < data.length; i++) {
+                dates.push(data[i].date);
+            }
+            for (let i = 0; i < data.length; i++) {
+                counts.push(data[i].count);
+            }
+            myChart.setOption({
+                xAxis: {
+                    data: dates
+                },
+                series: [{
+                    data: counts
+                }]
+            })
+        }
+    })
+</script>
+</body>
+</html>

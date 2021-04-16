@@ -10,6 +10,7 @@ import com.cat.pojo.Inventory;
 import com.cat.pojo.WorkOrder;
 import com.cat.pojo.dto.OrderCount;
 import com.cat.utils.BoardUtil;
+import com.cat.utils.OrderComparator;
 import com.cat.utils.OrderUtil;
 import org.springframework.stereotype.Service;
 
@@ -87,7 +88,7 @@ public class OrderService {
                 "module1", OrderModule.BOTTOM.getName(),
                 "date", date.toString()
         ));
-        OrderUtil.sortOrderList(orders, sortPattern);
+        orders.sort((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2));
         return orders;
     }
 
@@ -103,7 +104,7 @@ public class OrderService {
                 "module2", OrderModule.WEIGHT.getName(),
                 "date", date.toString()
         ));
-        OrderUtil.sortOrderList(orders, sortPattern);
+        orders.sort((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2));
         return orders;
     }
 

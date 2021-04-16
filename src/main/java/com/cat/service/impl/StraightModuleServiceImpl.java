@@ -2,6 +2,7 @@ package com.cat.service.impl;
 
 import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.*;
+import com.cat.pojo.message.OrderMessage;
 import com.cat.service.*;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
@@ -43,6 +44,7 @@ public class StraightModuleServiceImpl implements ModuleService {
                 this.signalService.insertTakeBoardSignal(currOrder.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
                 log.info("下料信号: {}", cuttingSignal);
+                MainService.RUNNING_ORDER.set(OrderMessage.of(currOrder, cuttingSignal));
                 WorkOrder nextOrder = i < orders.size() - 1 ? orders.get(i + 1) : OrderUtil.getFakeOrder();
                 log.info("后续工单: {}", nextOrder);
                 this.processStraightOrder(currOrder, nextOrder, param, specs, cuttingSignal);

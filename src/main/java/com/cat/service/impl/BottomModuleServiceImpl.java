@@ -2,6 +2,7 @@ package com.cat.service.impl;
 
 import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.*;
+import com.cat.pojo.message.OrderMessage;
 import com.cat.service.*;
 import com.cat.utils.BoardUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class BottomModuleServiceImpl implements ModuleService {
                 this.signalService.insertTakeBoardSignal(order.getId());
                 CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
                 log.info("下料信号: {}", cuttingSignal);
+                MainService.RUNNING_ORDER.set(OrderMessage.of(order, cuttingSignal));
                 this.processBottomOrder(order, param, cuttingSignal);
                 this.actionService.processCompletedAction(order);
                 if (this.signalService.checkingForNewProcessStopSignal()) {

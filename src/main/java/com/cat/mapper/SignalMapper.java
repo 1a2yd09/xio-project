@@ -6,6 +6,9 @@ import com.cat.pojo.TakeBoardSignal;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+/**
+ * @author CAT
+ */
 @Mapper
 public interface SignalMapper {
     /**

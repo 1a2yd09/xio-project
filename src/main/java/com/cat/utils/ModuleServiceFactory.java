@@ -6,8 +6,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author CAT
+ */
 @Component
-public class ModuleFactory implements ApplicationContextAware {
+public class ModuleServiceFactory implements ApplicationContextAware {
     private ApplicationContext context;
 
     @Override

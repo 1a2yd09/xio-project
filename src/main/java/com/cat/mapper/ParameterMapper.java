@@ -3,6 +3,9 @@ package com.cat.mapper;
 import com.cat.pojo.OperatingParameter;
 import org.apache.ibatis.annotations.Mapper;
 
+/**
+ * @author CAT
+ */
 @Mapper
 public interface ParameterMapper {
     /**

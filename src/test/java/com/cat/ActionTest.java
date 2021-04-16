@@ -8,6 +8,8 @@ import com.cat.pojo.MachineAction;
 import com.cat.pojo.NormalBoard;
 import com.cat.pojo.WorkOrder;
 import com.cat.service.*;
+import com.cat.service.impl.BottomModuleServiceImpl;
+import com.cat.service.impl.StraightModuleServiceImpl;
 import com.cat.utils.OrderUtil;
 import com.cat.utils.SignalUtil;
 import org.junit.jupiter.api.Test;
@@ -31,9 +33,13 @@ class ActionTest extends BaseTest {
     StockSpecService stockSpecService;
     @Autowired
     ParameterService parameterService;
+    @Autowired
+    BottomModuleServiceImpl bottomModuleServiceImpl;
+    @Autowired
+    StraightModuleServiceImpl straightModuleServiceImpl;
 
     @Test
-    void testNotBottomAction() throws InterruptedException {
+    void testNotBottomAction() {
         // 经过下述对重流程，将生成3个库存件和2个成品，工单本身需求2个成品:
         // 下料板: 4.00×1245.00×3400.00
         // 成品板: 4.0×245×3190
@@ -43,7 +49,7 @@ class ActionTest extends BaseTest {
         NormalBoard stock = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.STOCK, order.getId());
         stock.setLength(new BigDecimal(3300));
         stockSpecService.insertStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
-        mainService.processingNotBottomOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processStraightOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 测试一，生成11个机器动作:
         assertEquals(11, actionService.getMachineActionCount());
 
@@ -51,7 +57,7 @@ class ActionTest extends BaseTest {
         int oldUnfinishedCount = order.getIncompleteQuantity();
         Inventory inventory = inventoryService.getInventory(stock.getStandardSpec(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
-        mainService.processCompletedAction(order);
+        actionService.processCompletedAction(order);
 
         order = this.orderService.getCompletedOrderById(3098562);
         int newUnfinishedCount = order.getIncompleteQuantity();
@@ -67,14 +73,14 @@ class ActionTest extends BaseTest {
     }
 
     @Test
-    void testBottomOrderAction() throws InterruptedException {
+    void testBottomOrderAction() {
         // 经过下述轿底流程，将生成3个半成品和2个成品，工单本身需求2个成品:
         // 下料板 2.5×1250×2504:
         // 成品板 2.5×121×2185:
         // 半成品 2.5×192×2504:
         WorkOrder order = orderService.getOrderById(3099510);
 
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         // 测试一，生成10个机器动作:
         assertEquals(10, actionService.getMachineActionCount());
 
@@ -97,7 +103,7 @@ class ActionTest extends BaseTest {
         NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT, order.getId());
         Inventory inventory = inventoryService.getInventory(semiProduct.getStandardSpec(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
-        mainService.processCompletedAction(order);
+        actionService.processCompletedAction(order);
 
         order = this.orderService.getCompletedOrderById(3099510);
         int newUnfinishedCount = order.getIncompleteQuantity();
@@ -115,7 +121,7 @@ class ActionTest extends BaseTest {
     @Test
     void testCompletedAllActions() {
         WorkOrder order = orderService.getOrderById(3098528);
-        mainService.processingBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         assertFalse(actionService.isAllMachineActionsProcessed());
         actionService.completedMachineActionById(1);
         assertFalse(actionService.isAllMachineActionsProcessed());

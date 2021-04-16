@@ -1,13 +1,19 @@
 package com.cat.service;
 
 import com.cat.enums.ActionState;
+import com.cat.enums.BoardCategory;
 import com.cat.mapper.ActionMapper;
+import com.cat.pojo.Inventory;
 import com.cat.pojo.MachineAction;
+import com.cat.pojo.WorkOrder;
+import com.cat.utils.BoardUtil;
 import com.cat.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author CAT
@@ -16,9 +22,52 @@ import java.util.List;
 @Service
 public class ActionService {
     private final ActionMapper actionMapper;
+    private final OrderService orderService;
+    private final InventoryService inventoryService;
 
-    public ActionService(ActionMapper actionMapper) {
+    public ActionService(ActionMapper actionMapper, OrderService orderService, InventoryService inventoryService) {
         this.actionMapper = actionMapper;
+        this.orderService = orderService;
+        this.inventoryService = inventoryService;
+    }
+
+    /**
+     * 处理一组被机器处理完毕的动作。
+     */
+    public void processCompletedAction(WorkOrder... orders) {
+        this.waitingForAllMachineActionsCompleted();
+
+        Map<Integer, Integer> map = new HashMap<>(4);
+        for (WorkOrder order : orders) {
+            map.put(order.getId(), 0);
+        }
+        Inventory inventory = null;
+        int inventoryCount = 0;
+
+        for (MachineAction action : this.getAllMachineActions()) {
+            // 只处理动作状态为已完成的动作:
+            if (ActionState.COMPLETED.value.equals(action.getState())) {
+                String bc = action.getBoardCategory();
+                if (BoardCategory.PRODUCT.value.equals(bc)) {
+                    map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+                } else if (BoardCategory.STOCK.value.equals(bc) || BoardCategory.SEMI_PRODUCT.value.equals(bc)) {
+                    if (inventory == null) {
+                        inventory = new Inventory(BoardUtil.getStandardSpecStr(action.getBoardSpecification()), action.getBoardMaterial(), bc);
+                    }
+                    inventoryCount++;
+                }
+            }
+        }
+
+        for (WorkOrder order : orders) {
+            this.orderService.addOrderCompletedQuantity(order, map.get(order.getId()));
+        }
+        if (inventory != null) {
+            inventory.setQuantity(inventoryCount);
+            this.inventoryService.updateInventoryQuantity(inventory);
+        }
+
+        this.transferAllActions();
     }
 
     /**

@@ -6,7 +6,7 @@
     <resultMap id="paramMap" type="com.cat.pojo.OperatingParameter"/>
 
     <select id="getLatestOperatingParameter" resultMap="paramMap">
-        SELECT TOP 1 *
+        SELECT TOP 1 id, order_date, fixed_width, waste_threshold, sort_pattern, order_module, created_at
         FROM tb_operating_parameter
         ORDER BY id DESC
     </select>

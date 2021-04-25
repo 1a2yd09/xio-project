@@ -8,7 +8,7 @@
     <resultMap id="cuttingSignalMap" type="com.cat.pojo.CuttingSignal"/>
 
     <select id="getLatestNotProcessedControlSignal" resultMap="controlSignalMap">
-        SELECT TOP 1 *
+        SELECT TOP 1 id, processed, category, created_at
         FROM tb_process_control_signal
         WHERE processed = 0
         ORDER BY id DESC
@@ -26,7 +26,7 @@
     </insert>
 
     <select id="getLatestTakeBoardSignal" resultMap="takeSignalMap">
-        SELECT TOP 1 *
+        SELECT TOP 1 id, processed, order_id, created_at
         FROM tb_take_board_signal
         ORDER BY id DESC
     </select>
@@ -37,7 +37,7 @@
     </insert>
 
     <select id="getLatestNotProcessedCuttingSignal" resultMap="cuttingSignalMap">
-        SELECT TOP 1 *
+        SELECT TOP 1 id, processed, cutting_size, forward_edge, order_id, created_at
         FROM tb_cutting_signal
         WHERE processed = 0
         ORDER BY id DESC

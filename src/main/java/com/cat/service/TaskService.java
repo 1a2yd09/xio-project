@@ -69,8 +69,8 @@ public class TaskService {
         boolean runningStatus = ThreadUtil.WORK_THREAD_RUNNING.get();
         log.info("工作流程是否正常: {}", runningStatus);
         if (!runningStatus) {
-            log.info("提交新的工作任务至线程池");
-            ThreadPoolFactory.getDefaultThreadPool().execute(mainService::start);
+            log.info("提交新的工作任务至业务线程池");
+            ThreadPoolFactory.getServiceThreadPool().execute(mainService::start);
         }
     }
 }

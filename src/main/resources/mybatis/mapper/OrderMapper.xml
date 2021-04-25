@@ -42,33 +42,143 @@
     </update>
 
     <select id="getOrderById" resultMap="orderMap">
-        SELECT *
+        SELECT ZZTSCPCH,
+               HTH,
+               PLNBEZ,
+               MAKTX,
+               VORNR,
+               ZGG,
+               GAMNG,
+               [b.CU_ORGMAT],
+               ZZSSRQ,
+               [b.CU_ORGSIZE],
+               [b.CU_ORGMAT_AMOUNT],
+               [b.CU_ProNum],
+               SXH,
+               AUFNR,
+               id,
+               bid,
+               ARBPL,
+               YWGSL,
+               BHGSL,
+               BFSL,
+               ZT,
+               GDMK,
+               jhwgrq
         FROM tb_local_work_order
         WHERE bid = #{id}
     </select>
 
     <select id="getCompletedOrderById" resultMap="orderMap">
-        SELECT *
+        SELECT ZZTSCPCH,
+               HTH,
+               PLNBEZ,
+               MAKTX,
+               VORNR,
+               ZGG,
+               GAMNG,
+               [b.CU_ORGMAT],
+               ZZSSRQ,
+               [b.CU_ORGSIZE],
+               [b.CU_ORGMAT_AMOUNT],
+               [b.CU_ProNum],
+               SXH,
+               AUFNR,
+               id,
+               bid,
+               ARBPL,
+               YWGSL,
+               BHGSL,
+               BFSL,
+               ZT,
+               GDMK,
+               jhwgrq
         FROM tb_completed_work_order
         WHERE bid = #{id}
     </select>
 
     <select id="getNotBottomOrders" resultMap="orderMap">
-        SELECT *
+        SELECT ZZTSCPCH,
+               HTH,
+               PLNBEZ,
+               MAKTX,
+               VORNR,
+               ZGG,
+               GAMNG,
+               [b.CU_ORGMAT],
+               ZZSSRQ,
+               [b.CU_ORGSIZE],
+               [b.CU_ORGMAT_AMOUNT],
+               [b.CU_ProNum],
+               SXH,
+               AUFNR,
+               id,
+               bid,
+               ARBPL,
+               YWGSL,
+               BHGSL,
+               BFSL,
+               ZT,
+               GDMK,
+               jhwgrq
         FROM tb_local_work_order
         WHERE GDMK IN (#{module1}, #{module2})
           AND jhwgrq = #{date}
     </select>
 
     <select id="getBottomOrders" resultMap="orderMap">
-        SELECT *
+        SELECT ZZTSCPCH,
+               HTH,
+               PLNBEZ,
+               MAKTX,
+               VORNR,
+               ZGG,
+               GAMNG,
+               [b.CU_ORGMAT],
+               ZZSSRQ,
+               [b.CU_ORGSIZE],
+               [b.CU_ORGMAT_AMOUNT],
+               [b.CU_ProNum],
+               SXH,
+               AUFNR,
+               id,
+               bid,
+               ARBPL,
+               YWGSL,
+               BHGSL,
+               BFSL,
+               ZT,
+               GDMK,
+               jhwgrq
         FROM tb_local_work_order
         WHERE GDMK IN (#{module1})
           AND jhwgrq = #{date}
     </select>
 
     <select id="getAllProductionOrders" resultMap="orderMap">
-        SELECT *
+        SELECT ZZTSCPCH,
+               HTH,
+               PLNBEZ,
+               MAKTX,
+               VORNR,
+               ZGG,
+               GAMNG,
+               [b.CU_ORGMAT],
+               ZZSSRQ,
+               [b.CU_ORGSIZE],
+               [b.CU_ORGMAT_AMOUNT],
+               [b.CU_ProNum],
+               SXH,
+               AUFNR,
+               id,
+               bid,
+               ARBPL,
+               YWGSL,
+               BHGSL,
+               BFSL,
+               ZT,
+               GDMK,
+               jhwgrq
         FROM tb_local_work_order
     </select>
 
@@ -92,7 +202,29 @@
 
     <insert id="transferWorkOrderToCompleted">
         INSERT INTO tb_completed_work_order
-        SELECT *
+        SELECT ZZTSCPCH,
+               HTH,
+               PLNBEZ,
+               MAKTX,
+               VORNR,
+               ZGG,
+               GAMNG,
+               [b.CU_ORGMAT],
+               ZZSSRQ,
+               [b.CU_ORGSIZE],
+               [b.CU_ORGMAT_AMOUNT],
+               [b.CU_ProNum],
+               SXH,
+               AUFNR,
+               id,
+               bid,
+               ARBPL,
+               YWGSL,
+               BHGSL,
+               BFSL,
+               ZT,
+               GDMK,
+               jhwgrq
         FROM tb_local_work_order
         WHERE bid = #{id}
     </insert>
@@ -113,7 +245,29 @@
         TRUNCATE TABLE tb_stock_specification;
         TRUNCATE TABLE tb_take_board_signal;
         INSERT INTO tb_local_work_order
-        SELECT *
+        SELECT ZZTSCPCH,
+               HTH,
+               PLNBEZ,
+               MAKTX,
+               VORNR,
+               ZGG,
+               GAMNG,
+               [b.CU_ORGMAT],
+               ZZSSRQ,
+               [b.CU_ORGSIZE],
+               [b.CU_ORGMAT_AMOUNT],
+               [b.CU_ProNum],
+               SXH,
+               AUFNR,
+               id,
+               bid,
+               ARBPL,
+               YWGSL,
+               BHGSL,
+               BFSL,
+               ZT,
+               GDMK,
+               jhwgrq
         FROM tb_remote_work_order;
     </update>
 

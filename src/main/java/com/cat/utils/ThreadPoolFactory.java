@@ -11,17 +11,17 @@ public class ThreadPoolFactory {
     private static final int MAXIMUM_POOL_SIZE_SIZE = 1;
     private static final int KEEP_ALIVE_TIME = 0;
     private static final AtomicInteger THREAD_COUNTER = new AtomicInteger(0);
-    private static final ExecutorService DEFAULT_THREAD_POOL;
+    private static final ExecutorService SERVICE_THREAD_POOL;
 
     static {
         ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(1);
         RejectedExecutionHandler handler = new ThreadPoolExecutor.DiscardPolicy();
-        ThreadFactory threadFactory = r -> new Thread(r, "default-pool-thread-" + THREAD_COUNTER.incrementAndGet());
-        DEFAULT_THREAD_POOL = new ThreadPoolExecutor(
+        ThreadFactory threadFactory = r -> new Thread(r, "service-pool-thread-" + THREAD_COUNTER.incrementAndGet());
+        SERVICE_THREAD_POOL = new ThreadPoolExecutor(
                 CORE_POOL_SIZE,
                 MAXIMUM_POOL_SIZE_SIZE,
                 KEEP_ALIVE_TIME,
-                TimeUnit.SECONDS,
+                TimeUnit.MILLISECONDS,
                 workQueue,
                 threadFactory,
                 handler);
@@ -30,7 +30,7 @@ public class ThreadPoolFactory {
     private ThreadPoolFactory() {
     }
 
-    public static ExecutorService getDefaultThreadPool() {
-        return DEFAULT_THREAD_POOL;
+    public static ExecutorService getServiceThreadPool() {
+        return SERVICE_THREAD_POOL;
     }
 }

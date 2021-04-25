@@ -31,9 +31,9 @@ public class MailService {
 
     public MailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
-        this.mailPool = new ThreadPoolExecutor(5, 5, 0L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(5),
-                r -> new Thread(r, "mail-pool-thread"));
+        this.mailPool = new ThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(1),
+                r -> new Thread(r, "mail-pool-thread-" + r.hashCode()));
     }
 
     /**

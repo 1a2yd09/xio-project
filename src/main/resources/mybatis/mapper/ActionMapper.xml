@@ -27,7 +27,15 @@
     </select>
 
     <select id="getAllMachineActions" resultMap="actionMap">
-        SELECT *
+        SELECT id,
+               state,
+               action_category,
+               cut_distance,
+               board_category,
+               board_specification,
+               board_material,
+               order_id,
+               created_at
         FROM tb_machine_action
         ORDER BY id
     </select>

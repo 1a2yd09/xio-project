@@ -13,20 +13,32 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewWorkOrder {
-    private String operationState;
-    private String productSpecification;
-    private String material;
-    private String productQuantity;
-    private LocalDateTime completionDate;
-    private Integer id;
+public class OldWorkOrder {
     private String batchNumber;
-    private String sequenceNumber;
+    private String contractNumber;
+    private String itemNumber;
+    private String productName;
+    private String processNumber;
+    private String productSpecification;
+    private String productQuantity;
+    private String material;
+    private String implementationDate;
     private String cuttingSize;
-    private String siteModule;
+    private String cuttingQuantity;
+    private String programNumber;
+    private String sequenceNumber;
+    private String orderNumber;
+    private String oid;
+    private Integer id;
+    private String workCentre;
     private String completedQuantity;
+    private String reportQuantity;
+    private String scrapQuantity;
+    private String operationState;
+    private String siteModule;
+    private LocalDateTime completionDate;
 
-    public NewWorkOrder(String productSpecification, String productQuantity, String material, Integer id, String completedQuantity) {
+    public OldWorkOrder(String productSpecification, String productQuantity, String material, Integer id, String completedQuantity) {
         this.productSpecification = productSpecification;
         this.productQuantity = productQuantity;
         this.material = material;

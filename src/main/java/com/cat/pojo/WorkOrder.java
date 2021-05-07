@@ -14,29 +14,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkOrder {
-    private String batchNumber;
-    private String contractNumber;
-    private String itemNumber;
-    private String productName;
-    private String processNumber;
-    private String productSpecification;
-    private String productQuantity;
-    private String material;
-    private String implementationDate;
-    private String cuttingSize;
-    private String cuttingQuantity;
-    private String programNumber;
-    private String sequenceNumber;
-    private String orderNumber;
-    private String oid;
-    private Integer id;
-    private String workCentre;
-    private String completedQuantity;
-    private String reportQuantity;
-    private String scrapQuantity;
     private String operationState;
-    private String siteModule;
+    private String productSpecification;
+    private String material;
+    private String productQuantity;
     private LocalDateTime completionDate;
+    private Integer id;
+    private String batchNumber;
+    private String sequenceNumber;
+    private String cuttingSize;
+    private String siteModule;
+    private String completedQuantity;
 
     public WorkOrder(String productSpecification, String productQuantity, String material, Integer id, String completedQuantity) {
         this.productSpecification = productSpecification;

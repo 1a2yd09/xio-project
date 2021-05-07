@@ -1,6 +1,6 @@
 package com.cat.mapper;
 
-import com.cat.pojo.NewWorkOrder;
+import com.cat.pojo.OldWorkOrder;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -12,20 +12,20 @@ import java.util.Map;
  * @author CAT
  */
 @Mapper
-public interface NewOrderMapper {
+public interface OldOrderMapper {
     /**
      * 更新指定工单的运行状态。
      *
      * @param order 工单对象
      */
-    void updateOrderState(NewWorkOrder order);
+    void updateOrderState(OldWorkOrder order);
 
     /**
      * 更新指定工单的已完工数量。
      *
      * @param order 工单对象
      */
-    void updateOrderCompletedQuantity(NewWorkOrder order);
+    void updateOrderCompletedQuantity(OldWorkOrder order);
 
     /**
      * 根据工单 ID 获取指定工单，不存在指定 ID 工单时将返回 null。
@@ -33,7 +33,7 @@ public interface NewOrderMapper {
      * @param id 工单 ID
      * @return 工单对象
      */
-    NewWorkOrder getOrderById(@Param("id") Integer id);
+    OldWorkOrder getOrderById(@Param("id") Integer id);
 
     /**
      * 根据工单 ID 获取指定完成工单，不存在指定 ID 工单时将返回 null。
@@ -41,7 +41,7 @@ public interface NewOrderMapper {
      * @param id 工单 ID
      * @return 工单对象
      */
-    NewWorkOrder getCompletedOrderById(@Param("id") Integer id);
+    OldWorkOrder getCompletedOrderById(@Param("id") Integer id);
 
     /**
      * 根据工单模块和工单日期获取对重直梁工单集合。
@@ -49,7 +49,7 @@ public interface NewOrderMapper {
      * @param paramMap 参数集合
      * @return 工单集合
      */
-    List<NewWorkOrder> getNotBottomOrders(Map<String, String> paramMap);
+    List<OldWorkOrder> getNotBottomOrders(Map<String, String> paramMap);
 
     /**
      * 根据工单模块和工单日期获取轿底工单集合。
@@ -57,14 +57,14 @@ public interface NewOrderMapper {
      * @param paramMap 参数集合
      * @return 工单集合
      */
-    List<NewWorkOrder> getBottomOrders(Map<String, String> paramMap);
+    List<OldWorkOrder> getBottomOrders(Map<String, String> paramMap);
 
     /**
      * 获取当前生产工单表中的全体工单集合。
      *
      * @return 工单集合
      */
-    List<NewWorkOrder> getAllProductionOrders();
+    List<OldWorkOrder> getAllProductionOrders();
 
     /**
      * 根据工单 ID 从远程工单表中删除对应工单。

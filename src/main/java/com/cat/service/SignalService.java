@@ -8,7 +8,12 @@ import com.cat.pojo.TakeBoardSignal;
 import com.cat.pojo.WorkOrder;
 import com.cat.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledFuture;
+import java.util.function.BooleanSupplier;
 
 /**
  * @author CAT
@@ -17,38 +22,39 @@ import org.springframework.stereotype.Service;
 @Service
 public class SignalService {
     private final SignalMapper signalMapper;
+    private final ActionService actionService;
+    private final ThreadPoolTaskScheduler scheduler;
 
-    public SignalService(SignalMapper signalMapper) {
+    public SignalService(SignalMapper signalMapper, ActionService actionService, ThreadPoolTaskScheduler scheduler) {
         this.signalMapper = signalMapper;
+        this.actionService = actionService;
+        this.scheduler = scheduler;
     }
 
-    /**
-     * 接收新的下料信号。
-     *
-     * @param order 工单
-     * @return 下料信号
-     */
-    public CuttingSignal receiveNewCuttingSignal(WorkOrder order) {
+    public void waitingForSignal(BooleanSupplier supplier) {
         // test:
-        this.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
-        log.info("等待下料信号...");
-        CuttingSignal signal;
-        while (true) {
-            try {
-                signal = ThreadUtil.getCuttingMessageQueue().take();
-                break;
-            } catch (Exception e) {
-                log.warn("interrupted!", e);
+        this.actionService.completedAllMachineActions();
+        log.info("等待特定信号到达...");
+        CountDownLatch cdl = new CountDownLatch(1);
+        ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
+            if (supplier.getAsBoolean()) {
+                cdl.countDown();
             }
+        }, 1000);
+        try {
+            cdl.await();
+            sf.cancel(false);
+            log.info("特定信号到达...");
+        } catch (InterruptedException e) {
+            log.warn("等待特定信号过程中出现异常: ", e);
+            Thread.currentThread().interrupt();
         }
-        log.info("获取到新的下料信号...");
-        return signal;
     }
 
     /**
      * 等待新的流程启动信号。
      */
-    public void waitingForNewProcessStartSignal() {
+    public void checkStartSignal() {
         // test:
         this.insertProcessControlSignal(ControlSignalCategory.START);
         log.info("等待流程启动信号...");
@@ -58,6 +64,7 @@ public class SignalService {
                 break;
             } catch (Exception e) {
                 log.warn("interrupted!", e);
+                Thread.currentThread().interrupt();
             }
         }
         log.info("获取到新的流程启动信号...");
@@ -68,7 +75,7 @@ public class SignalService {
      *
      * @return true 表示有新的流程停止信号
      */
-    public boolean checkingForNewProcessStopSignal() {
+    public boolean checkStopSignal() {
         log.info("检查流程停止信号...");
         Integer flag = ThreadUtil.getStopControlMessageQueue().poll();
         return flag != null;
@@ -102,6 +109,17 @@ public class SignalService {
     }
 
     /**
+     * 发送取板信号。
+     *
+     * @param order 工单对象
+     */
+    public void sendTakeBoardSignal(WorkOrder order) {
+        if (order != null) {
+            this.signalMapper.insertTakeBoardSignal(order.getId());
+        }
+    }
+
+    /**
      * 获取最新未被处理的下料信号，不存在未被处理的下料信号时将返回 null。
      *
      * @return 下料信号
@@ -114,6 +132,27 @@ public class SignalService {
             return cuttingSignal;
         }
         return null;
+    }
+
+    /**
+     * 查看是否存在最新未处理的下料信号。
+     *
+     * @return true 表示存在未处理的下料信号，否则表示不存在
+     */
+    public boolean isReceivedNewCuttingSignal() {
+        return this.signalMapper.getLatestNotProcessedCuttingSignal() != null;
+    }
+
+    /**
+     * 获取最新未处理的下料信号。
+     *
+     * @return 下料信号对象
+     */
+    public CuttingSignal getNewProcessedCuttingSignal() {
+        CuttingSignal signal = this.signalMapper.getLatestNotProcessedCuttingSignal();
+        signal.setProcessed(true);
+        this.signalMapper.updateCuttingSignal(signal);
+        return signal;
     }
 
     /**

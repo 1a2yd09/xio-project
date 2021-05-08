@@ -11,6 +11,7 @@ import com.cat.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,45 @@ public class ActionService {
         this.actionMapper = actionMapper;
         this.orderService = orderService;
         this.inventoryService = inventoryService;
+    }
+
+    /**
+     * 处理一组被机器完成的动作。
+     *
+     * @param orderDeque 工单队列
+     * @param orders     动作列表中涉及的工单
+     */
+    public void processAction(Deque<WorkOrder> orderDeque, WorkOrder... orders) {
+        Map<Integer, Integer> map = new HashMap<>(4);
+        for (WorkOrder order : orders) {
+            map.put(order.getId(), 0);
+        }
+        Inventory inventory = null;
+        int inventoryCount = 0;
+
+        for (MachineAction action : this.getAllMachineActions()) {
+            String bc = action.getBoardCategory();
+            if (BoardCategory.PRODUCT.value.equals(bc)) {
+                map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+            } else if (BoardCategory.STOCK.value.equals(bc) || BoardCategory.SEMI_PRODUCT.value.equals(bc)) {
+                if (inventory == null) {
+                    inventory = new Inventory(BoardUtil.getStandardSpecStr(action.getBoardSpecification()), action.getBoardMaterial(), bc);
+                }
+                inventoryCount++;
+            }
+        }
+
+        for (int i = orders.length - 1; i >= 0; i--) {
+            WorkOrder order = orders[i];
+            this.orderService.addOrderCompletedQuantity(order, map.get(order.getId()));
+            if (order.getIncompleteQuantity() != 0) {
+                orderDeque.offerFirst(order);
+            }
+        }
+        if (inventory != null) {
+            inventory.setQuantity(inventoryCount);
+            this.inventoryService.updateInventoryQuantity(inventory);
+        }
     }
 
     /**
@@ -83,6 +123,7 @@ public class ActionService {
                 break;
             } catch (Exception e) {
                 log.warn("interrupted!", e);
+                Thread.currentThread().interrupt();
             }
         }
         log.info("全部动作执行完毕...");
@@ -94,8 +135,7 @@ public class ActionService {
      * @return true 表示都被处理，false 表示未都被处理
      */
     public boolean isAllMachineActionsProcessed() {
-        // 如果机器动作表中的最后一个动作状态不为“未完成”，则表示全部机器动作都被处理完毕:
-        return !ActionState.INCOMPLETE.value.equals(this.actionMapper.getFinalMachineActionState());
+        return ActionState.COMPLETED.value.equals(this.actionMapper.getFinalMachineActionState());
     }
 
     /**
@@ -161,5 +201,14 @@ public class ActionService {
      */
     public void truncateMachineAction() {
         this.actionMapper.truncateMachineAction();
+    }
+
+    /**
+     * 确认剩余未完成动作是否包含旋转动作
+     *
+     * @return true 表示不包含旋转动作，否则包含旋转动作
+     */
+    public boolean isAllRotateActionsCompleted() {
+        return this.actionMapper.getIncompleteRotateActionCount() == 0;
     }
 }

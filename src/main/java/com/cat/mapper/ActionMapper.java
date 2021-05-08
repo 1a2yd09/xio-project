@@ -67,4 +67,11 @@ public interface ActionMapper {
      * 将机器动作表中的所有记录转移到已处理动作表。
      */
     void transferAllMachineActions();
+
+    /**
+     * 返回机器动作表中未完成动作中的旋转动作个数。
+     *
+     * @return 未完成旋转动作个数
+     */
+    int getIncompleteRotateActionCount();
 }

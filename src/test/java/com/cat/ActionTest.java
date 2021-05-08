@@ -49,7 +49,7 @@ class ActionTest extends BaseTest {
         NormalBoard stock = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.STOCK, order.getId());
         stock.setLength(new BigDecimal(3300));
         stockSpecService.insertStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
-        straightModuleServiceImpl.processStraightOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         // 测试一，生成11个机器动作:
         assertEquals(11, actionService.getMachineActionCount());
 
@@ -80,7 +80,7 @@ class ActionTest extends BaseTest {
         // 半成品 2.5×192×2504:
         WorkOrder order = orderService.getOrderById(3099510);
 
-        bottomModuleServiceImpl.processBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         // 测试一，生成10个机器动作:
         assertEquals(10, actionService.getMachineActionCount());
 
@@ -121,7 +121,7 @@ class ActionTest extends BaseTest {
     @Test
     void testCompletedAllActions() {
         WorkOrder order = orderService.getOrderById(3098528);
-        bottomModuleServiceImpl.processBottomOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         assertFalse(actionService.isAllMachineActionsProcessed());
         actionService.completedMachineActionById(1);
         assertFalse(actionService.isAllMachineActionsProcessed());

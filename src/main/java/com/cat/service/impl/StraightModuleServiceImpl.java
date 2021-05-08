@@ -1,5 +1,6 @@
 package com.cat.service.impl;
 
+import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.*;
 import com.cat.pojo.message.OrderMessage;
@@ -9,6 +10,8 @@ import com.cat.utils.OrderUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -37,22 +40,28 @@ public class StraightModuleServiceImpl implements ModuleService {
         log.info("库存件规格集合: {}", specs);
         List<WorkOrder> orders = this.orderService.getPreprocessNotBottomOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
         log.info("直梁对重模块工单数量: {}", orders.size());
-        for (int i = 0; i < orders.size(); i++) {
-            WorkOrder currOrder = orders.get(i);
+        Deque<WorkOrder> orderDeque = new LinkedList<>(orders);
+        this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
+        while (!orderDeque.isEmpty()) {
+            WorkOrder currOrder = orderDeque.pollFirst();
             log.info("当前工单: {}", currOrder);
-            while (currOrder.getIncompleteQuantity() != 0) {
-                this.signalService.insertTakeBoardSignal(currOrder.getId());
-                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(currOrder);
-                log.info("下料信号: {}", cuttingSignal);
-                MainService.RUNNING_ORDER.set(OrderMessage.of(currOrder, cuttingSignal));
-                WorkOrder nextOrder = i < orders.size() - 1 ? orders.get(i + 1) : OrderUtil.getFakeOrder();
-                log.info("后续工单: {}", nextOrder);
-                this.processStraightOrder(currOrder, nextOrder, param, specs, cuttingSignal);
-                this.actionService.processCompletedAction(currOrder, nextOrder);
-                if (this.signalService.checkingForNewProcessStopSignal()) {
-                    log.info("收到流程停止信号...");
-                    return;
-                }
+            // test:
+            this.signalService.insertCuttingSignal(currOrder.getCuttingSize(), ForwardEdge.SHORT, currOrder.getId());
+            this.signalService.waitingForSignal(this.signalService::isReceivedNewCuttingSignal);
+            CuttingSignal signal = this.signalService.getNewProcessedCuttingSignal();
+            MainService.RUNNING_ORDER.set(OrderMessage.of(currOrder, signal));
+            log.info("下料信号: {}", signal);
+            WorkOrder nextOrder = orderDeque.isEmpty() ? OrderUtil.getFakeOrder() : orderDeque.pollFirst();
+            log.info("后续工单: {}", nextOrder);
+            this.processOrder(currOrder, nextOrder, param, specs, signal);
+            this.actionService.processAction(orderDeque, currOrder, nextOrder);
+            this.signalService.waitingForSignal(this.actionService::isAllRotateActionsCompleted);
+            this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
+            this.signalService.waitingForSignal(this.actionService::isAllMachineActionsProcessed);
+            this.actionService.transferAllActions();
+            if (this.signalService.checkStopSignal()) {
+                log.info("收到流程停止信号...");
+                return;
             }
         }
     }
@@ -66,7 +75,7 @@ public class StraightModuleServiceImpl implements ModuleService {
      * @param specs         库存件规格集合
      * @param cuttingSignal 下料信号
      */
-    public void processStraightOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
+    public void processOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         log.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());

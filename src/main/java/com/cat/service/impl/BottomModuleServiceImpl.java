@@ -1,5 +1,6 @@
 package com.cat.service.impl;
 
+import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.*;
 import com.cat.pojo.message.OrderMessage;
@@ -8,6 +9,8 @@ import com.cat.utils.BoardUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -32,19 +35,26 @@ public class BottomModuleServiceImpl implements ModuleService {
     public void processOrderList(OperatingParameter param) {
         List<WorkOrder> orders = this.orderService.getBottomOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
         log.info("轿底平台模块工单数量: {}", orders.size());
-        for (WorkOrder order : orders) {
+        Deque<WorkOrder> orderDeque = new LinkedList<>(orders);
+        this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
+        while (!orderDeque.isEmpty()) {
+            WorkOrder order = orderDeque.pollFirst();
             log.info("当前工单: {}", order);
-            while (order.getIncompleteQuantity() != 0) {
-                this.signalService.insertTakeBoardSignal(order.getId());
-                CuttingSignal cuttingSignal = this.signalService.receiveNewCuttingSignal(order);
-                log.info("下料信号: {}", cuttingSignal);
-                MainService.RUNNING_ORDER.set(OrderMessage.of(order, cuttingSignal));
-                this.processBottomOrder(order, param, cuttingSignal);
-                this.actionService.processCompletedAction(order);
-                if (this.signalService.checkingForNewProcessStopSignal()) {
-                    log.info("收到流程停止信号...");
-                    return;
-                }
+            // test:
+            this.signalService.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
+            this.signalService.waitingForSignal(this.signalService::isReceivedNewCuttingSignal);
+            CuttingSignal signal = this.signalService.getNewProcessedCuttingSignal();
+            MainService.RUNNING_ORDER.set(OrderMessage.of(order, signal));
+            log.info("下料信号: {}", signal);
+            this.processOrder(order, param, signal);
+            this.actionService.processAction(orderDeque, order);
+            this.signalService.waitingForSignal(this.actionService::isAllRotateActionsCompleted);
+            this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
+            this.signalService.waitingForSignal(this.actionService::isAllMachineActionsProcessed);
+            this.actionService.transferAllActions();
+            if (this.signalService.checkStopSignal()) {
+                log.info("收到流程停止信号...");
+                return;
             }
         }
     }
@@ -56,7 +66,7 @@ public class BottomModuleServiceImpl implements ModuleService {
      * @param parameter     运行参数
      * @param cuttingSignal 下料信号
      */
-    public void processBottomOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
+    public void processOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         log.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());

@@ -33,7 +33,7 @@ class NotBottomProcessTest extends BaseTest {
     void test1() {
         WorkOrder order = orderService.getOrderById(3098562);
         order.setProductQuantity("10");
-        straightModuleServiceImpl.processStraightOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(10, actionService.getAllMachineActions().size());
     }
@@ -44,7 +44,7 @@ class NotBottomProcessTest extends BaseTest {
         order.setProductQuantity("1");
         WorkOrder nextOrder = orderService.getOrderById(3118526);
         nextOrder.setProductQuantity("4");
-        straightModuleServiceImpl.processStraightOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(13, actionService.getAllMachineActions().size());
     }
@@ -58,7 +58,7 @@ class NotBottomProcessTest extends BaseTest {
         WorkOrder nextOrder = orderService.getOrderById(3118526);
         nextOrder.setProductSpecification("4×242×3300");
         nextOrder.setProductQuantity("2");
-        straightModuleServiceImpl.processStraightOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(11, actionService.getAllMachineActions().size());
     }
@@ -68,7 +68,7 @@ class NotBottomProcessTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3098562);
         order.setProductQuantity("2");
         WorkOrder nextOrder = orderService.getOrderById(3118526);
-        straightModuleServiceImpl.processStraightOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, nextOrder, parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(10, actionService.getAllMachineActions().size());
     }
@@ -80,7 +80,7 @@ class NotBottomProcessTest extends BaseTest {
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
         product.setLength(new BigDecimal("3200"));
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
-        straightModuleServiceImpl.processStraightOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(10, actionService.getAllMachineActions().size());
     }
@@ -91,7 +91,7 @@ class NotBottomProcessTest extends BaseTest {
         order.setProductQuantity("1");
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), product.getLength());
-        straightModuleServiceImpl.processStraightOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(10, actionService.getAllMachineActions().size());
     }
@@ -102,7 +102,7 @@ class NotBottomProcessTest extends BaseTest {
         order.setProductQuantity("1");
         NormalBoard product = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.PRODUCT, order.getId());
         stockSpecService.insertStockSpec(product.getHeight(), product.getWidth(), new BigDecimal(3180));
-        straightModuleServiceImpl.processStraightOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(13, actionService.getAllMachineActions().size());
     }

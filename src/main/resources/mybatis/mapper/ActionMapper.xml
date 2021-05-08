@@ -71,4 +71,11 @@
                created_at
         FROM tb_machine_action
     </insert>
+
+    <select id="getIncompleteRotateActionCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) AS rotate_count
+        FROM tb_machine_action
+        WHERE action_category = N'旋转'
+          AND state = N'未完成';
+    </select>
 </mapper>

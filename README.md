@@ -47,7 +47,7 @@ public class MainService {
     public void start() {
         ThreadUtil.WORK_THREAD_RUNNING.set(true);
         try {
-            this.signalService.waitingForNewProcessStartSignal();
+            this.signalService.checkStartSignal();
             OperatingParameter param = this.parameterService.getLatestOperatingParameter();
             OrderModule orderModule = OrderModule.get(param.getOrderModule());
             this.moduleServiceFactory.getModuleService(orderModule.name()).processOrderList(param);

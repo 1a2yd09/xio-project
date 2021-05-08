@@ -6,6 +6,8 @@ import com.cat.pojo.WorkOrder;
  * @author CAT
  */
 public class OrderUtil {
+    private static final WorkOrder FAKE_STRAIGHT_ORDER = new WorkOrder("0.00×0.00×0.00", "0", "无", -1, "0");
+
     private OrderUtil() {
     }
 
@@ -35,6 +37,6 @@ public class OrderUtil {
     }
 
     public static WorkOrder getFakeOrder() {
-        return new WorkOrder("0.00×0.00×0.00", "0", "无", -1, "0");
+        return FAKE_STRAIGHT_ORDER;
     }
 }

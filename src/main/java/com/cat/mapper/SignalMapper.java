@@ -47,7 +47,7 @@ public interface SignalMapper {
     void insertTakeBoardSignal(@Param("orderId") Integer orderId);
 
     /**
-     * 获取最新未被处理的下料信号记录。
+     * 获取最新未被处理的下料信号记录，不存在将返回 null。
      *
      * @return 下料信号对象
      */

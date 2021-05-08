@@ -1,10 +1,7 @@
 package com.cat.service;
 
-import com.cat.enums.ActionState;
 import com.cat.enums.ControlSignalCategory;
-import com.cat.mapper.ActionMapper;
 import com.cat.mapper.SignalMapper;
-import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.ProcessControlSignal;
 import com.cat.utils.ThreadPoolFactory;
 import com.cat.utils.ThreadUtil;
@@ -19,13 +16,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskService {
     private final SignalMapper signalMapper;
-    private final ActionMapper actionMapper;
-
     private final MainService mainService;
 
-    public TaskService(SignalMapper signalMapper, ActionMapper actionMapper, MainService mainService) {
+    public TaskService(SignalMapper signalMapper, MainService mainService) {
         this.signalMapper = signalMapper;
-        this.actionMapper = actionMapper;
         this.mainService = mainService;
     }
 
@@ -41,26 +35,6 @@ public class TaskService {
             } else {
                 ThreadUtil.getStopControlMessageQueue().put(signal.getCategory());
             }
-        }
-    }
-
-    @Scheduled(initialDelay = 1_000, fixedDelay = 1_000)
-    public void checkNewCuttingMessage() throws InterruptedException {
-        CuttingSignal signal = this.signalMapper.getLatestNotProcessedCuttingSignal();
-        if (signal != null) {
-            log.info("检测到新的下料信号到达...");
-            signal.setProcessed(Boolean.TRUE);
-            this.signalMapper.updateCuttingSignal(signal);
-            ThreadUtil.getCuttingMessageQueue().put(signal);
-        }
-    }
-
-    @Scheduled(initialDelay = 1_000, fixedDelay = 1_000)
-    public void checkNewActionDoneMessage() throws InterruptedException {
-        String state = actionMapper.getFinalMachineActionState();
-        if (state != null && !ActionState.INCOMPLETE.value.equals(state)) {
-            log.info("检测到所有动作都被处理完毕...");
-            ThreadUtil.getActionProcessedMessageQueue().put(state);
         }
     }
 

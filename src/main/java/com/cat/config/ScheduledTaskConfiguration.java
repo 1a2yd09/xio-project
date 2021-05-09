@@ -18,7 +18,8 @@ public class ScheduledTaskConfiguration implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(5);
+        scheduler.setPoolSize(2);
+        scheduler.setThreadNamePrefix("at-scheduled-thread-");
         scheduler.initialize();
         taskRegistrar.setTaskScheduler(scheduler);
     }
@@ -26,8 +27,8 @@ public class ScheduledTaskConfiguration implements SchedulingConfigurer {
     @Bean
     public ThreadPoolTaskScheduler scheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(5);
-        scheduler.setThreadNamePrefix("scheduler-");
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("self-task-scheduler-thread-");
         return scheduler;
     }
 }

@@ -84,12 +84,13 @@ public class OrderService {
      * @return 轿底工单集合
      */
     public List<WorkOrder> getBottomOrders(OrderSortPattern sortPattern, LocalDate date) {
-        List<WorkOrder> orders = this.orderMapper.getBottomOrders(Map.of(
+        return this.orderMapper.getBottomOrders(Map.of(
                 "module1", OrderModule.BOTTOM.getName(),
                 "date", date.toString()
-        ));
-        orders.sort((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2));
-        return orders;
+        )).stream()
+                .filter(OrderUtil::validateOrder)
+                .sorted((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -99,13 +100,14 @@ public class OrderService {
      * @return 对重直梁工单集合
      */
     public List<WorkOrder> getNotBottomOrders(OrderSortPattern sortPattern, LocalDate date) {
-        List<WorkOrder> orders = this.orderMapper.getNotBottomOrders(Map.of(
+        return this.orderMapper.getNotBottomOrders(Map.of(
                 "module1", OrderModule.STRAIGHT.getName(),
                 "module2", OrderModule.WEIGHT.getName(),
                 "date", date.toString()
-        ));
-        orders.sort((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2));
-        return orders;
+        )).stream()
+                .filter(OrderUtil::validateOrder)
+                .sorted((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2))
+                .collect(Collectors.toList());
     }
 
     public List<OrderCount> getCompletedOrderCountByRange(int range) {

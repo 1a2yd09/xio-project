@@ -35,7 +35,7 @@ public enum OrderModule {
 
     private final String name;
 
-    private static final Map<String, OrderModule> LOOKUP = new HashMap<>(7);
+    private static final Map<String, OrderModule> LOOKUP = new HashMap<>(8);
 
     static {
         for (OrderModule orderModule : OrderModule.values()) {

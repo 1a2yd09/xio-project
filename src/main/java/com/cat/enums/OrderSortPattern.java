@@ -31,7 +31,7 @@ public enum OrderSortPattern {
 
     private final String name;
 
-    private static final Map<String, OrderSortPattern> LOOKUP = new HashMap<>(6);
+    private static final Map<String, OrderSortPattern> LOOKUP = new HashMap<>(8);
 
     static {
         for (OrderSortPattern sortPattern : OrderSortPattern.values()) {

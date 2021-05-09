@@ -23,7 +23,7 @@ public class BoardUtil {
     /**
      * 夹钳深度
      */
-    public static final BigDecimal CLAMP_DEPTH = new BigDecimal(242);
+    public static final BigDecimal CLAMP_DEPTH = new BigDecimal(245);
     /**
      * 规格字符串分隔符
      */

@@ -55,6 +55,8 @@ public class StraightModuleServiceImpl implements ModuleService {
             log.info("后续工单: {}", nextOrder);
             this.processOrder(currOrder, nextOrder, param, specs, signal);
             this.actionService.processAction(orderDeque, currOrder, nextOrder);
+            // test:
+            this.actionService.completedAllMachineActions();
             this.signalService.waitingForSignal(this.actionService::isAllRotateActionsCompleted);
             this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
             this.signalService.waitingForSignal(this.actionService::isAllMachineActionsProcessed);

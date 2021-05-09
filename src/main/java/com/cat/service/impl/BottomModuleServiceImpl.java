@@ -48,6 +48,8 @@ public class BottomModuleServiceImpl implements ModuleService {
             log.info("下料信号: {}", signal);
             this.processOrder(order, param, signal);
             this.actionService.processAction(orderDeque, order);
+            // test:
+            this.actionService.completedAllMachineActions();
             this.signalService.waitingForSignal(this.actionService::isAllRotateActionsCompleted);
             this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
             this.signalService.waitingForSignal(this.actionService::isAllMachineActionsProcessed);

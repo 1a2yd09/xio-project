@@ -22,18 +22,19 @@ import java.util.function.BooleanSupplier;
 @Service
 public class SignalService {
     private final SignalMapper signalMapper;
-    private final ActionService actionService;
     private final ThreadPoolTaskScheduler scheduler;
 
-    public SignalService(SignalMapper signalMapper, ActionService actionService, ThreadPoolTaskScheduler scheduler) {
+    public SignalService(SignalMapper signalMapper, ThreadPoolTaskScheduler scheduler) {
         this.signalMapper = signalMapper;
-        this.actionService = actionService;
         this.scheduler = scheduler;
     }
 
+    /**
+     * 根据函数式接口事件，等待特定的信号到达。
+     *
+     * @param supplier 无参且返回布尔值的函数
+     */
     public void waitingForSignal(BooleanSupplier supplier) {
-        // test:
-        this.actionService.completedAllMachineActions();
         log.info("等待特定信号到达...");
         CountDownLatch cdl = new CountDownLatch(1);
         ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
@@ -55,8 +56,6 @@ public class SignalService {
      * 等待新的流程启动信号。
      */
     public void checkStartSignal() {
-        // test:
-        this.insertProcessControlSignal(ControlSignalCategory.START);
         log.info("等待流程启动信号...");
         while (true) {
             try {

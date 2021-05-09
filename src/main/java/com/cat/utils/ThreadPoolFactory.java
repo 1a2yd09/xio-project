@@ -16,7 +16,7 @@ public class ThreadPoolFactory {
     static {
         ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(1);
         RejectedExecutionHandler handler = new ThreadPoolExecutor.DiscardPolicy();
-        ThreadFactory threadFactory = r -> new Thread(r, "service-pool-thread-" + THREAD_COUNTER.incrementAndGet());
+        ThreadFactory threadFactory = r -> new Thread(r, "service-thread-" + THREAD_COUNTER.incrementAndGet());
         SERVICE_THREAD_POOL = new ThreadPoolExecutor(
                 CORE_POOL_SIZE,
                 MAXIMUM_POOL_SIZE_SIZE,

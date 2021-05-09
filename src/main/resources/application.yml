@@ -13,3 +13,14 @@ mybatis:
     map-underscore-to-camel-case: true
 server:
   port: ${PORT:8090}
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: xio
+  datasource:
+    url: jdbc:sqlserver://${DB_HOST:localhost}:1433;databaseName=xio
+    username: ${DB_USER:sa}
+    password: ${DB_PASS:admin}

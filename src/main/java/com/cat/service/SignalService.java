@@ -2,6 +2,7 @@ package com.cat.service;
 
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
+import com.cat.enums.SignalCategory;
 import com.cat.mapper.SignalMapper;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.TakeBoardSignal;
@@ -34,8 +35,8 @@ public class SignalService {
      *
      * @param supplier 无参且返回布尔值的函数
      */
-    public void waitingForSignal(BooleanSupplier supplier) {
-        log.info("等待特定信号到达...");
+    public void waitingForSignal(SignalCategory sc, BooleanSupplier supplier) {
+        log.info("等待{}信号到达...", sc.getName());
         CountDownLatch cdl = new CountDownLatch(1);
         ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
             if (supplier.getAsBoolean()) {
@@ -45,9 +46,9 @@ public class SignalService {
         try {
             cdl.await();
             sf.cancel(false);
-            log.info("特定信号到达...");
+            log.info("{}信号到达...", sc.getName());
         } catch (InterruptedException e) {
-            log.warn("等待特定信号过程中出现异常: ", e);
+            log.warn("等待信号过程中出现异常: ", e);
             Thread.currentThread().interrupt();
         }
     }

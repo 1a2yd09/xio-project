@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
  * @author CAT
  */
 public class ParamUtil {
+    private static final OperatingParameter DEFAULT_PARAM = new OperatingParameter(-1L, LocalDate.now(), BigDecimal.ZERO, BigDecimal.ZERO, OrderSortPattern.SEQ.getName(), OrderModule.BOTTOM_PLATFORM.getName(), LocalDateTime.now());
+    private static final StockSpecification DEFAULT_STOCK_SPEC = new StockSpecification(-1L, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, LocalDateTime.now());
+
     private ParamUtil() {
     }
 
@@ -22,7 +25,7 @@ public class ParamUtil {
      * @return 运行参数
      */
     public static OperatingParameter getDefaultParameter() {
-        return new OperatingParameter(-1L, LocalDate.now(), BigDecimal.ZERO, BigDecimal.ZERO, OrderSortPattern.SEQ.getName(), OrderModule.BOTTOM_PLATFORM.getName(), LocalDateTime.now());
+        return DEFAULT_PARAM;
     }
 
     public static OperatingParameter getCommonParameter(OrderSortPattern orderSortPattern, OrderModule orderModule) {
@@ -35,6 +38,6 @@ public class ParamUtil {
      * @return 库存件规格
      */
     public static StockSpecification getDefaultStockSpec() {
-        return new StockSpecification(-1L, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, LocalDateTime.now());
+        return DEFAULT_STOCK_SPEC;
     }
 }

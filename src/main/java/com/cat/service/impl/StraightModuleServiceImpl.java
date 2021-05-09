@@ -2,6 +2,7 @@ package com.cat.service.impl;
 
 import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
+import com.cat.enums.SignalCategory;
 import com.cat.pojo.*;
 import com.cat.pojo.message.OrderMessage;
 import com.cat.service.*;
@@ -47,7 +48,7 @@ public class StraightModuleServiceImpl implements ModuleService {
             log.info("当前工单: {}", currOrder);
             // test:
             this.signalService.insertCuttingSignal(currOrder.getCuttingSize(), ForwardEdge.SHORT, currOrder.getId());
-            this.signalService.waitingForSignal(this.signalService::isReceivedNewCuttingSignal);
+            this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
             CuttingSignal signal = this.signalService.getNewProcessedCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(currOrder, signal));
             log.info("下料信号: {}", signal);
@@ -57,9 +58,9 @@ public class StraightModuleServiceImpl implements ModuleService {
             this.actionService.processAction(orderDeque, currOrder, nextOrder);
             // test:
             this.actionService.completedAllMachineActions();
-            this.signalService.waitingForSignal(this.actionService::isAllRotateActionsCompleted);
+            this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
             this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
-            this.signalService.waitingForSignal(this.actionService::isAllMachineActionsProcessed);
+            this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);
             this.actionService.transferAllActions();
             if (this.signalService.checkStopSignal()) {
                 log.info("收到流程停止信号...");

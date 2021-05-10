@@ -75,9 +75,3 @@ public class TaskService {
     }
 }
 ```
-
-## 启动
-
-1. 使用`Maven`命令`mvn clean package`命令对项目进行打包；
-2. 使用`Java`命令`java -jar -Dspring.profiles.active=production xio.jar`启动套料系统；
-3. 访问`http://localhost:8090`查看近期工单完成近况页面。

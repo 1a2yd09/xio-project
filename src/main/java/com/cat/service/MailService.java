@@ -1,9 +1,10 @@
 package com.cat.service;
 
+import com.cat.mapper.MailMapper;
 import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.MailConfig;
 import com.cat.pojo.WorkOrder;
 import com.cat.pojo.message.OrderMessage;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -20,20 +21,20 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class MailService {
-    @Value("${smtp.from}")
-    String from;
-    @Value("${smtp.to}")
-    String to;
-
     private final JavaMailSender mailSender;
+    private final MailMapper mailMapper;
 
-    private final ExecutorService mailPool;
+    private static final ExecutorService MAIL_POOL;
 
-    public MailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-        this.mailPool = new ThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS,
+    static {
+        MAIL_POOL = new ThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(1),
                 r -> new Thread(r, "mail-pool-thread-" + r.hashCode()));
+    }
+
+    public MailService(JavaMailSender mailSender, MailMapper mailMapper) {
+        this.mailSender = mailSender;
+        this.mailMapper = mailMapper;
     }
 
     /**
@@ -45,9 +46,10 @@ public class MailService {
         try {
             MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+            MailConfig config = this.mailMapper.getLatestMailConfig();
 
-            helper.setFrom(this.from);
-            helper.setTo(this.to);
+            helper.setFrom(config.getSendFrom());
+            helper.setTo(config.getSendTo());
             helper.setSubject("Work thread throw exception!");
             String text = "<p>OrderId: %d.</p><p>CuttingSize: %s.</p><p>ProductSpecification: %s.</p><p>Send at: %s.</p>";
             WorkOrder order = msg.getOrder();
@@ -55,7 +57,7 @@ public class MailService {
             String html = String.format(text, order.getId(), signal.getCuttingSize(), order.getProductSpecification(), msg.getCreatedAt());
             helper.setText(html, true);
 
-            this.mailPool.execute(() -> mailSender.send(mimeMessage));
+            MAIL_POOL.execute(() -> mailSender.send(mimeMessage));
         } catch (MessagingException e) {
             e.printStackTrace();
         }

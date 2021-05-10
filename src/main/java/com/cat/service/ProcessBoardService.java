@@ -47,7 +47,9 @@ public class ProcessBoardService {
      * @param wasteThreshold 废料阈值
      */
     private void backToFrontCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
-        NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, boardList.getBoardAllWidth(), wasteThreshold);
+        NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.SHORT, boardList.getBoards().get(0).getLength(), wasteThreshold);
+        this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard);
+        extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, boardList.getBoardAllWidth(), wasteThreshold);
         this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
         for (NormalBoard board : boardList.getBoards()) {
             extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.SHORT, board.getLength(), wasteThreshold);

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cat.mapper.MailMapper">
+    <resultMap id="mailMap" type="com.cat.pojo.MailConfig"/>
+
+    <select id="getLatestMailConfig" resultMap="mailMap">
+        SELECT TOP 1 id,
+                     host,
+                     port,
+                     auth,
+                     username,
+                     password,
+                     send_from,
+                     send_to,
+                     created_at
+        FROM tb_mail_config
+        ORDER BY id DESC
+    </select>
+</mapper>

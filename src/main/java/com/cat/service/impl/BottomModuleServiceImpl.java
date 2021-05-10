@@ -1,6 +1,5 @@
 package com.cat.service.impl;
 
-import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.SignalCategory;
 import com.cat.pojo.*;
@@ -41,16 +40,12 @@ public class BottomModuleServiceImpl implements ModuleService {
         while (!orderDeque.isEmpty()) {
             WorkOrder order = orderDeque.pollFirst();
             log.info("当前工单: {}", order);
-            // test:
-            this.signalService.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, order.getId());
             this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
             CuttingSignal signal = this.signalService.getNewProcessedCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(order, signal));
             log.info("下料信号: {}", signal);
             this.processOrder(order, param, signal);
             this.actionService.processAction(orderDeque, order);
-            // test:
-            this.actionService.completedAllMachineActions();
             this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
             this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
             this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);

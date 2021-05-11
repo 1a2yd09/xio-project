@@ -10,10 +10,6 @@ import lombok.Getter;
 @Getter
 public enum SignalCategory {
     /**
-     * 启动
-     */
-    START("启动"),
-    /**
      * 取板
      */
     TAKE_BOARD("取板"),
@@ -28,11 +24,7 @@ public enum SignalCategory {
     /**
      * 动作
      */
-    ACTION("动作"),
-    /**
-     * 停止
-     */
-    STOP("停止");
+    ACTION("动作");
 
     private final String name;
 }

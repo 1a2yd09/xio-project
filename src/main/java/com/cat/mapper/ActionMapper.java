@@ -69,7 +69,7 @@ public interface ActionMapper {
     void transferAllMachineActions();
 
     /**
-     * 返回机器动作表中未完成动作中的旋转动作个数。
+     * 返回机器动作表中未完成的旋转动作个数。
      *
      * @return 未完成旋转动作个数
      */

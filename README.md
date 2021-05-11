@@ -52,7 +52,7 @@ public class MainService {
             this.signalService.checkStartSignal();
             OperatingParameter param = this.parameterService.getLatestOperatingParameter();
             OrderModule orderModule = OrderModule.get(param.getOrderModule());
-            this.moduleServiceFactory.getModuleService(orderModule.name()).processOrderList(param);
+            this.moduleServiceFactory.getModuleService(orderModule.name()).processOrderCollection(param);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             this.mailService.sendWorkErrorMail(RUNNING_ORDER.get());

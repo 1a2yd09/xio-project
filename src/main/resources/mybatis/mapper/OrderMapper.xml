@@ -61,7 +61,7 @@
         WHERE WoNo = #{id}
     </select>
 
-    <select id="getNotBottomOrders" resultMap="orderMap">
+    <select id="getStraightOrders" resultMap="orderMap">
         SELECT Status,
                Size,
                Texture,
@@ -75,23 +75,7 @@
                CompleteQTY
         FROM tb_new_local_work_order
         WHERE GDMK IN (#{module1}, #{module2})
-          AND CompleteDate = #{date}
-    </select>
-
-    <select id="getNotStartedStraightOrders" resultMap="orderMap">
-        SELECT Status,
-            Size,
-            Texture,
-            QTY,
-            CompleteDate,
-            WoNo,
-            PC,
-            SXH,
-            OriSize,
-            GDMK,
-            CompleteQTY
-        FROM tb_new_local_work_order
-        WHERE GDMK IN (#{module1}, #{module2}) AND Status = N'未开工'
+          AND Status = N'未开工'
           AND CompleteDate = #{date}
     </select>
 
@@ -109,10 +93,11 @@
                CompleteQTY
         FROM tb_new_local_work_order
         WHERE GDMK IN (#{module1})
+          AND Status = N'未开工'
           AND CompleteDate = #{date}
     </select>
 
-    <select id="getAllProductionOrders" resultMap="orderMap">
+    <select id="getAllLocalOrders" resultMap="orderMap">
         SELECT Status,
                Size,
                Texture,
@@ -181,7 +166,7 @@
     </insert>
 
     <select id="getCompletedOrderCount" resultType="java.lang.Integer">
-        SELECT COUNT(*)
+        SELECT COUNT(*) AS order_count
         FROM tb_new_completed_work_order;
     </select>
 

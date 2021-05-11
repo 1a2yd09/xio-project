@@ -49,6 +49,21 @@ public class BoardUtil {
     }
 
     /**
+     * 判断规格字符串是否为一个有效规格字符串，即厚度、宽度、长度中不存在为零的度量。
+     *
+     * @param specification 规格字符串
+     * @return true 表示规格字符串有效，否则表示无效
+     */
+    public static boolean isValidSpec(String specification) {
+        for (BigDecimal dec : specStrToDecList(specification)) {
+            if (dec.compareTo(BigDecimal.ZERO) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * 将规格数组转化为标准规格字符串。
      *
      * @param measures 规格数组

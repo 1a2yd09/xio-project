@@ -3,6 +3,7 @@ package com.cat.service;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
 import com.cat.enums.SignalCategory;
+import com.cat.exception.TaskEndException;
 import com.cat.mapper.SignalMapper;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.TakeBoardSignal;
@@ -13,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ScheduledFuture;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -41,14 +39,14 @@ public class SignalService {
     public void waitingForSignal(SignalCategory sc, BooleanSupplier supplier) {
         log.info("等待{}信号到达...", sc.getName());
         CountDownLatch cdl = new CountDownLatch(1);
-        ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
+        this.scheduler.scheduleWithFixedDelay(() -> {
             if (supplier.getAsBoolean()) {
                 cdl.countDown();
+                throw new TaskEndException("定时任务结束...");
             }
         }, 1000);
         try {
             cdl.await();
-            sf.cancel(false);
             log.info("{}信号到达...", sc.getName());
         } catch (InterruptedException e) {
             log.warn("等待信号过程中出现异常: ", e);
@@ -127,8 +125,8 @@ public class SignalService {
      *
      * @return 下料信号
      */
-    public CuttingSignal getLatestNotProcessedCuttingSignal() {
-        CuttingSignal cuttingSignal = this.signalMapper.getLatestNotProcessedCuttingSignal();
+    public CuttingSignal getLatestUnProcessedCuttingSignal() {
+        CuttingSignal cuttingSignal = this.signalMapper.getLatestUnProcessedCuttingSignal();
         if (cuttingSignal != null) {
             cuttingSignal.setProcessed(true);
             this.signalMapper.updateCuttingSignal(cuttingSignal);
@@ -138,33 +136,27 @@ public class SignalService {
     }
 
     /**
-     * 查看是否存在最新未处理的下料信号。
+     * 查看是否收到有效的下料新信号。
      *
-     * @return true 表示存在未处理的下料信号，否则表示不存在
+     * @return true 表示收到有效的下料新信号，否则表示未接收到有效的下料新信号
      */
     public boolean isReceivedNewCuttingSignal() {
-        CuttingSignal signal = this.signalMapper.getLatestNotProcessedCuttingSignal();
+        CuttingSignal signal = this.signalMapper.getLatestUnProcessedCuttingSignal();
         if (signal != null) {
             signal.setProcessed(true);
             this.signalMapper.updateCuttingSignal(signal);
-            List<BigDecimal> decList = BoardUtil.specStrToDecList(signal.getCuttingSize());
-            for (BigDecimal dec : decList) {
-                if (dec.compareTo(BigDecimal.ZERO) == 0) {
-                    return false;
-                }
-            }
-            return true;
+            return BoardUtil.isValidSpec(signal.getCuttingSize());
         } else {
             return false;
         }
     }
 
     /**
-     * 获取最新未处理的下料信号。
+     * 获取最新的下料信号。
      *
      * @return 下料信号对象
      */
-    public CuttingSignal getNewProcessedCuttingSignal() {
+    public CuttingSignal getLatestCuttingSignal() {
         return this.signalMapper.getLatestCuttingSignal();
     }
 

@@ -57,7 +57,6 @@ class ActionTest extends BaseTest {
         int oldUnfinishedCount = order.getIncompleteQuantity();
         Inventory inventory = inventoryService.getInventory(stock.getStandardSpec(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
-        actionService.processCompletedAction(order);
 
         order = this.orderService.getCompletedOrderById(3098562);
         int newUnfinishedCount = order.getIncompleteQuantity();
@@ -103,7 +102,6 @@ class ActionTest extends BaseTest {
         NormalBoard semiProduct = new NormalBoard("2.50×192.00×2504.00", "镀锌板", BoardCategory.SEMI_PRODUCT, order.getId());
         Inventory inventory = inventoryService.getInventory(semiProduct.getStandardSpec(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
-        actionService.processCompletedAction(order);
 
         order = this.orderService.getCompletedOrderById(3099510);
         int newUnfinishedCount = order.getIncompleteQuantity();

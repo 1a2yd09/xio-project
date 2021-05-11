@@ -17,12 +17,12 @@
     </update>
 
     <select id="getMachineActionCount" resultType="java.lang.Integer">
-        SELECT COUNT(*)
+        SELECT COUNT(*) AS action_count
         FROM tb_machine_action
     </select>
 
     <select id="getProcessedActionCount" resultType="java.lang.Integer">
-        SELECT COUNT(*)
+        SELECT COUNT(*) AS action_count
         FROM tb_processed_action
     </select>
 

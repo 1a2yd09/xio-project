@@ -7,7 +7,6 @@ import com.cat.pojo.Inventory;
 import com.cat.pojo.MachineAction;
 import com.cat.pojo.WorkOrder;
 import com.cat.utils.BoardUtil;
-import com.cat.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +32,7 @@ public class ActionService {
     }
 
     /**
-     * 处理一组被机器完成的动作。
+     * 处理一组将被机器完成的动作。
      *
      * @param orderDeque 工单队列
      * @param orders     动作列表中涉及的工单
@@ -72,67 +71,9 @@ public class ActionService {
     }
 
     /**
-     * 处理一组被机器处理完毕的动作。
-     */
-    public void processCompletedAction(WorkOrder... orders) {
-        this.waitingForAllMachineActionsCompleted();
-
-        Map<Integer, Integer> map = new HashMap<>(4);
-        for (WorkOrder order : orders) {
-            map.put(order.getId(), 0);
-        }
-        Inventory inventory = null;
-        int inventoryCount = 0;
-
-        for (MachineAction action : this.getAllMachineActions()) {
-            // 只处理动作状态为已完成的动作:
-            if (ActionState.COMPLETED.value.equals(action.getState())) {
-                String bc = action.getBoardCategory();
-                if (BoardCategory.PRODUCT.value.equals(bc)) {
-                    map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
-                } else if (BoardCategory.STOCK.value.equals(bc) || BoardCategory.SEMI_PRODUCT.value.equals(bc)) {
-                    if (inventory == null) {
-                        inventory = new Inventory(BoardUtil.getStandardSpecStr(action.getBoardSpecification()), action.getBoardMaterial(), bc);
-                    }
-                    inventoryCount++;
-                }
-            }
-        }
-
-        for (WorkOrder order : orders) {
-            this.orderService.addOrderCompletedQuantity(order, map.get(order.getId()));
-        }
-        if (inventory != null) {
-            inventory.setQuantity(inventoryCount);
-            this.inventoryService.updateInventoryQuantity(inventory);
-        }
-
-        this.transferAllActions();
-    }
-
-    /**
-     * 等待所有机器动作都被处理完毕。
-     */
-    public void waitingForAllMachineActionsCompleted() {
-        // test:
-        this.completedAllMachineActions();
-        log.info("等待动作全部执行...");
-        while (true) {
-            try {
-                ThreadUtil.getActionProcessedMessageQueue().take();
-                break;
-            } catch (Exception e) {
-                log.warn("interrupted!", e);
-                Thread.currentThread().interrupt();
-            }
-        }
-        log.info("全部动作执行完毕...");
-    }
-
-    /**
-     * 查看当前机器动作表中的全部动作是否都被处理。
+     * 查看当前机器动作表中的全部动作是否都被完成。
      *
-     * @return true 表示都被处理，false 表示未都被处理
+     * @return true 表示都被完成，否则表示未都被完成
      */
     public boolean isAllMachineActionsProcessed() {
         return ActionState.COMPLETED.value.equals(this.actionMapper.getFinalMachineActionState());

@@ -23,7 +23,7 @@
     </update>
 
     <select id="getInventoryCount" resultType="java.lang.Integer">
-        SELECT COUNT(*)
+        SELECT COUNT(*) AS inventory_count
         FROM tb_inventory
     </select>
 </mapper>

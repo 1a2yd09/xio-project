@@ -16,7 +16,7 @@ public interface SignalMapper {
      *
      * @return 信号对象
      */
-    ProcessControlSignal getLatestNotProcessedControlSignal();
+    ProcessControlSignal getLatestUnProcessedControlSignal();
 
     /**
      * 更新指定流程控制信号记录。
@@ -51,10 +51,10 @@ public interface SignalMapper {
      *
      * @return 下料信号对象
      */
-    CuttingSignal getLatestNotProcessedCuttingSignal();
+    CuttingSignal getLatestUnProcessedCuttingSignal();
 
     /**
-     * 获取最新未被处理的下料信号记录，不存在将返回 null。
+     * 获取最新的下料信号记录，不存在下料信号记录将返回 null。
      *
      * @return 下料信号对象
      */

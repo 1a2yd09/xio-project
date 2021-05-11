@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author CAT
@@ -32,16 +30,15 @@ public class BottomModuleServiceImpl implements ModuleService {
     }
 
     @Override
-    public void processOrderList(OperatingParameter param) {
-        List<WorkOrder> orders = this.orderService.getBottomOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
-        log.info("轿底平台模块工单数量: {}", orders.size());
-        Deque<WorkOrder> orderDeque = new LinkedList<>(orders);
+    public void processOrderCollection(OperatingParameter param) {
+        Deque<WorkOrder> orderDeque = this.orderService.getBottomDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
+        log.info("轿底平台模块工单数量: {}", orderDeque.size());
         this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
         while (!orderDeque.isEmpty()) {
             WorkOrder order = orderDeque.pollFirst();
             log.info("当前工单: {}", order);
             this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
-            CuttingSignal signal = this.signalService.getNewProcessedCuttingSignal();
+            CuttingSignal signal = this.signalService.getLatestCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(order, signal));
             log.info("下料信号: {}", signal);
             this.processOrder(order, param, signal);

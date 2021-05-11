@@ -18,9 +18,9 @@ public enum OrderState {
      */
     COMPLETED("已完工"),
     /**
-     * 已中断
+     * 已暂停
      */
-    INTERRUPTED("已中断");
+    PAUSED("已暂停");
 
     public final String value;
 

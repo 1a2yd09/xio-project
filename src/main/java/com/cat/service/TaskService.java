@@ -25,26 +25,27 @@ public class TaskService {
 
     @Scheduled(initialDelay = 1_000, fixedDelay = 3_000)
     public void checkNewControlMessage() throws InterruptedException {
-        ProcessControlSignal signal = this.signalMapper.getLatestNotProcessedControlSignal();
+        ProcessControlSignal signal = this.signalMapper.getLatestUnProcessedControlSignal();
         if (signal != null) {
             log.info("检测到新的流程控制信号到达...");
             signal.setProcessed(Boolean.TRUE);
             this.signalMapper.updateControlSignal(signal);
-            if (ControlSignalCategory.START.value.equals(signal.getCategory())) {
-                ThreadUtil.getStartControlMessageQueue().put(signal.getCategory());
+            Integer category = signal.getCategory();
+            if (ControlSignalCategory.START.value.equals(category)) {
+                ThreadUtil.getStartControlMessageQueue().put(category);
             } else {
-                ThreadUtil.getStopControlMessageQueue().put(signal.getCategory());
+                ThreadUtil.getStopControlMessageQueue().put(category);
             }
         }
     }
 
-    @Scheduled(initialDelay = 3_000, fixedDelay = 60_000)
+    @Scheduled(initialDelay = 1_000, fixedDelay = 60_000)
     public void checkMainThreadState() {
-        boolean runningStatus = ThreadUtil.WORK_THREAD_RUNNING.get();
-        log.info("工作流程是否正常: {}", runningStatus);
-        if (!runningStatus) {
-            log.info("提交新的工作任务至业务线程池");
-            ThreadPoolFactory.getServiceThreadPool().execute(mainService::start);
+        boolean isRunning = ThreadUtil.WORK_THREAD_RUNNING.get();
+        log.info("工作流程是否正常: {}", isRunning);
+        if (!isRunning) {
+            log.info("提交新的工作任务至业务线程池...");
+            ThreadPoolFactory.getServiceThreadPool().execute(this.mainService::start);
         }
     }
 }

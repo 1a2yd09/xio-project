@@ -26,12 +26,12 @@ class MainTest extends BaseTest {
 
     @Test
     void testStart() {
-        assertEquals(759, orderService.getAllProductionOrders().size());
+        assertEquals(759, orderService.getAllLocalOrders().size());
         parameterService.insertOperatingParameter(ParamUtil.getCommonParameter(OrderSortPattern.SEQ, OrderModule.BOTTOM_PLATFORM));
         mainService.start();
         parameterService.insertOperatingParameter(ParamUtil.getCommonParameter(OrderSortPattern.SEQ, OrderModule.STRAIGHT_WEIGHT));
         mainService.start();
-        assertEquals(0, orderService.getAllProductionOrders().size());
+        assertEquals(0, orderService.getAllLocalOrders().size());
         assertEquals(759, orderService.getCompletedOrderCount());
     }
 }

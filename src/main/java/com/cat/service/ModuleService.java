@@ -11,5 +11,5 @@ public interface ModuleService {
      *
      * @param param 运行参数
      */
-    void processOrderList(OperatingParameter param);
+    void processOrderCollection(OperatingParameter param);
 }

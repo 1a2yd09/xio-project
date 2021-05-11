@@ -7,7 +7,7 @@
     <resultMap id="takeSignalMap" type="com.cat.pojo.TakeBoardSignal"/>
     <resultMap id="cuttingSignalMap" type="com.cat.pojo.CuttingSignal"/>
 
-    <select id="getLatestNotProcessedControlSignal" resultMap="controlSignalMap">
+    <select id="getLatestUnProcessedControlSignal" resultMap="controlSignalMap">
         SELECT TOP 1 id, processed, category, created_at
         FROM tb_process_control_signal
         WHERE processed = 0
@@ -36,7 +36,7 @@
         VALUES (#{orderId})
     </insert>
 
-    <select id="getLatestNotProcessedCuttingSignal" resultMap="cuttingSignalMap">
+    <select id="getLatestUnProcessedCuttingSignal" resultMap="cuttingSignalMap">
         SELECT TOP 1 id, processed, cutting_size, forward_edge, order_id, created_at
         FROM tb_cutting_signal
         WHERE processed = 0

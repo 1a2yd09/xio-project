@@ -24,15 +24,15 @@ class SignalTest extends BaseTest {
 
     @Test
     void testCuttingSignal() {
-        CuttingSignal cs = signalService.getLatestNotProcessedCuttingSignal();
+        CuttingSignal cs = signalService.getLatestUnProcessedCuttingSignal();
         assertNull(cs);
 
         signalService.insertCuttingSignal("2.5×1250×1589", ForwardEdge.SHORT, 3098528);
-        cs = signalService.getLatestNotProcessedCuttingSignal();
+        cs = signalService.getLatestUnProcessedCuttingSignal();
         assertNotNull(cs);
         System.out.println(cs);
 
-        cs = signalService.getLatestNotProcessedCuttingSignal();
+        cs = signalService.getLatestUnProcessedCuttingSignal();
         assertNull(cs);
     }
 }

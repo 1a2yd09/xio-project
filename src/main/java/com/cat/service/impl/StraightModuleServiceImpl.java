@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -35,21 +34,20 @@ public class StraightModuleServiceImpl implements ModuleService {
     }
 
     @Override
-    public void processOrderList(OperatingParameter param) {
+    public void processOrderCollection(OperatingParameter param) {
         List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
         log.info("库存件规格集合: {}", specs);
-        List<WorkOrder> orders = this.orderService.getPreprocessNotBottomOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
-        log.info("直梁对重模块工单数量: {}", orders.size());
-        Deque<WorkOrder> orderDeque = new LinkedList<>(orders);
+        Deque<WorkOrder> orderDeque = this.orderService.getPreprocessStraightDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
+        log.info("直梁对重模块工单数量: {}", orderDeque.size());
         this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
         while (!orderDeque.isEmpty()) {
             WorkOrder currOrder = orderDeque.pollFirst();
             log.info("当前工单: {}", currOrder);
             this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
-            CuttingSignal signal = this.signalService.getNewProcessedCuttingSignal();
+            CuttingSignal signal = this.signalService.getLatestCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(currOrder, signal));
             log.info("下料信号: {}", signal);
-            this.orderService.getPreprocessStraightDeque(orderDeque, OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
+            orderDeque.addAll(this.orderService.getPreprocessStraightDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate()));
             WorkOrder nextOrder = orderDeque.isEmpty() ? OrderUtil.getFakeOrder() : orderDeque.pollFirst();
             log.info("后续工单: {}", nextOrder);
             this.processOrder(currOrder, nextOrder, param, specs, signal);

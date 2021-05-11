@@ -10,6 +10,7 @@ spring:
 mybatis:
   mapper-locations: mybatis/mapper/*.xml
   configuration:
+    # 该属性将开启驼峰映射，非常重要:
     map-underscore-to-camel-case: true
 server:
   port: ${PORT:8090}

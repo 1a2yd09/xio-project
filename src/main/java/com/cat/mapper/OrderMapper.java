@@ -36,7 +36,7 @@ public interface OrderMapper {
     WorkOrder getOrderById(@Param("id") Integer id);
 
     /**
-     * 根据工单 ID 获取指定完成工单，不存在指定 ID 工单时将返回 null。
+     * 根据工单 ID 获取指定完工工单，不存在指定 ID 工单时将返回 null。
      *
      * @param id 工单 ID
      * @return 工单对象
@@ -44,23 +44,15 @@ public interface OrderMapper {
     WorkOrder getCompletedOrderById(@Param("id") Integer id);
 
     /**
-     * 根据工单模块和工单日期获取对重直梁工单集合。
+     * 根据工单模块和工单日期获取未开工的对重直梁工单集合。
      *
      * @param paramMap 参数集合
      * @return 工单集合
      */
-    List<WorkOrder> getNotBottomOrders(Map<String, String> paramMap);
+    List<WorkOrder> getStraightOrders(Map<String, String> paramMap);
 
     /**
-     * 根据工单模块和工单日期获取对重直梁工单集合。
-     *
-     * @param paramMap 参数集合
-     * @return 工单集合
-     */
-    List<WorkOrder> getNotStartedStraightOrders(Map<String, String> paramMap);
-
-    /**
-     * 根据工单模块和工单日期获取轿底工单集合。
+     * 根据工单模块和工单日期获取未开工的轿底工单集合。
      *
      * @param paramMap 参数集合
      * @return 工单集合
@@ -68,11 +60,11 @@ public interface OrderMapper {
     List<WorkOrder> getBottomOrders(Map<String, String> paramMap);
 
     /**
-     * 获取当前生产工单表中的全体工单集合。
+     * 获取本地工单表中的全体工单集合。
      *
      * @return 工单集合
      */
-    List<WorkOrder> getAllProductionOrders();
+    List<WorkOrder> getAllLocalOrders();
 
     /**
      * 根据工单 ID 从远程工单表中删除对应工单。
@@ -82,7 +74,7 @@ public interface OrderMapper {
     void deleteRemoteOrderById(@Param("id") Integer id);
 
     /**
-     * 根据工单 ID 从工单表中删除对应工单。
+     * 根据工单 ID 从本地工单表中删除对应工单。
      *
      * @param id 工单 ID。
      */

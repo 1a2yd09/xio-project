@@ -7,11 +7,14 @@ import com.cat.mapper.SignalMapper;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.TakeBoardSignal;
 import com.cat.pojo.WorkOrder;
+import com.cat.utils.BoardUtil;
 import com.cat.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.BooleanSupplier;
@@ -140,7 +143,20 @@ public class SignalService {
      * @return true 表示存在未处理的下料信号，否则表示不存在
      */
     public boolean isReceivedNewCuttingSignal() {
-        return this.signalMapper.getLatestNotProcessedCuttingSignal() != null;
+        CuttingSignal signal = this.signalMapper.getLatestNotProcessedCuttingSignal();
+        if (signal != null) {
+            signal.setProcessed(true);
+            this.signalMapper.updateCuttingSignal(signal);
+            List<BigDecimal> decList = BoardUtil.specStrToDecList(signal.getCuttingSize());
+            for (BigDecimal dec : decList) {
+                if (dec.compareTo(BigDecimal.ZERO) == 0) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -149,10 +165,7 @@ public class SignalService {
      * @return 下料信号对象
      */
     public CuttingSignal getNewProcessedCuttingSignal() {
-        CuttingSignal signal = this.signalMapper.getLatestNotProcessedCuttingSignal();
-        signal.setProcessed(true);
-        this.signalMapper.updateCuttingSignal(signal);
-        return signal;
+        return this.signalMapper.getLatestCuttingSignal();
     }
 
     /**

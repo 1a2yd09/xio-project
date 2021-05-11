@@ -13,12 +13,12 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  */
 @Configuration
 @EnableScheduling
-@Profile({"production", "test"})
+@Profile({"production", "test", "xio"})
 public class ScheduledTaskConfiguration implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(2);
+        scheduler.setPoolSize(5);
         scheduler.setThreadNamePrefix("at-scheduled-thread-");
         scheduler.initialize();
         taskRegistrar.setTaskScheduler(scheduler);
@@ -27,7 +27,7 @@ public class ScheduledTaskConfiguration implements SchedulingConfigurer {
     @Bean
     public ThreadPoolTaskScheduler scheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
+        scheduler.setPoolSize(5);
         scheduler.setThreadNamePrefix("self-task-scheduler-thread-");
         return scheduler;
     }

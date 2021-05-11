@@ -19,7 +19,7 @@ public class BoardUtil {
     /**
      * 夹钳宽度
      */
-    public static final BigDecimal CLAMP_WIDTH = new BigDecimal(900);
+    public static final BigDecimal CLAMP_WIDTH = new BigDecimal(480);
     /**
      * 夹钳深度
      */

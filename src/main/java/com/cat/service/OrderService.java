@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -76,6 +77,26 @@ public class OrderService {
         return orders.stream().filter(order -> order.getIncompleteQuantity() > 0).collect(Collectors.toList());
     }
 
+    public void getPreprocessStraightDeque(Deque<WorkOrder> orderDeque, OrderSortPattern sortPattern, LocalDate date) {
+        List<WorkOrder> orders = this.getNotStartedStraightOrders(sortPattern, date);
+        Map<String, Inventory> stockMap = this.inventoryMapper.getInventories(BoardCategory.STOCK.value)
+                .stream()
+                .collect(Collectors.toMap(stock -> BoardUtil.getStandardSpecStr(stock.getSpecification()), Function.identity()));
+
+        for (WorkOrder order : orders) {
+            Inventory stock = stockMap.get(BoardUtil.getStandardSpecStr(order.getProductSpecification()));
+            if (stock != null && stock.getMaterial().equals(order.getMaterial()) && stock.getQuantity() > 0) {
+                int usedStockQuantity = Math.min(order.getIncompleteQuantity(), stock.getQuantity());
+                // 使用库存件作为成品属于工单开工的行为之一:
+                this.addOrderCompletedQuantity(order, usedStockQuantity);
+                stock.setQuantity(stock.getQuantity() - usedStockQuantity);
+                this.inventoryMapper.updateInventoryQuantity(stock);
+            }
+        }
+
+        orderDeque.addAll(orders.stream().filter(order -> order.getIncompleteQuantity() > 0).collect(Collectors.toList()));
+    }
+
     /**
      * 根据排序方式以及计划完工日期获取轿底工单集合。
      *
@@ -100,7 +121,7 @@ public class OrderService {
      * @return 对重直梁工单集合
      */
     public List<WorkOrder> getNotBottomOrders(OrderSortPattern sortPattern, LocalDate date) {
-        return this.orderMapper.getNotBottomOrders(Map.of(
+        List<WorkOrder> list = this.orderMapper.getNotStartedStraightOrders(Map.of(
                 "module1", OrderModule.STRAIGHT.getName(),
                 "module2", OrderModule.WEIGHT.getName(),
                 "date", date.toString()
@@ -108,6 +129,33 @@ public class OrderService {
                 .filter(OrderUtil::validateOrder)
                 .sorted((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2))
                 .collect(Collectors.toList());
+        for (WorkOrder order : list) {
+            order.setOperationState(OrderState.STARTED.value);
+            this.orderMapper.updateOrderState(order);
+        }
+        return list;
+    }
+
+    /**
+     * 根据计划完工日期获取对重直梁工单集合。
+     *
+     * @param date 计划完工日期
+     * @return 对重直梁工单集合
+     */
+    public List<WorkOrder> getNotStartedStraightOrders(OrderSortPattern sortPattern, LocalDate date) {
+        List<WorkOrder> list = this.orderMapper.getNotStartedStraightOrders(Map.of(
+                "module1", OrderModule.STRAIGHT.getName(),
+                "module2", OrderModule.WEIGHT.getName(),
+                "date", date.toString()
+        )).stream()
+                .filter(OrderUtil::validateOrder)
+                .sorted((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2))
+                .collect(Collectors.toList());
+        for (WorkOrder order : list) {
+            order.setOperationState(OrderState.STARTED.value);
+            this.orderMapper.updateOrderState(order);
+        }
+        return list;
     }
 
     public List<OrderCount> getCompletedOrderCountByRange(int range) {

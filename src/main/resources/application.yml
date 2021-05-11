@@ -21,6 +21,6 @@ spring:
     activate:
       on-profile: xio
   datasource:
-    url: jdbc:sqlserver://${DB_HOST:localhost}:1433;databaseName=xio
+    url: jdbc:sqlserver://${DB_HOST:10.19.90.45}:1433;databaseName=xio
     username: ${DB_USER:sa}
-    password: ${DB_PASS:admin}
+    password: ${DB_PASS:skq123456}

@@ -78,6 +78,23 @@
           AND CompleteDate = #{date}
     </select>
 
+    <select id="getNotStartedStraightOrders" resultMap="orderMap">
+        SELECT Status,
+            Size,
+            Texture,
+            QTY,
+            CompleteDate,
+            WoNo,
+            PC,
+            SXH,
+            OriSize,
+            GDMK,
+            CompleteQTY
+        FROM tb_new_local_work_order
+        WHERE GDMK IN (#{module1}, #{module2}) AND Status = N'未开工'
+          AND CompleteDate = #{date}
+    </select>
+
     <select id="getBottomOrders" resultMap="orderMap">
         SELECT Status,
                Size,
@@ -182,7 +199,7 @@
                                             HTH, PartNo, PartName, Size, Texture, QTY, CompleteTime, Remark,
                                             CompleteDate, WoNo, UpSize, PC, SXH, OriSize, CXH, DBCXH, GDMK)
         SELECT PKID,
-               N'未完工',
+               N'未开工',
                OwnerID,
                OwnerName,
                BookerID,

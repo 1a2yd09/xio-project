@@ -52,6 +52,14 @@ public interface OrderMapper {
     List<WorkOrder> getNotBottomOrders(Map<String, String> paramMap);
 
     /**
+     * 根据工单模块和工单日期获取对重直梁工单集合。
+     *
+     * @param paramMap 参数集合
+     * @return 工单集合
+     */
+    List<WorkOrder> getNotStartedStraightOrders(Map<String, String> paramMap);
+
+    /**
      * 根据工单模块和工单日期获取轿底工单集合。
      *
      * @param paramMap 参数集合

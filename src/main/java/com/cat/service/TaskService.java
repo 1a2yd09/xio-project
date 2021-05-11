@@ -23,7 +23,7 @@ public class TaskService {
         this.mainService = mainService;
     }
 
-    @Scheduled(initialDelay = 1_000, fixedDelay = 1_000)
+    @Scheduled(initialDelay = 1_000, fixedDelay = 3_000)
     public void checkNewControlMessage() throws InterruptedException {
         ProcessControlSignal signal = this.signalMapper.getLatestNotProcessedControlSignal();
         if (signal != null) {
@@ -38,7 +38,7 @@ public class TaskService {
         }
     }
 
-    @Scheduled(initialDelay = 3_000, fixedDelay = 3_000)
+    @Scheduled(initialDelay = 3_000, fixedDelay = 60_000)
     public void checkMainThreadState() {
         boolean runningStatus = ThreadUtil.WORK_THREAD_RUNNING.get();
         log.info("工作流程是否正常: {}", runningStatus);

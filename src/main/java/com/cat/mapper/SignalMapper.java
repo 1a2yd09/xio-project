@@ -54,6 +54,13 @@ public interface SignalMapper {
     CuttingSignal getLatestNotProcessedCuttingSignal();
 
     /**
+     * 获取最新未被处理的下料信号记录，不存在将返回 null。
+     *
+     * @return 下料信号对象
+     */
+    CuttingSignal getLatestCuttingSignal();
+
+    /**
      * 更新指定下料信号记录。
      *
      * @param cuttingSignal 下料信号对象

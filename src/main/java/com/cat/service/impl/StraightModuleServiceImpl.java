@@ -49,6 +49,7 @@ public class StraightModuleServiceImpl implements ModuleService {
             CuttingSignal signal = this.signalService.getNewProcessedCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(currOrder, signal));
             log.info("下料信号: {}", signal);
+            this.orderService.getPreprocessStraightDeque(orderDeque, OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
             WorkOrder nextOrder = orderDeque.isEmpty() ? OrderUtil.getFakeOrder() : orderDeque.pollFirst();
             log.info("后续工单: {}", nextOrder);
             this.processOrder(currOrder, nextOrder, param, specs, signal);

@@ -3,7 +3,6 @@ package com.cat.service;
 import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.ForwardEdge;
 import com.cat.enums.SignalCategory;
-import com.cat.exception.TaskEndException;
 import com.cat.mapper.SignalMapper;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.TakeBoardSignal;
@@ -15,6 +14,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledFuture;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -39,14 +39,14 @@ public class SignalService {
     public void waitingForSignal(SignalCategory sc, BooleanSupplier supplier) {
         log.info("等待{}信号到达...", sc.getName());
         CountDownLatch cdl = new CountDownLatch(1);
-        this.scheduler.scheduleWithFixedDelay(() -> {
+        ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
             if (supplier.getAsBoolean()) {
                 cdl.countDown();
-                throw new TaskEndException("定时任务结束...");
             }
         }, 1000);
         try {
             cdl.await();
+            sf.cancel(false);
             log.info("{}信号到达...", sc.getName());
         } catch (InterruptedException e) {
             log.warn("等待信号过程中出现异常: ", e);

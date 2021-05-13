@@ -1,5 +1,6 @@
 package com.cat.service;
 
+import com.cat.enums.ControlSignalCategory;
 import com.cat.enums.OrderModule;
 import com.cat.pojo.OperatingParameter;
 import com.cat.pojo.message.OrderMessage;
@@ -31,12 +32,15 @@ public class MainService {
     public void start() {
         ThreadUtil.WORK_THREAD_RUNNING.set(true);
         try {
+            // test:
+            this.signalService.insertProcessControlSignal(ControlSignalCategory.START);
             this.signalService.checkStartSignal();
             OperatingParameter param = this.parameterService.getLatestOperatingParameter();
             OrderModule orderModule = OrderModule.get(param.getOrderModule());
             this.moduleServiceFactory.getModuleService(orderModule.name()).processOrderCollection(param);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        } finally {
             ThreadUtil.WORK_THREAD_RUNNING.set(false);
         }
     }

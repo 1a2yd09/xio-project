@@ -3,10 +3,7 @@ package com.cat.service;
 import com.cat.enums.ActionCategory;
 import com.cat.enums.ForwardEdge;
 import com.cat.mapper.ActionMapper;
-import com.cat.pojo.BoardList;
-import com.cat.pojo.CutBoard;
-import com.cat.pojo.MachineAction;
-import com.cat.pojo.NormalBoard;
+import com.cat.pojo.*;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.DecimalUtil;
 import org.springframework.stereotype.Service;
@@ -31,11 +28,11 @@ public class ProcessBoardService {
      * @param boardList      目标板材列表
      * @param wasteThreshold 废料阈值
      */
-    public void cutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
+    public void cutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold, CuttingSignal signal) {
         if (BoardUtil.isAllowBackToFront(boardList.getLastBoard())) {
-            this.backToFrontCutting(cutBoard, boardList, wasteThreshold);
+            this.backToFrontCutting(cutBoard, boardList, wasteThreshold, signal);
         } else {
-            this.frontToBackCutting(cutBoard, boardList, wasteThreshold);
+            this.frontToBackCutting(cutBoard, boardList, wasteThreshold, signal);
         }
     }
 
@@ -46,7 +43,8 @@ public class ProcessBoardService {
      * @param boardList      目标板材列表
      * @param wasteThreshold 废料阈值
      */
-    private void backToFrontCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
+    private void backToFrontCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold, CuttingSignal signal) {
+        cutBoard.setWidth(cutBoard.getWidth().add(signal.getLongEdgeTrim()));
         NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.SHORT, boardList.getBoards().get(0).getLength(), wasteThreshold);
         this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard);
         extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, boardList.getBoardAllWidth(), wasteThreshold);
@@ -67,11 +65,16 @@ public class ProcessBoardService {
      * @param boardList      目标板材列表
      * @param wasteThreshold 废料阈值
      */
-    private void frontToBackCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold) {
+    private void frontToBackCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold, CuttingSignal signal) {
+        cutBoard.setWidth(cutBoard.getWidth().add(signal.getLongEdgeTrim()));
         for (NormalBoard board : boardList.getBoards()) {
             NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.SHORT, board.getLength(), wasteThreshold);
             this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard);
             for (int i = 0; i < board.getCutTimes(); i++) {
+                if (i == 0) {
+                    extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, cutBoard.getWidth().subtract(signal.getLongEdgeTrim()), wasteThreshold);
+                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
+                }
                 BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), board.getWidth());
                 if (remainingWidth.compareTo(BoardUtil.CLAMP_DEPTH) <= 0) {
                     extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, board.getWidth(), wasteThreshold);
@@ -85,7 +88,6 @@ public class ProcessBoardService {
             this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
         }
     }
-
 
     /**
      * 板材裁剪函数，负责下料板材的实际旋转和裁剪操作。

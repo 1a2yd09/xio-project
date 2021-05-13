@@ -5,14 +5,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.4</version>
+        <version>2.4.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.cat</groupId>
-    <artifactId>xio-spring-boot</artifactId>
+    <artifactId>xio</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>xio-spring-boot</name>
-    <description>Demo project for Spring Boot</description>
+    <name>xio-project</name>
     <properties>
         <java.version>11</java.version>
         <skipTests>true</skipTests>

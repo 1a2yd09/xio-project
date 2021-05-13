@@ -7,6 +7,8 @@ import com.cat.service.SignalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -27,7 +29,7 @@ class SignalTest extends BaseTest {
         CuttingSignal cs = signalService.getLatestUnProcessedCuttingSignal();
         assertNull(cs);
 
-        signalService.insertCuttingSignal("2.5×1250×1589", ForwardEdge.SHORT, 3098528);
+        signalService.insertCuttingSignal("2.5×1250×1589", ForwardEdge.SHORT, BigDecimal.ZERO, 3098528);
         cs = signalService.getLatestUnProcessedCuttingSignal();
         assertNotNull(cs);
         System.out.println(cs);

@@ -2,14 +2,12 @@ package com.cat.utils;
 
 import com.cat.enums.BoardCategory;
 import com.cat.enums.ForwardEdge;
-import com.cat.pojo.CutBoard;
-import com.cat.pojo.NormalBoard;
-import com.cat.pojo.StockSpecification;
-import com.cat.pojo.WorkOrder;
+import com.cat.pojo.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -136,10 +134,6 @@ public class BoardUtil {
         return boardWidth.compareTo(wasteThreshold) >= 0 && boardLength.compareTo(wasteThreshold) >= 0 ? BoardCategory.REMAINING : BoardCategory.WASTE;
     }
 
-    public static Queue<NormalBoard> getBoardLengthPriorityQueue() {
-        return new PriorityQueue<>(Comparator.comparing(NormalBoard::getLength).reversed());
-    }
-
     /**
      * 当后续裁剪板材为成品时，如果成品总宽度小于夹钳宽度且需修剪长度，则必须保证留有夹钳宽度大小的剩余宽度供裁剪成品。
      *
@@ -193,7 +187,7 @@ public class BoardUtil {
      */
     public static boolean isAllowBackToFront(NormalBoard normalBoard) {
         // 如果说最后一类板材宽度总宽大于宽度阈值并且宽度大于深度阈值，那就允许从后向前紧挨着排板，因为既不需要预留空间也不用担心深度问题。
-        // 如果只是前者不满足，那为了充分利用板材，就在中间将补齐的原料给出去。
+        // 如果只是前者不满足，那为了充分利用板材，会在中间将原本为了保证修边而补齐的原料给出去，然后推送最后一块板材。
         // 如果只是后者不满足，那就按照从前向后紧挨着的方式进行排板。
         return normalBoard.getAllWidth().compareTo(CLAMP_WIDTH) >= 0 && normalBoard.getWidth().compareTo(CLAMP_DEPTH) >= 0;
     }
@@ -325,5 +319,16 @@ public class BoardUtil {
             }
         }
         return nextProduct;
+    }
+
+    /**
+     * 将下料信号中原料尺寸所包含的宽度度量减去较长边修边值。
+     *
+     * @param signal 下料信号对象
+     */
+    public static void changeCuttingSize(CuttingSignal signal) {
+        List<BigDecimal> decList = specStrToDecList(signal.getCuttingSize());
+        decList.set(1, decList.get(1).subtract(signal.getLongEdgeTrim()));
+        signal.setCuttingSize(getStandardSpecStr(decList.toArray(new BigDecimal[]{})));
     }
 }

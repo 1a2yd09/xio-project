@@ -1,5 +1,6 @@
 package com.cat.service.impl;
 
+import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.SignalCategory;
 import com.cat.pojo.*;
@@ -10,6 +11,7 @@ import com.cat.utils.OrderUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Deque;
 import java.util.List;
 
@@ -43,6 +45,8 @@ public class StraightModuleServiceImpl implements ModuleService {
         while (!orderDeque.isEmpty()) {
             WorkOrder currOrder = orderDeque.pollFirst();
             log.info("当前工单: {}", currOrder);
+            // test:
+            this.signalService.insertCuttingSignal(currOrder.getCuttingSize(), ForwardEdge.SHORT, BigDecimal.ZERO, currOrder.getId());
             this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
             CuttingSignal signal = this.signalService.getLatestCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(currOrder, signal));
@@ -52,6 +56,8 @@ public class StraightModuleServiceImpl implements ModuleService {
             log.info("后续工单: {}", nextOrder);
             this.processOrder(currOrder, nextOrder, param, specs, signal);
             this.actionService.processAction(orderDeque, currOrder, nextOrder);
+            // test:
+            this.actionService.completedAllMachineActions();
             this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
             this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
             this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);
@@ -102,6 +108,6 @@ public class StraightModuleServiceImpl implements ModuleService {
         } else {
             boardList.addBoard(productBoard);
         }
-        this.processBoardService.cutting(cutBoard, boardList, parameter.getWasteThreshold());
+        this.processBoardService.cutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
     }
 }

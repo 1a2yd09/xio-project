@@ -37,14 +37,14 @@
     </insert>
 
     <select id="getLatestUnProcessedCuttingSignal" resultMap="cuttingSignalMap">
-        SELECT TOP 1 id, processed, cutting_size, forward_edge, order_id, created_at
+        SELECT TOP 1 id, processed, cutting_size, forward_edge, long_edge_trim, order_id, created_at
         FROM tb_cutting_signal
         WHERE processed = 0
         ORDER BY id DESC
     </select>
 
     <select id="getLatestCuttingSignal" resultMap="cuttingSignalMap">
-        SELECT TOP 1 id, processed, cutting_size, forward_edge, order_id, created_at
+        SELECT TOP 1 id, processed, cutting_size, forward_edge, long_edge_trim, order_id, created_at
         FROM tb_cutting_signal
         ORDER BY id DESC
     </select>
@@ -56,7 +56,7 @@
     </update>
 
     <insert id="insertCuttingSignal">
-        INSERT INTO tb_cutting_signal(cutting_size, forward_edge, order_id)
-        VALUES (#{cuttingSize}, #{forwardEdge}, #{orderId})
+        INSERT INTO tb_cutting_signal(cutting_size, forward_edge, long_edge_trim, order_id)
+        VALUES (#{cuttingSize}, #{forwardEdge}, #{longEdgeTrim}, #{orderId})
     </insert>
 </mapper>

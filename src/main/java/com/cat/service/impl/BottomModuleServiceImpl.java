@@ -1,5 +1,6 @@
 package com.cat.service.impl;
 
+import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.SignalCategory;
 import com.cat.pojo.*;
@@ -9,6 +10,7 @@ import com.cat.utils.BoardUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Deque;
 
 /**
@@ -37,12 +39,16 @@ public class BottomModuleServiceImpl implements ModuleService {
         while (!orderDeque.isEmpty()) {
             WorkOrder order = orderDeque.pollFirst();
             log.info("当前工单: {}", order);
+            // test:
+            this.signalService.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, BigDecimal.ZERO, order.getId());
             this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
             CuttingSignal signal = this.signalService.getLatestCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(order, signal));
             log.info("下料信号: {}", signal);
             this.processOrder(order, param, signal);
             this.actionService.processAction(orderDeque, order);
+            // test:
+            this.actionService.completedAllMachineActions();
             this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
             this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
             this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);
@@ -62,6 +68,7 @@ public class BottomModuleServiceImpl implements ModuleService {
      * @param cuttingSignal 下料信号
      */
     public void processOrder(WorkOrder order, OperatingParameter parameter, CuttingSignal cuttingSignal) {
+        BoardUtil.changeCuttingSize(cuttingSignal);
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         log.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
@@ -71,6 +78,6 @@ public class BottomModuleServiceImpl implements ModuleService {
         BoardList boardList = new BoardList();
         boardList.addBoard(semiProductBoard);
         boardList.addBoard(productBoard);
-        this.processBoardService.cutting(cutBoard, boardList, parameter.getWasteThreshold());
+        this.processBoardService.cutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
     }
 }

@@ -6,6 +6,8 @@ import com.cat.pojo.TakeBoardSignal;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
+
 /**
  * @author CAT
  */
@@ -70,9 +72,13 @@ public interface SignalMapper {
     /**
      * 新增下料信号记录。
      *
-     * @param cuttingSize 原料板规格
-     * @param forwardEdge 原料板朝向
-     * @param orderId     工单 ID
+     * @param cuttingSize  原料板规格
+     * @param forwardEdge  原料板朝向
+     * @param longEdgeTrim 长边修边值
+     * @param orderId      工单 ID
      */
-    void insertCuttingSignal(@Param("cuttingSize") String cuttingSize, @Param("forwardEdge") Integer forwardEdge, @Param("orderId") Integer orderId);
+    void insertCuttingSignal(@Param("cuttingSize") String cuttingSize,
+                             @Param("forwardEdge") Integer forwardEdge,
+                             @Param("longEdgeTrim") BigDecimal longEdgeTrim,
+                             @Param("orderId") Integer orderId);
 }

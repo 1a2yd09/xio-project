@@ -68,22 +68,4 @@ class BoardTest extends BaseTest {
         assertFalse(BoardUtil.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1100×1600"));
         assertFalse(BoardUtil.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1300×1600"));
     }
-
-    @Test
-    void testBoardQueue() {
-        Queue<NormalBoard> queue = BoardUtil.getBoardLengthPriorityQueue();
-        NormalBoard board1 = new NormalBoard("2.5×800×1000", "镀锌板", BoardCategory.PRODUCT, 10000);
-        board1.setCutTimes(1);
-        NormalBoard board2 = new NormalBoard("2.5×1000×2000", "镀锌板", BoardCategory.PRODUCT, 10000);
-        board2.setCutTimes(1);
-        NormalBoard board3 = new NormalBoard("2.5×1000×1600", "镀锌板", BoardCategory.PRODUCT, 10000);
-        board3.setCutTimes(2);
-        queue.add(board1);
-        queue.add(board2);
-        queue.add(board3);
-        assertEquals(3, queue.size());
-        System.out.println(queue.poll());
-        System.out.println(queue.poll());
-        System.out.println(queue.poll());
-    }
 }

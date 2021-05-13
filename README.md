@@ -28,11 +28,11 @@
 
 ## 工单完成情况与可视化
 
-员工可在前台生产管理系统查看当前处理工单以及非成品板材生成情况。
+员工可在前台生产管理系统查看当前动作流程以及工单、板材完成情况。
 
 ![前台生产管理系统](images/界面图.jpg)
 
-访问指定页面查看近期工单完成情况。
+访问指定页面查看近期工单统计数据。
 
 ![工单完成近况](./images/近况图.jpg)
 
@@ -55,7 +55,7 @@ public class MainService {
             this.moduleServiceFactory.getModuleService(orderModule.name()).processOrderCollection(param);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            this.mailService.sendWorkErrorMail(RUNNING_ORDER.get());
+        } finally {
             ThreadUtil.WORK_THREAD_RUNNING.set(false);
         }
     }
@@ -64,13 +64,13 @@ public class MainService {
 
 ```java
 public class TaskService {
-    @Scheduled(initialDelay = 3_000, fixedDelay = 3_000)
+    @Scheduled(initialDelay = 1_000, fixedDelay = 3_000)
     public void checkMainThreadState() {
-        boolean runningStatus = ThreadUtil.WORK_THREAD_RUNNING.get();
-        log.info("工作流程是否正常: {}", runningStatus);
-        if (!runningStatus) {
-            log.info("提交新的工作任务至线程池");
-            ThreadPoolFactory.getDefaultThreadPool().execute(mainService::start);
+        boolean isRunning = ThreadUtil.WORK_THREAD_RUNNING.get();
+        log.info("工作流程是否正常: {}", isRunning);
+        if (!isRunning) {
+            log.info("提交新的工作任务至业务线程池...");
+            ThreadPoolFactory.getServiceThreadPool().execute(this.mainService::start);
         }
     }
 }

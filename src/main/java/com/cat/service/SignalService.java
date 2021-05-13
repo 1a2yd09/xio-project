@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.BooleanSupplier;
@@ -40,6 +41,7 @@ public class SignalService {
         log.info("等待{}信号到达...", sc.getName());
         CountDownLatch cdl = new CountDownLatch(1);
         ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
+            log.info("等待{}信号到达...", sc.getName());
             if (supplier.getAsBoolean()) {
                 cdl.countDown();
             }
@@ -167,7 +169,7 @@ public class SignalService {
      * @param forwardEdge 下料板朝向，0表示短边朝前，1表示长边朝前
      * @param orderId     工单 ID
      */
-    public void insertCuttingSignal(String cuttingSize, ForwardEdge forwardEdge, Integer orderId) {
-        this.signalMapper.insertCuttingSignal(cuttingSize, forwardEdge.code, orderId);
+    public void insertCuttingSignal(String cuttingSize, ForwardEdge forwardEdge, BigDecimal longEdgeTrim, Integer orderId) {
+        this.signalMapper.insertCuttingSignal(cuttingSize, forwardEdge.code, longEdgeTrim, orderId);
     }
 }

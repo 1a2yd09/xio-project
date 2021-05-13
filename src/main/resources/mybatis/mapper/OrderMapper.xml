@@ -212,7 +212,7 @@
     </update>
 
     <select id="getCompletedOrderCountByDate" resultType="java.lang.Integer">
-        SELECT COUNT(*)
+        SELECT COUNT(*) as order_count
         FROM tb_new_completed_work_order
         WHERE CompleteDate = #{date}
     </select>

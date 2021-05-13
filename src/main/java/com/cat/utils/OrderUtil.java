@@ -47,7 +47,7 @@ public class OrderUtil {
     }
 
     /**
-     * 验证工单对象的成品尺寸、材质、原料尺寸是否为空或无内容
+     * 验证工单对象的成品尺寸、材质、原料尺寸是否为空或无内容。
      *
      * @param order 工单对象
      * @return true 表示工单对象上述三个属性都包含内容，否则至少一个属性不包含内容
@@ -62,7 +62,7 @@ public class OrderUtil {
      * @param s 字符串对象
      * @return true 表示该字符串包含内容，否则不包含内容
      */
-    public static boolean validateStr(String s) {
+    private static boolean validateStr(String s) {
         return StringUtils.hasText(s);
     }
 }

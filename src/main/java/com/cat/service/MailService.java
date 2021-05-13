@@ -5,16 +5,15 @@ import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.MailConfig;
 import com.cat.pojo.WorkOrder;
 import com.cat.pojo.message.OrderMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author CAT
@@ -23,22 +22,16 @@ import java.util.concurrent.TimeUnit;
 public class MailService {
     private final JavaMailSender mailSender;
     private final MailMapper mailMapper;
+    private final ThreadPoolTaskExecutor executor;
 
-    private static final ExecutorService MAIL_POOL;
-
-    static {
-        MAIL_POOL = new ThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(1),
-                r -> new Thread(r, "mail-pool-thread-" + r.hashCode()));
-    }
-
-    public MailService(JavaMailSender mailSender, MailMapper mailMapper) {
+    public MailService(JavaMailSender mailSender, MailMapper mailMapper, @Qualifier("mailTaskExecutor") @Autowired(required = false) ThreadPoolTaskExecutor executor) {
         this.mailSender = mailSender;
         this.mailMapper = mailMapper;
+        this.executor = executor;
     }
 
     /**
-     * 发送工单无法处理邮件。
+     * 发送业务流程异常邮件。
      *
      * @param msg 消息
      */
@@ -57,7 +50,7 @@ public class MailService {
             String html = String.format(text, order.getId(), signal.getCuttingSize(), order.getProductSpecification(), msg.getCreatedAt());
             helper.setText(html, true);
 
-            MAIL_POOL.execute(() -> mailSender.send(mimeMessage));
+            this.executor.execute(() -> this.mailSender.send(mimeMessage));
         } catch (MessagingException e) {
             e.printStackTrace();
         }

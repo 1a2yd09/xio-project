@@ -17,46 +17,47 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 @EnableScheduling
 @Profile({"native", "xio"})
-public class ScheduledTaskConfiguration implements SchedulingConfigurer {
+public class ThreadPoolConfiguration implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(4);
-        scheduler.setThreadNamePrefix("at-scheduled-thread-");
+        scheduler.setThreadNamePrefix("at-scheduled-");
         scheduler.initialize();
         taskRegistrar.setTaskScheduler(scheduler);
     }
 
-    @Bean
-    public ThreadPoolTaskScheduler scheduler() {
+    @Bean("serviceTaskScheduler")
+    public ThreadPoolTaskScheduler serviceTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(6);
-        scheduler.setThreadNamePrefix("self-task-scheduler-thread-");
+        scheduler.setThreadNamePrefix("service-scheduler-");
         scheduler.initialize();
         return scheduler;
     }
 
-    @Bean
+    @Bean("serviceTaskExecutor")
     public ThreadPoolTaskExecutor serviceTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
         executor.setMaxPoolSize(1);
         executor.setKeepAliveSeconds(0);
         executor.setQueueCapacity(1);
-        executor.setThreadNamePrefix("serviceTaskExecutor-");
+        executor.setThreadNamePrefix("service-executor-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
         executor.initialize();
         return executor;
     }
 
     @Bean
+    @Profile("mailTaskExecutor")
     public ThreadPoolTaskExecutor mailTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(3);
         executor.setMaxPoolSize(3);
         executor.setKeepAliveSeconds(0);
         executor.setQueueCapacity(1);
-        executor.setThreadNamePrefix("serviceTaskExecutor-");
+        executor.setThreadNamePrefix("mail-executor-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
         executor.initialize();
         return executor;

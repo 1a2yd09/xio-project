@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author CAT
  */
-public class ThreadUtil {
-    private ThreadUtil() {
+public class SynUtil {
+    private SynUtil() {
 
     }
 

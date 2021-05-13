@@ -45,6 +45,7 @@ public class BottomModuleServiceImpl implements ModuleService {
             CuttingSignal signal = this.signalService.getLatestCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(order, signal));
             log.info("下料信号: {}", signal);
+            orderDeque.addAll(this.orderService.getBottomDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate()));
             this.processOrder(order, param, signal);
             this.actionService.processAction(orderDeque, order);
             // test:

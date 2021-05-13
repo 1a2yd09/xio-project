@@ -130,6 +130,12 @@ public class OrderService {
         return new LinkedList<>(this.getBottomOrders(sortPattern, date));
     }
 
+    /**
+     * 根据日期范围获取完工工单的数量情况。
+     *
+     * @param range 范围
+     * @return 范围内每个日期的工单完成数量
+     */
     public List<OrderCount> getCompletedOrderCountByRange(int range) {
         LocalDate now = LocalDate.now();
         List<OrderCount> result = new ArrayList<>(range);

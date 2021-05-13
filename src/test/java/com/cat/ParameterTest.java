@@ -23,7 +23,6 @@ class ParameterTest extends BaseTest {
 
     @Test
     void testInsertParameter() {
-        parameterService.insertOperatingParameter(ParamUtil.getCommonParameter(OrderSortPattern.SPEC, OrderModule.STRAIGHT_WEIGHT));
         OperatingParameter op = parameterService.getLatestOperatingParameter();
         assertNotNull(op);
         System.out.println(op);

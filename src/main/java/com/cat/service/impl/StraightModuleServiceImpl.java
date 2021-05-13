@@ -37,8 +37,6 @@ public class StraightModuleServiceImpl implements ModuleService {
 
     @Override
     public void processOrderCollection(OperatingParameter param) {
-        List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
-        log.info("库存件规格集合: {}", specs);
         Deque<WorkOrder> orderDeque = this.orderService.getPreprocessStraightDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
         log.info("直梁对重模块工单数量: {}", orderDeque.size());
         this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
@@ -54,7 +52,7 @@ public class StraightModuleServiceImpl implements ModuleService {
             orderDeque.addAll(this.orderService.getPreprocessStraightDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate()));
             WorkOrder nextOrder = orderDeque.isEmpty() ? OrderUtil.getFakeOrder() : orderDeque.pollFirst();
             log.info("后续工单: {}", nextOrder);
-            this.processOrder(currOrder, nextOrder, param, specs, signal);
+            this.processOrder(currOrder, nextOrder, param, signal);
             this.actionService.processAction(orderDeque, currOrder, nextOrder);
             // test:
             this.actionService.completedAllMachineActions();
@@ -75,10 +73,9 @@ public class StraightModuleServiceImpl implements ModuleService {
      * @param order         对重直梁工单
      * @param nextOrder     后续对重直梁工单
      * @param parameter     运行参数
-     * @param specs         库存件规格集合
      * @param cuttingSignal 下料信号
      */
-    public void processOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, List<StockSpecification> specs, CuttingSignal cuttingSignal) {
+    public void processOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, CuttingSignal cuttingSignal) {
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         log.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
@@ -91,8 +88,10 @@ public class StraightModuleServiceImpl implements ModuleService {
                 boardList.addBoard(productBoard);
                 boardList.addBoard(nextProduct);
             } else {
+                List<StockSpecification> specs = this.stockSpecService.getGroupStockSpecs();
+                log.info("库存件规格集合: {}", specs);
                 NormalBoard stockBoard = BoardUtil.getMatchStock(specs, cutBoard, productBoard);
-                log.info("库存件信息: {}", stockBoard);
+                log.info("可用的库存件信息: {}", stockBoard);
                 if (stockBoard.getCutTimes() > 0) {
                     if (productBoard.getLength().compareTo(stockBoard.getLength()) >= 0) {
                         boardList.addBoard(productBoard);

@@ -8,8 +8,9 @@ import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.TakeBoardSignal;
 import com.cat.pojo.WorkOrder;
 import com.cat.utils.BoardUtil;
-import com.cat.utils.ThreadUtil;
+import com.cat.utils.SynUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,7 @@ public class SignalService {
     private final SignalMapper signalMapper;
     private final ThreadPoolTaskScheduler scheduler;
 
-    public SignalService(SignalMapper signalMapper, ThreadPoolTaskScheduler scheduler) {
+    public SignalService(SignalMapper signalMapper, @Qualifier("serviceTaskScheduler") ThreadPoolTaskScheduler scheduler) {
         this.signalMapper = signalMapper;
         this.scheduler = scheduler;
     }
@@ -41,7 +42,6 @@ public class SignalService {
         log.info("等待{}信号到达...", sc.getName());
         CountDownLatch cdl = new CountDownLatch(1);
         ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
-            log.info("等待{}信号到达...", sc.getName());
             if (supplier.getAsBoolean()) {
                 cdl.countDown();
             }
@@ -63,10 +63,10 @@ public class SignalService {
         log.info("等待流程启动信号...");
         while (true) {
             try {
-                ThreadUtil.getStartControlMessageQueue().take();
+                SynUtil.getStartControlMessageQueue().take();
                 break;
             } catch (Exception e) {
-                log.warn("interrupted!", e);
+                log.warn("等待流程启动信号过程中出现异常: ", e);
                 Thread.currentThread().interrupt();
             }
         }
@@ -80,7 +80,7 @@ public class SignalService {
      */
     public boolean checkStopSignal() {
         log.info("检查流程停止信号...");
-        Integer flag = ThreadUtil.getStopControlMessageQueue().poll();
+        Integer flag = SynUtil.getStopControlMessageQueue().poll();
         return flag != null;
     }
 

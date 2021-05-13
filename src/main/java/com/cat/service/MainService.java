@@ -5,7 +5,7 @@ import com.cat.enums.OrderModule;
 import com.cat.pojo.OperatingParameter;
 import com.cat.pojo.message.OrderMessage;
 import com.cat.utils.ModuleServiceFactory;
-import com.cat.utils.ThreadUtil;
+import com.cat.utils.SynUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,7 @@ public class MainService {
     }
 
     public void start() {
-        ThreadUtil.WORK_THREAD_RUNNING.set(true);
+        SynUtil.WORK_THREAD_RUNNING.set(true);
         try {
             // test:
             this.signalService.insertProcessControlSignal(ControlSignalCategory.START);
@@ -41,7 +41,7 @@ public class MainService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
-            ThreadUtil.WORK_THREAD_RUNNING.set(false);
+            SynUtil.WORK_THREAD_RUNNING.set(false);
         }
     }
 }

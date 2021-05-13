@@ -28,10 +28,6 @@ public class ParamUtil {
         return DEFAULT_PARAM;
     }
 
-    public static OperatingParameter getCommonParameter(OrderSortPattern orderSortPattern, OrderModule orderModule) {
-        return new OperatingParameter(LocalDate.of(2019, 11, 13), new BigDecimal(192), new BigDecimal(100), orderSortPattern.getName(), orderModule.getName());
-    }
-
     /**
      * 获取一个默认的库存件规格。
      *

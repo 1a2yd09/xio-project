@@ -49,7 +49,7 @@ class ActionTest extends BaseTest {
         NormalBoard stock = new NormalBoard(order.getProductSpecification(), order.getMaterial(), BoardCategory.STOCK, order.getId());
         stock.setLength(new BigDecimal(3300));
         stockSpecService.insertStockSpec(stock.getHeight(), stock.getWidth(), stock.getLength());
-        straightModuleServiceImpl.processOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), stockSpecService.getGroupStockSpecs(), SignalUtil.getDefaultCuttingSignal(order));
+        straightModuleServiceImpl.processOrder(order, OrderUtil.getFakeOrder(), parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
         // 测试一，生成11个机器动作:
         assertEquals(11, actionService.getMachineActionCount());
 

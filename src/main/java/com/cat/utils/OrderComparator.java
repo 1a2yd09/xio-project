@@ -10,7 +10,7 @@ import java.util.Map;
 
 public enum OrderComparator {
     /**
-     * SEQ
+     * 按照顺序号进行工单排序。
      */
     SEQ("SEQ") {
         @Override
@@ -21,7 +21,7 @@ public enum OrderComparator {
         }
     },
     /**
-     * SPEC
+     * 按照规格进行工单排序。
      */
     SPEC("SPEC") {
         @Override
@@ -31,7 +31,7 @@ public enum OrderComparator {
         }
     },
     /**
-     * PCH_SEQ
+     * 先按批次号再按顺序号进行排序。
      */
     PCH_SEQ("PCH_SEQ") {
         @Override
@@ -47,7 +47,7 @@ public enum OrderComparator {
         }
     },
     /**
-     * PCH_SPEC
+     * 先按批次号再按规格进行排序。
      */
     PCH_SPEC("PCH_SPEC") {
         @Override

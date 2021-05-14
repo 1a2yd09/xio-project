@@ -32,6 +32,7 @@ public class StraightModuleServiceImpl extends AbstractModuleService {
 
     @Override
     public void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, WorkOrder... orders) {
+        BoardUtil.changeCuttingSize(cuttingSignal);
         WorkOrder order = orders[0];
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         log.info("下料板信息: {}", cutBoard);

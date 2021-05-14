@@ -21,6 +21,13 @@ public interface SignalMapper {
     ProcessControlSignal getLatestUnProcessedControlSignal();
 
     /**
+     * 获取最新的流程控制信号。
+     *
+     * @return 信号对象
+     */
+    ProcessControlSignal getLatestControlSignal();
+
+    /**
      * 更新指定流程控制信号记录。
      *
      * @param controlSignal 流程控制信号对象

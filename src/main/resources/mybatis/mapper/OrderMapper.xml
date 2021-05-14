@@ -171,44 +171,16 @@
     </select>
 
     <update id="restoreDatabase">
-        TRUNCATE TABLE tb_new_completed_work_order;
         TRUNCATE TABLE tb_cutting_signal;
         TRUNCATE TABLE tb_inventory;
-        TRUNCATE TABLE tb_new_local_work_order;
         TRUNCATE TABLE tb_machine_action;
+        TRUNCATE TABLE tb_new_completed_work_order;
+        TRUNCATE TABLE tb_new_local_work_order;
+        TRUNCATE TABLE tb_operating_parameter;
         TRUNCATE TABLE tb_process_control_signal;
         TRUNCATE TABLE tb_processed_action;
         TRUNCATE TABLE tb_stock_specification;
         TRUNCATE TABLE tb_take_board_signal;
-        INSERT INTO tb_new_local_work_order(PKID, Status, OwnerID, OwnerName, BookerID, BookerName, AddDate, UpdateDate,
-                                            HTH, PartNo, PartName, Size, Texture, QTY, CompleteTime, Remark,
-                                            CompleteDate, WoNo, UpSize, PC, SXH, OriSize, CXH, DBCXH, GDMK)
-        SELECT PKID,
-               N'未开工',
-               OwnerID,
-               OwnerName,
-               BookerID,
-               BookerName,
-               AddDate,
-               UpdateDate,
-               HTH,
-               PartNo,
-               PartName,
-               Size,
-               Texture,
-               QTY,
-               CompleteTime,
-               Remark,
-               CompleteDate,
-               CAST(WoNo AS INT),
-               UpSize,
-               PC,
-               SXH,
-               OriSize,
-               CXH,
-               DBCXH,
-               GDMK
-        FROM tb_new_remote_work_order;
     </update>
 
     <select id="getCompletedOrderCountByDate" resultType="java.lang.Integer">
@@ -233,4 +205,29 @@
             #{order.id}
         </foreach>
     </update>
+
+    <insert id="insertOrder">
+        INSERT INTO tb_new_local_work_order (Status,
+                                             Size,
+                                             Texture,
+                                             QTY,
+                                             CompleteDate,
+                                             WoNo,
+                                             PC,
+                                             SXH,
+                                             OriSize,
+                                             GDMK,
+                                             CompleteQTY)
+        VALUES (#{operationState},
+                #{productSpecification},
+                #{material},
+                #{productQuantity},
+                CAST(#{completionDate} AS DATE),
+                #{id},
+                #{batchNumber},
+                #{sequenceNumber},
+                #{cuttingSize},
+                #{siteModule},
+                #{completedQuantity})
+    </insert>
 </mapper>

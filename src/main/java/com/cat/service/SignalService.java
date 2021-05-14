@@ -5,6 +5,7 @@ import com.cat.enums.ForwardEdge;
 import com.cat.enums.SignalCategory;
 import com.cat.mapper.SignalMapper;
 import com.cat.pojo.CuttingSignal;
+import com.cat.pojo.ProcessControlSignal;
 import com.cat.pojo.TakeBoardSignal;
 import com.cat.pojo.WorkOrder;
 import com.cat.utils.BoardUtil;
@@ -91,6 +92,15 @@ public class SignalService {
      */
     public void insertProcessControlSignal(ControlSignalCategory signalCategory) {
         this.signalMapper.insertProcessControlSignal(signalCategory.value);
+    }
+
+    /**
+     * 获取最新的流程控制信号对象。
+     *
+     * @return 信号对象
+     */
+    public ProcessControlSignal getLatestControlSignal() {
+        return this.signalMapper.getLatestControlSignal();
     }
 
     /**

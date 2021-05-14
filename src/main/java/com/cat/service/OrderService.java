@@ -94,7 +94,7 @@ public class OrderService {
             }
         }
 
-        return new LinkedList<>(orderList);
+        return orderList.stream().filter(order -> order.getIncompleteQuantity() > 0).collect(Collectors.toCollection(LinkedList::new));
     }
 
     /**
@@ -192,5 +192,14 @@ public class OrderService {
      */
     public Integer getCompletedOrderCount() {
         return this.orderMapper.getCompletedOrderCount();
+    }
+
+    /**
+     * 新增一条工单记录。
+     *
+     * @param order 工单对象
+     */
+    public void insertOrder(WorkOrder order) {
+        this.orderMapper.insertOrder(order);
     }
 }

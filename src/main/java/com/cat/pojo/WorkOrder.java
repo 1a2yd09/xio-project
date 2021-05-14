@@ -26,12 +26,11 @@ public class WorkOrder {
     private String siteModule;
     private String completedQuantity;
 
-    public WorkOrder(String productSpecification, String productQuantity, String material, Integer id, String completedQuantity) {
+    public WorkOrder(String productSpecification, String material, String productQuantity, Integer id) {
         this.productSpecification = productSpecification;
-        this.productQuantity = productQuantity;
         this.material = material;
+        this.productQuantity = productQuantity;
         this.id = id;
-        this.completedQuantity = completedQuantity;
     }
 
     /**

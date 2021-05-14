@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @EnableScheduling
-@Profile({"native", "xio"})
+@Profile({"native", "test", "xio", "mail"})
 public class ThreadPoolConfiguration implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -49,8 +49,8 @@ public class ThreadPoolConfiguration implements SchedulingConfigurer {
         return executor;
     }
 
-    @Bean
-    @Profile("mailTaskExecutor")
+    @Bean("mailTaskExecutor")
+    @Profile("mail")
     public ThreadPoolTaskExecutor mailTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(3);

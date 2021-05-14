@@ -15,6 +15,9 @@ class BoardTest extends BaseTest {
     @Autowired
     ProcessBoardService processBoardService;
 
+    /**
+     * 比较两个规格字符串。
+     */
     @Test
     void testCompareTwoSpecStr() {
         String s1 = "2.5×200×2185";
@@ -25,6 +28,9 @@ class BoardTest extends BaseTest {
         assertNotEquals(0, BoardUtil.compareTwoSpecStr(s1, s2));
     }
 
+    /**
+     * 将规格字符串转为规格列表。
+     */
     @Test
     void testSpecStrToDecList() {
         List<BigDecimal> list = BoardUtil.specStrToDecList("1.2×722.4×1250");
@@ -35,6 +41,9 @@ class BoardTest extends BaseTest {
         System.out.println(list);
     }
 
+    /**
+     * 获取标准规格字符串。
+     */
     @Test
     void testGetStandardSpecStr() {
         String result = BoardUtil.getStandardSpecStr(new BigDecimal("1.2"), new BigDecimal("722.4"), new BigDecimal("1250"));
@@ -45,6 +54,9 @@ class BoardTest extends BaseTest {
         System.out.println(result);
     }
 
+    /**
+     * 测试板材分类逻辑。
+     */
     @Test
     void testCalBoardCategory() {
         BoardCategory bc = BoardUtil.calBoardCategory(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ZERO);
@@ -55,6 +67,9 @@ class BoardTest extends BaseTest {
         assertEquals(BoardCategory.WASTE, bc);
     }
 
+    /**
+     * 测试第一块板材规格是否大于第二块板材规格。
+     */
     @Test
     void testCompareTwoSpec() {
         assertTrue(BoardUtil.isFirstSpecGeSecondSpec("2.5×1200×1500", "2.5×1100×1400"));

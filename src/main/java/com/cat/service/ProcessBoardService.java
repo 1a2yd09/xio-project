@@ -67,14 +67,15 @@ public class ProcessBoardService {
      */
     private void frontToBackCutting(CutBoard cutBoard, BoardList boardList, BigDecimal wasteThreshold, CuttingSignal signal) {
         cutBoard.setWidth(cutBoard.getWidth().add(signal.getLongEdgeTrim()));
-        for (NormalBoard board : boardList.getBoards()) {
+        for (int i = 0; i < boardList.getBoards().size(); i++) {
+            NormalBoard board = boardList.getBoards().get(i);
             NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.SHORT, board.getLength(), wasteThreshold);
             this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard);
-            for (int i = 0; i < board.getCutTimes(); i++) {
-                if (i == 0) {
-                    extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, cutBoard.getWidth().subtract(signal.getLongEdgeTrim()), wasteThreshold);
-                    this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
-                }
+            if (i == 0) {
+                extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, cutBoard.getWidth().subtract(signal.getLongEdgeTrim()), wasteThreshold);
+                this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
+            }
+            for (int j = 0; j < board.getCutTimes(); j++) {
                 BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), board.getWidth());
                 if (remainingWidth.compareTo(BoardUtil.CLAMP_DEPTH) <= 0) {
                     extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, board.getWidth(), wasteThreshold);

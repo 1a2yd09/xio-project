@@ -15,6 +15,6 @@ public class SignalUtil {
     }
 
     public static CuttingSignal getDefaultCuttingSignal(WorkOrder order) {
-        return new CuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT.code, BigDecimal.ZERO, order.getId());
+        return new CuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT.code, BigDecimal.TEN, order.getId());
     }
 }

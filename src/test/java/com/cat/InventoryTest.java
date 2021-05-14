@@ -12,6 +12,9 @@ class InventoryTest extends BaseTest {
     @Autowired
     InventoryService inventoryService;
 
+    /**
+     * 测试相同规格、材质、类型的存货是否会相互叠加。
+     */
     @Test
     void testUpdateInventoryQuantity() {
         int retVal = inventoryService.getInventoryCount();

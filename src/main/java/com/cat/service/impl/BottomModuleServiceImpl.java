@@ -31,8 +31,8 @@ public class BottomModuleServiceImpl extends AbstractModuleService {
 
     @Override
     public void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, WorkOrder... orders) {
-        WorkOrder order = orders[0];
         BoardUtil.changeCuttingSize(cuttingSignal);
+        WorkOrder order = orders[0];
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         log.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());

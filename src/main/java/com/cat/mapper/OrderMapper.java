@@ -130,4 +130,11 @@ public interface OrderMapper {
      * @param orders 工单集合
      */
     void batchUpdateOrderState(List<WorkOrder> orders);
+
+    /**
+     * 新增一条工单记录。
+     *
+     * @param order 工单对象
+     */
+    void insertOrder(WorkOrder order);
 }

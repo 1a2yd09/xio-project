@@ -1,10 +1,7 @@
 package com.cat;
 
-import com.cat.enums.OrderModule;
-import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.OperatingParameter;
 import com.cat.service.ParameterService;
-import com.cat.utils.ParamUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

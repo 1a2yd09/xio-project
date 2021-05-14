@@ -1,17 +1,14 @@
 package com.cat.service.impl;
 
-import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
-import com.cat.enums.SignalCategory;
 import com.cat.pojo.*;
-import com.cat.pojo.message.OrderMessage;
 import com.cat.service.*;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Deque;
 import java.util.List;
 
@@ -20,68 +17,29 @@ import java.util.List;
  */
 @Slf4j
 @Service("STRAIGHT_WEIGHT")
-public class StraightModuleServiceImpl implements ModuleService {
-    private final ProcessBoardService processBoardService;
+public class StraightModuleServiceImpl extends AbstractModuleService {
     private final StockSpecService stockSpecService;
-    private final OrderService orderService;
-    private final SignalService signalService;
-    private final ActionService actionService;
 
-    public StraightModuleServiceImpl(ProcessBoardService processBoardService, StockSpecService stockSpecService, OrderService orderService, SignalService signalService, ActionService actionService) {
-        this.processBoardService = processBoardService;
+    public StraightModuleServiceImpl(SignalService signalService, ActionService actionService, OrderService orderService, ProcessBoardService processBoardService, StockSpecService stockSpecService) {
+        super(signalService, actionService, orderService, processBoardService);
         this.stockSpecService = stockSpecService;
-        this.orderService = orderService;
-        this.signalService = signalService;
-        this.actionService = actionService;
     }
 
     @Override
-    public void processOrderCollection(OperatingParameter param) {
-        Deque<WorkOrder> orderDeque = this.orderService.getPreprocessStraightDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
-        log.info("直梁对重模块工单数量: {}", orderDeque.size());
-        this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
-        while (!orderDeque.isEmpty()) {
-            WorkOrder currOrder = orderDeque.pollFirst();
-            log.info("当前工单: {}", currOrder);
-            // test:
-            this.signalService.insertCuttingSignal(currOrder.getCuttingSize(), ForwardEdge.SHORT, BigDecimal.ZERO, currOrder.getId());
-            this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
-            CuttingSignal signal = this.signalService.getLatestCuttingSignal();
-            MainService.RUNNING_ORDER.set(OrderMessage.of(currOrder, signal));
-            log.info("下料信号: {}", signal);
-            orderDeque.addAll(this.orderService.getPreprocessStraightDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate()));
-            WorkOrder nextOrder = orderDeque.isEmpty() ? OrderUtil.getFakeOrder() : orderDeque.pollFirst();
-            log.info("后续工单: {}", nextOrder);
-            this.processOrder(currOrder, nextOrder, param, signal);
-            this.actionService.processAction(orderDeque, currOrder, nextOrder);
-            // test:
-            this.actionService.completedAllMachineActions();
-            this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
-            this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
-            this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);
-            this.actionService.transferAllActions();
-            if (this.signalService.checkStopSignal()) {
-                log.info("收到流程停止信号...");
-                return;
-            }
-        }
+    public Deque<WorkOrder> getOrderDeque(OrderSortPattern sortPattern, LocalDate date) {
+        return this.getOrderService().getPreprocessStraightDeque(sortPattern, date);
     }
 
-    /**
-     * 对重直梁流程。
-     *
-     * @param order         对重直梁工单
-     * @param nextOrder     后续对重直梁工单
-     * @param parameter     运行参数
-     * @param cuttingSignal 下料信号
-     */
-    public void processOrder(WorkOrder order, WorkOrder nextOrder, OperatingParameter parameter, CuttingSignal cuttingSignal) {
+    @Override
+    public void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, WorkOrder... orders) {
+        WorkOrder order = orders[0];
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), order.getMaterial(), cuttingSignal.getForwardEdge(), order.getId());
         log.info("下料板信息: {}", cutBoard);
         NormalBoard productBoard = BoardUtil.getStandardProduct(order.getProductSpecification(), order.getMaterial(), cutBoard.getWidth(), order.getIncompleteQuantity(), order.getId());
         log.info("成品板信息: {}", productBoard);
         BoardList boardList = new BoardList();
         if (productBoard.getCutTimes() == order.getIncompleteQuantity()) {
+            WorkOrder nextOrder = orders[1];
             NormalBoard nextProduct = BoardUtil.getNextProduct(nextOrder, cutBoard, productBoard);
             log.info("后续成品板信息: {}", nextProduct);
             if (nextProduct.getCutTimes() > 0) {
@@ -107,6 +65,13 @@ public class StraightModuleServiceImpl implements ModuleService {
         } else {
             boardList.addBoard(productBoard);
         }
-        this.processBoardService.cutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
+        this.getProcessBoardService().cutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
+    }
+
+    @Override
+    public WorkOrder[] getProcessOrders(Deque<WorkOrder> orderDeque) {
+        WorkOrder currentOrder = orderDeque.isEmpty() ? OrderUtil.getFakeOrder() : orderDeque.pollFirst();
+        WorkOrder nextOrder = orderDeque.isEmpty() ? OrderUtil.getFakeOrder() : orderDeque.pollFirst();
+        return new WorkOrder[]{currentOrder, nextOrder};
     }
 }

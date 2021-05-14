@@ -1,12 +1,9 @@
 package com.cat;
 
-import com.cat.enums.OrderModule;
-import com.cat.enums.OrderSortPattern;
 import com.cat.service.ActionService;
 import com.cat.service.MainService;
 import com.cat.service.OrderService;
 import com.cat.service.ParameterService;
-import com.cat.utils.ParamUtil;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

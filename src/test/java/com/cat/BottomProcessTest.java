@@ -27,7 +27,7 @@ class BottomProcessTest extends BaseTest {
     @Test
     void test1() {
         WorkOrder order = orderService.getOrderById(3099510);
-        bottomModuleServiceImpl.processOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processOrder(parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order), order);
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(10, actionService.getAllMachineActions().size());
     }
@@ -36,7 +36,7 @@ class BottomProcessTest extends BaseTest {
     void test2() {
         WorkOrder order = orderService.getOrderById(3099510);
         order.setProductSpecification("2.5×121×2504");
-        bottomModuleServiceImpl.processOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processOrder(parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order), order);
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(7, actionService.getAllMachineActions().size());
     }
@@ -46,7 +46,7 @@ class BottomProcessTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3099510);
         order.setProductQuantity("8");
         order.setCuttingSize("2.5×1000×2504");
-        bottomModuleServiceImpl.processOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processOrder(parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order), order);
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(9, actionService.getAllMachineActions().size());
     }
@@ -56,7 +56,7 @@ class BottomProcessTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3099510);
         order.setProductQuantity("8");
         order.setProductSpecification("2.5×240×2185");
-        bottomModuleServiceImpl.processOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processOrder(parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order), order);
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(7, actionService.getAllMachineActions().size());
     }
@@ -66,7 +66,7 @@ class BottomProcessTest extends BaseTest {
         WorkOrder order = orderService.getOrderById(3099510);
         order.setProductQuantity("15");
         order.setProductSpecification("2.5×100×2185");
-        bottomModuleServiceImpl.processOrder(order, parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order));
+        bottomModuleServiceImpl.processOrder(parameterService.getLatestOperatingParameter(), SignalUtil.getDefaultCuttingSignal(order), order);
         actionService.getAllMachineActions().forEach(System.out::println);
         assertEquals(13, actionService.getAllMachineActions().size());
     }

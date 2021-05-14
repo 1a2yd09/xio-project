@@ -224,4 +224,13 @@
         GROUP BY CompleteDate
         ORDER BY CompleteDate DESC;
     </select>
+
+    <update id="batchUpdateOrderState" parameterType="java.util.List">
+        UPDATE tb_new_local_work_order
+        SET Status = N'已开工'
+        WHERE WoNo IN
+        <foreach collection="orders" item="order" open="(" separator="," close=")">
+            #{order.id}
+        </foreach>
+    </update>
 </mapper>

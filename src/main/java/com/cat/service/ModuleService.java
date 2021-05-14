@@ -7,9 +7,9 @@ import com.cat.pojo.OperatingParameter;
  */
 public interface ModuleService {
     /**
-     * 处理工单集合。
+     * 启动模块套料流程。
      *
      * @param param 运行参数
      */
-    void processOrderCollection(OperatingParameter param);
+    void process(OperatingParameter param);
 }

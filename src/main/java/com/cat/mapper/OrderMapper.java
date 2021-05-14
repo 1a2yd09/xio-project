@@ -123,4 +123,11 @@ public interface OrderMapper {
      * @return 完成数量集合
      */
     List<Integer> getCompletedOrderCountByRange(@Param("start") LocalDate start, @Param("end") LocalDate end);
+
+    /**
+     * 更新一组工单集合的状态为已开工。
+     *
+     * @param orders 工单集合
+     */
+    void batchUpdateOrderState(List<WorkOrder> orders);
 }

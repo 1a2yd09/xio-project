@@ -1,7 +1,6 @@
 package com.cat;
 
 import com.cat.enums.BoardCategory;
-import com.cat.pojo.NormalBoard;
 import com.cat.service.ProcessBoardService;
 import com.cat.utils.BoardUtil;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Queue;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -37,7 +37,7 @@ public class MainService {
             this.signalService.checkStartSignal();
             OperatingParameter param = this.parameterService.getLatestOperatingParameter();
             OrderModule orderModule = OrderModule.get(param.getOrderModule());
-            this.moduleServiceFactory.getModuleService(orderModule.name()).processOrderCollection(param);
+            this.moduleServiceFactory.getModuleService(orderModule.name()).process(param);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {

@@ -63,9 +63,9 @@ public class OrderService {
                 .filter(OrderUtil::validateOrder)
                 .sorted((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2))
                 .collect(Collectors.toList());
-        for (WorkOrder order : orderList) {
-            order.setOperationState(OrderState.STARTED.value);
-            this.orderMapper.updateOrderState(order);
+        if (!orderList.isEmpty()) {
+            orderList.forEach(order -> order.setOperationState(OrderState.STARTED.value));
+            this.orderMapper.batchUpdateOrderState(orderList);
         }
         return orderList;
     }
@@ -112,9 +112,9 @@ public class OrderService {
                 .filter(OrderUtil::validateOrder)
                 .sorted((o1, o2) -> OrderComparator.getComparator(sortPattern.name()).compare(o1, o2))
                 .collect(Collectors.toList());
-        for (WorkOrder order : orderList) {
-            order.setOperationState(OrderState.STARTED.value);
-            this.orderMapper.updateOrderState(order);
+        if (!orderList.isEmpty()) {
+            orderList.forEach(order -> order.setOperationState(OrderState.STARTED.value));
+            this.orderMapper.batchUpdateOrderState(orderList);
         }
         return orderList;
     }

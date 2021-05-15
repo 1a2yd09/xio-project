@@ -2,10 +2,7 @@ package com.cat.service.impl;
 
 import com.cat.enums.OrderSortPattern;
 import com.cat.pojo.*;
-import com.cat.service.ActionService;
-import com.cat.service.OrderService;
-import com.cat.service.ProcessBoardService;
-import com.cat.service.SignalService;
+import com.cat.service.*;
 import com.cat.utils.BoardUtil;
 import com.cat.utils.OrderUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +17,8 @@ import java.util.Deque;
 @Slf4j
 @Service("BOTTOM_PLATFORM")
 public class BottomModuleServiceImpl extends AbstractModuleService {
-    public BottomModuleServiceImpl(SignalService signalService, ActionService actionService, OrderService orderService, ProcessBoardService processBoardService) {
-        super(signalService, actionService, orderService, processBoardService);
+    public BottomModuleServiceImpl(SignalService signalService, ActionService actionService, OrderService orderService, ParameterService parameterService, ProcessBoardService processBoardService) {
+        super(signalService, actionService, orderService, parameterService, processBoardService);
     }
 
     @Override

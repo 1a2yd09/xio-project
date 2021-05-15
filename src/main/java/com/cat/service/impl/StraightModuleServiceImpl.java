@@ -20,8 +20,8 @@ import java.util.List;
 public class StraightModuleServiceImpl extends AbstractModuleService {
     private final StockSpecService stockSpecService;
 
-    public StraightModuleServiceImpl(SignalService signalService, ActionService actionService, OrderService orderService, ProcessBoardService processBoardService, StockSpecService stockSpecService) {
-        super(signalService, actionService, orderService, processBoardService);
+    public StraightModuleServiceImpl(SignalService signalService, ActionService actionService, OrderService orderService, ParameterService parameterService, ProcessBoardService processBoardService, StockSpecService stockSpecService) {
+        super(signalService, actionService, orderService, parameterService, processBoardService);
         this.stockSpecService = stockSpecService;
     }
 

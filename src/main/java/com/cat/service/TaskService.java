@@ -42,7 +42,7 @@ public class TaskService {
         }
     }
 
-    @Scheduled(initialDelay = 7_000, fixedDelay = 3_000)
+    @Scheduled(initialDelay = 1_000, fixedDelay = 3_000)
     public void checkServiceThreadState() {
         boolean isRunning = SynUtil.WORK_THREAD_RUNNING.get();
         log.info("业务流程是否正常: {}", isRunning);

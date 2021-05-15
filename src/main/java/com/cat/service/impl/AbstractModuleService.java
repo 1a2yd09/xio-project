@@ -1,6 +1,5 @@
 package com.cat.service.impl;
 
-import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.SignalCategory;
 import com.cat.pojo.CuttingSignal;
@@ -11,7 +10,6 @@ import com.cat.service.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Deque;
 
@@ -24,12 +22,14 @@ public abstract class AbstractModuleService implements ModuleService {
     private final SignalService signalService;
     private final ActionService actionService;
     private final OrderService orderService;
+    private final ParameterService parameterService;
     private final ProcessBoardService processBoardService;
 
-    protected AbstractModuleService(SignalService signalService, ActionService actionService, OrderService orderService, ProcessBoardService processBoardService) {
+    protected AbstractModuleService(SignalService signalService, ActionService actionService, OrderService orderService, ParameterService parameterService, ProcessBoardService processBoardService) {
         this.signalService = signalService;
         this.actionService = actionService;
         this.orderService = orderService;
+        this.parameterService = parameterService;
         this.processBoardService = processBoardService;
     }
 
@@ -41,18 +41,15 @@ public abstract class AbstractModuleService implements ModuleService {
         while (!orderDeque.isEmpty()) {
             WorkOrder order = orderDeque.peekFirst();
             log.info("当前工单: {}", order);
-            // test:
-            this.signalService.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, BigDecimal.ZERO, order.getId());
             this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
             CuttingSignal signal = this.signalService.getLatestCuttingSignal();
             MainService.RUNNING_ORDER.set(OrderMessage.of(order, signal));
             log.info("下料信号: {}", signal);
-            orderDeque.addAll(this.getOrderDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate()));
+            OperatingParameter op = this.parameterService.getLatestOperatingParameter();
+            orderDeque.addAll(this.getOrderDeque(OrderSortPattern.get(op.getSortPattern()), op.getOrderDate()));
             WorkOrder[] processOrders = this.getProcessOrders(orderDeque);
-            this.processOrder(param, signal, processOrders);
+            this.processOrder(op, signal, processOrders);
             this.actionService.processAction(orderDeque, processOrders);
-            // test:
-            this.actionService.completedAllMachineActions();
             this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
             this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
             this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);

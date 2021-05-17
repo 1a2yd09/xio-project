@@ -21,7 +21,7 @@ public class ThreadPoolConfiguration implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(2);
+        scheduler.setPoolSize(6);
         scheduler.setThreadNamePrefix("at-scheduled-");
         scheduler.initialize();
         taskRegistrar.setTaskScheduler(scheduler);
@@ -30,7 +30,7 @@ public class ThreadPoolConfiguration implements SchedulingConfigurer {
     @Bean("serviceTaskScheduler")
     public ThreadPoolTaskScheduler serviceTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
+        scheduler.setPoolSize(6);
         scheduler.setThreadNamePrefix("service-scheduler-");
         scheduler.initialize();
         return scheduler;

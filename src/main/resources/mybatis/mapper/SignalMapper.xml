@@ -7,10 +7,18 @@
     <resultMap id="takeSignalMap" type="com.cat.pojo.TakeBoardSignal"/>
     <resultMap id="cuttingSignalMap" type="com.cat.pojo.CuttingSignal"/>
 
-    <select id="getLatestUnProcessedControlSignal" resultMap="controlSignalMap">
+    <select timeout="5" id="getLatestUnProcessedControlSignal" resultMap="controlSignalMap">
         SELECT TOP 1 id, processed, category, created_at
         FROM tb_process_control_signal
         WHERE processed = 0
+        ORDER BY id DESC
+    </select>
+
+    <select timeout="5" id="getUnProcessedStartSignal" resultMap="controlSignalMap">
+        SELECT TOP 1 id, processed, category, created_at
+        FROM tb_process_control_signal
+        WHERE processed = 0
+          AND category = 1
         ORDER BY id DESC
     </select>
 
@@ -42,7 +50,7 @@
         VALUES (#{orderId})
     </insert>
 
-    <select id="getLatestUnProcessedCuttingSignal" resultMap="cuttingSignalMap">
+    <select timeout="5" id="getLatestUnProcessedCuttingSignal" resultMap="cuttingSignalMap">
         SELECT TOP 1 id, processed, cutting_size, forward_edge, long_edge_trim, order_id, created_at
         FROM tb_cutting_signal
         WHERE processed = 0

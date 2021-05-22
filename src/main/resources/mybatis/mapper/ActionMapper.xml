@@ -40,7 +40,7 @@
         ORDER BY id
     </select>
 
-    <select id="getFinalMachineActionState" resultType="string">
+    <select timeout="5" id="getFinalMachineActionState" resultType="string">
         SELECT TOP 1 state
         FROM tb_machine_action
         ORDER BY id DESC

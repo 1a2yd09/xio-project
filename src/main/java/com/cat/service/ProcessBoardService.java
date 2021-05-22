@@ -9,6 +9,8 @@ import com.cat.utils.DecimalUtil;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author CAT
@@ -87,6 +89,22 @@ public class ProcessBoardService {
         if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
             NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, BigDecimal.ZERO, wasteThreshold);
             this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
+        }
+    }
+
+    public void frontToBackCutting(CutBoard cutBoard, List<NormalBoard> boardList, BigDecimal wasteThreshold, CuttingSignal signal) {
+        List<NormalBoard> canCutBoard = boardList.stream().filter(normalBoard -> normalBoard.getCutTimes() > 0).collect(Collectors.toList());
+        for (int i = 0; i < canCutBoard.size(); i++) {
+            NormalBoard board = canCutBoard.get(i);
+            NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.SHORT, board.getLength(), wasteThreshold);
+            this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard);
+            if (i == 0) {
+                extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, cutBoard.getWidth().subtract(signal.getLongEdgeTrim()), wasteThreshold);
+                this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
+            }
+            for (int j = 0; j < board.getCutTimes(); j++) {
+                this.cuttingBoard(cutBoard, ForwardEdge.LONG, board);
+            }
         }
     }
 

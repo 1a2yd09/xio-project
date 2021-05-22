@@ -54,7 +54,7 @@ class ActionTest extends BaseTest {
         Inventory inventory = inventoryService.getInventory(stock.getStandardSpec(), stock.getMaterial(), stock.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
         parameterService.insertOperatingParameter(new OperatingParameter(LocalDate.now(), new BigDecimal("192"), new BigDecimal("100"), OrderSortPattern.SEQ.getName(), OrderModule.STRAIGHT_WEIGHT.getName()));
-        straightModuleServiceImpl.process(parameterService.getLatestOperatingParameter());
+        straightModuleServiceImpl.process();
         // 测试一，生成12个机器动作:
         assertEquals(12, actionService.getProcessedActionCount());
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:
@@ -82,7 +82,7 @@ class ActionTest extends BaseTest {
         Inventory inventory = inventoryService.getInventory(semiProduct.getStandardSpec(), semiProduct.getMaterial(), semiProduct.getCategory().value);
         int oldFinishedCount = inventory == null ? 0 : inventory.getQuantity();
         parameterService.insertOperatingParameter(new OperatingParameter(LocalDate.now(), new BigDecimal("192"), new BigDecimal("100"), OrderSortPattern.SEQ.getName(), OrderModule.BOTTOM_PLATFORM.getName()));
-        bottomModuleServiceImpl.process(parameterService.getLatestOperatingParameter());
+        bottomModuleServiceImpl.process();
         // 测试一，生成11个机器动作:
         assertEquals(11, actionService.getProcessedActionCount());
         // 测试二，工单的未完成数目等于原来的未完成数目减去上面生成的成品数目:

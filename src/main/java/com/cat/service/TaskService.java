@@ -1,6 +1,5 @@
 package com.cat.service;
 
-import com.cat.enums.ControlSignalCategory;
 import com.cat.mapper.SignalMapper;
 import com.cat.pojo.ProcessControlSignal;
 import com.cat.utils.SynUtil;
@@ -9,6 +8,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+
+import java.sql.SQLTimeoutException;
 
 /**
  * @author CAT
@@ -27,22 +28,22 @@ public class TaskService {
     }
 
     @Scheduled(initialDelay = 1_000, fixedDelay = 1_000)
-    public void checkNewControlMessage() throws InterruptedException {
-        ProcessControlSignal signal = this.signalMapper.getLatestUnProcessedControlSignal();
-        if (signal != null) {
-            log.info("检测到新的流程控制信号到达...");
-            signal.setProcessed(Boolean.TRUE);
-            this.signalMapper.updateControlSignal(signal);
-            Integer category = signal.getCategory();
-            if (ControlSignalCategory.START.value.equals(category)) {
-                SynUtil.getStartControlMessageQueue().put(category);
-            } else {
-                SynUtil.getStopControlMessageQueue().put(category);
+    public void checkStartControl() {
+        try {
+            ProcessControlSignal signal = this.signalMapper.getUnProcessedStartSignal();
+            if (signal != null) {
+                log.info("检测到新的流程控制信号到达...");
+                signal.setProcessed(Boolean.TRUE);
+                this.signalMapper.updateControlSignal(signal);
+                SynUtil.START_SIGNAL_QUEUE.put(1);
             }
+        } catch (SQLTimeoutException | InterruptedException e) {
+            log.error("检测流程控制信号异常...");
+            Thread.currentThread().interrupt();
         }
     }
 
-    @Scheduled(initialDelay = 1_000, fixedDelay = 5_000)
+    @Scheduled(initialDelay = 1_000, fixedDelay = 3_000)
     public void checkServiceThreadState() {
         boolean isRunning = SynUtil.WORK_THREAD_RUNNING.get();
         if (!isRunning) {

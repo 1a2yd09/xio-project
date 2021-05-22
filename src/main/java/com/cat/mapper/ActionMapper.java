@@ -4,6 +4,7 @@ import com.cat.pojo.MachineAction;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.sql.SQLTimeoutException;
 import java.util.List;
 
 /**
@@ -48,8 +49,9 @@ public interface ActionMapper {
      * 查询机器动作表中最后一个机器动作的状态，不存在机器动作时将返回 null。
      *
      * @return 状态
+     * @throws SQLTimeoutException 查询超时
      */
-    String getFinalMachineActionState();
+    String getFinalMachineActionState() throws SQLTimeoutException;
 
     /**
      * 将机器动作表中的所有机器动作记录状态置为已完成。

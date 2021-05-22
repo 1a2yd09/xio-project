@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author CAT
@@ -22,8 +25,16 @@ public class BottomModuleServiceImpl extends AbstractModuleService {
     }
 
     @Override
-    public Deque<WorkOrder> getOrderDeque(OrderSortPattern sortPattern, LocalDate date) {
-        return this.getOrderService().getBottomDeque(sortPattern, date);
+    public void getOrderDeque(Deque<WorkOrder> orderDeque, OrderSortPattern sortPattern, LocalDate date) {
+        Set<Integer> orderIdSet = new HashSet<>();
+        for (WorkOrder order : orderDeque) {
+            orderIdSet.add(order.getId());
+        }
+        for (WorkOrder order : this.getOrderService().getBottomOrders(sortPattern, date)) {
+            if (!orderIdSet.contains(order.getId())) {
+                orderDeque.offerLast(order);
+            }
+        }
     }
 
     @Override
@@ -40,6 +51,11 @@ public class BottomModuleServiceImpl extends AbstractModuleService {
         boardList.addBoard(semiProductBoard);
         boardList.addBoard(productBoard);
         this.getProcessBoardService().cutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
+    }
+
+    @Override
+    protected void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

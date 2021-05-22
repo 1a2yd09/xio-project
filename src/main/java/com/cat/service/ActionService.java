@@ -3,13 +3,12 @@ package com.cat.service;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.mapper.ActionMapper;
-import com.cat.pojo.Inventory;
 import com.cat.pojo.MachineAction;
 import com.cat.pojo.WorkOrder;
-import com.cat.utils.BoardUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLTimeoutException;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -23,12 +22,10 @@ import java.util.Map;
 public class ActionService {
     private final ActionMapper actionMapper;
     private final OrderService orderService;
-    private final InventoryService inventoryService;
 
-    public ActionService(ActionMapper actionMapper, OrderService orderService, InventoryService inventoryService) {
+    public ActionService(ActionMapper actionMapper, OrderService orderService) {
         this.actionMapper = actionMapper;
         this.orderService = orderService;
-        this.inventoryService = inventoryService;
     }
 
     /**
@@ -38,36 +35,35 @@ public class ActionService {
      * @param orders     动作列表中涉及的工单
      */
     public void processAction(Deque<WorkOrder> orderDeque, WorkOrder... orders) {
-        Map<Integer, Integer> map = new HashMap<>(4);
-        for (WorkOrder order : orders) {
-            map.put(order.getId(), 0);
-        }
-        Inventory inventory = null;
-        int inventoryCount = 0;
+        Map<Integer, Integer> map = new HashMap<>(16);
 
         for (MachineAction action : this.getAllMachineActions()) {
-            String bc = action.getBoardCategory();
-            if (BoardCategory.PRODUCT.value.equals(bc)) {
+            if (ActionState.COMPLETED.value.equals(action.getState()) && BoardCategory.PRODUCT.value.equals(action.getBoardCategory())) {
                 map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
-            } else if (BoardCategory.STOCK.value.equals(bc) || BoardCategory.SEMI_PRODUCT.value.equals(bc)) {
-                if (inventory == null) {
-                    inventory = new Inventory(BoardUtil.getStandardSpecStr(action.getBoardSpecification()), action.getBoardMaterial(), bc);
-                }
-                inventoryCount++;
             }
         }
 
-        for (int i = orders.length - 1; i >= 0; i--) {
-            WorkOrder order = orders[i];
-            this.orderService.addOrderCompletedQuantity(order, map.get(order.getId()));
-            if (order.getIncompleteQuantity() != 0) {
-                orderDeque.offerFirst(order);
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            this.orderService.addOrderCompletedQuantity(entry.getKey(), entry.getValue());
+        }
+
+        this.transferAllActions();
+    }
+
+    public void processAction() {
+        Map<Integer, Integer> map = new HashMap<>(16);
+
+        for (MachineAction action : this.getAllMachineActions()) {
+            if (ActionState.COMPLETED.value.equals(action.getState()) && BoardCategory.PRODUCT.value.equals(action.getBoardCategory())) {
+                map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
             }
         }
-        if (inventory != null) {
-            inventory.setQuantity(inventoryCount);
-            this.inventoryService.updateInventoryQuantity(inventory);
+
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            this.orderService.addOrderCompletedQuantity(entry.getKey(), entry.getValue());
         }
+
+        this.transferAllActions();
     }
 
     /**
@@ -76,7 +72,11 @@ public class ActionService {
      * @return true 表示都被完成，否则表示未都被完成
      */
     public boolean isAllMachineActionsProcessed() {
-        return ActionState.COMPLETED.value.equals(this.actionMapper.getFinalMachineActionState());
+        try {
+            return ActionState.COMPLETED.value.equals(this.actionMapper.getFinalMachineActionState());
+        } catch (SQLTimeoutException e) {
+            return false;
+        }
     }
 
     /**

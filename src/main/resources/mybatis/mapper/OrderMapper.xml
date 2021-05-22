@@ -75,7 +75,6 @@
                CompleteQTY
         FROM tb_new_local_work_order
         WHERE GDMK IN (#{module1}, #{module2})
-          AND Status = N'未开工'
           AND CompleteDate = #{date}
     </select>
 
@@ -93,7 +92,6 @@
                CompleteQTY
         FROM tb_new_local_work_order
         WHERE GDMK IN (#{module1})
-          AND Status = N'未开工'
           AND CompleteDate = #{date}
     </select>
 
@@ -230,4 +228,11 @@
                 #{siteModule},
                 #{completedQuantity})
     </insert>
+
+    <update id="exceptionRestore">
+        TRUNCATE TABLE tb_cutting_signal;
+        TRUNCATE TABLE tb_machine_action;
+        TRUNCATE TABLE tb_process_control_signal;
+        TRUNCATE TABLE tb_take_board_signal;
+    </update>
 </mapper>

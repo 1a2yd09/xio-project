@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author CAT
@@ -26,8 +28,16 @@ public class StraightModuleServiceImpl extends AbstractModuleService {
     }
 
     @Override
-    public Deque<WorkOrder> getOrderDeque(OrderSortPattern sortPattern, LocalDate date) {
-        return this.getOrderService().getPreprocessStraightDeque(sortPattern, date);
+    public void getOrderDeque(Deque<WorkOrder> orderDeque, OrderSortPattern sortPattern, LocalDate date) {
+        Set<Integer> orderIdSet = new HashSet<>();
+        for (WorkOrder order : orderDeque) {
+            orderIdSet.add(order.getId());
+        }
+        for (WorkOrder order : this.getOrderService().getStraightOrders(sortPattern, date)) {
+            if (!orderIdSet.contains(order.getId())) {
+                orderDeque.offerLast(order);
+            }
+        }
     }
 
     @Override
@@ -41,7 +51,7 @@ public class StraightModuleServiceImpl extends AbstractModuleService {
         BoardList boardList = new BoardList();
         if (productBoard.getCutTimes() == order.getIncompleteQuantity()) {
             WorkOrder nextOrder = orders[1];
-            NormalBoard nextProduct = BoardUtil.getNextProduct(nextOrder, cutBoard, productBoard);
+            NormalBoard nextProduct = BoardUtil.getNextProduct(order, nextOrder, cutBoard, productBoard);
             log.info("后续成品板信息: {}", nextProduct);
             if (nextProduct.getCutTimes() > 0) {
                 boardList.addBoard(productBoard);
@@ -67,6 +77,19 @@ public class StraightModuleServiceImpl extends AbstractModuleService {
             boardList.addBoard(productBoard);
         }
         this.getProcessBoardService().cutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
+    }
+
+    @Override
+    protected void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList) {
+        orderList.forEach(System.out::println);
+        System.out.println("==========");
+        List<WorkOrder> orders = OrderUtil.filterOrderList(orderList);
+        orders.forEach(System.out::println);
+        WorkOrder firstOrder = orders.get(0);
+        List<NormalBoard> boardList = this.getOrderService().getBoardList(BoardUtil.changeCuttingSize(cuttingSignal), orders, parameter.getWasteThreshold());
+        boardList.forEach(System.out::println);
+        CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), firstOrder.getMaterial(), cuttingSignal.getForwardEdge(), firstOrder.getId());
+        this.getProcessBoardService().frontToBackCutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
     }
 
     @Override

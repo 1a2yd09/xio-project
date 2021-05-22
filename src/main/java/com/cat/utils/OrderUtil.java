@@ -3,6 +3,10 @@ package com.cat.utils;
 import com.cat.pojo.WorkOrder;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @author CAT
  */
@@ -64,5 +68,15 @@ public class OrderUtil {
      */
     private static boolean validateStr(String s) {
         return StringUtils.hasText(s);
+    }
+
+    public static List<WorkOrder> filterOrderList(List<WorkOrder> orderList) {
+        WorkOrder firstOrder = orderList.get(0);
+        BigDecimal firstHeight = BoardUtil.specStrToDecList(firstOrder.getProductSpecification()).get(0);
+        return orderList.stream()
+                .filter(order -> order.getBatchNumber().equals(firstOrder.getBatchNumber()))
+                .filter(order -> order.getMaterial().equals(firstOrder.getMaterial()))
+                .filter(order -> BoardUtil.specStrToDecList(order.getProductSpecification()).get(0).compareTo(firstHeight) == 0)
+                .collect(Collectors.toList());
     }
 }

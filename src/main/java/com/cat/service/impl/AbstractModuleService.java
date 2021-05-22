@@ -1,17 +1,19 @@
 package com.cat.service.impl;
 
+import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.SignalCategory;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.OperatingParameter;
 import com.cat.pojo.WorkOrder;
-import com.cat.pojo.message.OrderMessage;
 import com.cat.service.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Deque;
+import java.util.List;
 
 /**
  * @author CAT
@@ -34,29 +36,28 @@ public abstract class AbstractModuleService implements ModuleService {
     }
 
     @Override
-    public void process(OperatingParameter param) {
-        Deque<WorkOrder> orderDeque = this.getOrderDeque(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
-        log.info("工单数量: {}", orderDeque.size());
-        this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
-        while (!orderDeque.isEmpty()) {
-            WorkOrder order = orderDeque.peekFirst();
-            log.info("当前工单: {}", order);
-            this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
-            CuttingSignal signal = this.signalService.getLatestCuttingSignal();
-            MainService.RUNNING_ORDER.set(OrderMessage.of(order, signal));
-            log.info("下料信号: {}", signal);
-            OperatingParameter op = this.parameterService.getLatestOperatingParameter();
-            orderDeque.addAll(this.getOrderDeque(OrderSortPattern.get(op.getSortPattern()), op.getOrderDate()));
-            WorkOrder[] processOrders = this.getProcessOrders(orderDeque);
-            this.processOrder(op, signal, processOrders);
-            this.actionService.processAction(orderDeque, processOrders);
-            this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
-            this.signalService.sendTakeBoardSignal(orderDeque.peekFirst());
-            this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);
-            this.actionService.transferAllActions();
-            if (this.signalService.checkStopSignal()) {
-                log.info("收到流程停止信号...");
-                return;
+    public void process() {
+        while (true) {
+            OperatingParameter param = this.parameterService.getLatestOperatingParameter();
+            List<WorkOrder> orders = this.orderService.getStraightOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
+            log.info("工单数量: {}", orders.size());
+            if (!orders.isEmpty()) {
+                WorkOrder order = orders.get(0);
+                log.info("当前工单: {}", order);
+                this.signalService.sendTakeBoardSignal(order);
+                // test:
+                this.signalService.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, new BigDecimal("15"), order.getId());
+                this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
+                CuttingSignal signal = this.signalService.getLatestCuttingSignal();
+                log.info("下料信号: {}", signal);
+                // 待整合:
+                this.processOrder(param, signal, orders);
+                // test:
+                this.actionService.completedAllMachineActions();
+                this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);
+                this.actionService.processAction();
+            } else {
+                break;
             }
         }
     }
@@ -64,11 +65,11 @@ public abstract class AbstractModuleService implements ModuleService {
     /**
      * 获取工单队列。
      *
+     * @param orderDeque  运行时工单队列
      * @param sortPattern 排序方式
      * @param date        工单日期
-     * @return 工单队列
      */
-    protected abstract Deque<WorkOrder> getOrderDeque(OrderSortPattern sortPattern, LocalDate date);
+    protected abstract void getOrderDeque(Deque<WorkOrder> orderDeque, OrderSortPattern sortPattern, LocalDate date);
 
     /**
      * 处理当前工单。
@@ -78,6 +79,15 @@ public abstract class AbstractModuleService implements ModuleService {
      * @param orders        处理当前工单需要的工单对象数组
      */
     protected abstract void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, WorkOrder... orders);
+
+    /**
+     * 处理当前工单新逻辑。
+     *
+     * @param parameter     运行参数
+     * @param cuttingSignal 下料信号
+     * @param orderList     工单列表
+     */
+    protected abstract void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList);
 
     /**
      * 获取处理当前工单需要的工单对象数组

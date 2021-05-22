@@ -26,4 +26,10 @@ public class CuttingSignal extends BaseSignal {
         this.longEdgeTrim = longEdgeTrim;
         this.orderId = orderId;
     }
+
+    public CuttingSignal(String cuttingSize, Integer forwardEdge, Integer orderId) {
+        this.cuttingSize = cuttingSize;
+        this.forwardEdge = forwardEdge;
+        this.orderId = orderId;
+    }
 }

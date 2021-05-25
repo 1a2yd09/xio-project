@@ -1,6 +1,5 @@
 package com.cat.service.impl;
 
-import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.SignalCategory;
 import com.cat.pojo.CuttingSignal;
@@ -10,7 +9,6 @@ import com.cat.service.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Deque;
 import java.util.List;
@@ -37,6 +35,7 @@ public abstract class AbstractModuleService implements ModuleService {
 
     @Override
     public void process() {
+        boolean firstSend = true;
         while (true) {
             OperatingParameter param = this.parameterService.getLatestOperatingParameter();
             List<WorkOrder> orders = this.orderService.getStraightOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
@@ -44,16 +43,17 @@ public abstract class AbstractModuleService implements ModuleService {
             if (!orders.isEmpty()) {
                 WorkOrder order = orders.get(0);
                 log.info("当前工单: {}", order);
-                this.signalService.sendTakeBoardSignal(order);
-                // test:
-                this.signalService.insertCuttingSignal(order.getCuttingSize(), ForwardEdge.SHORT, new BigDecimal("15"), order.getId());
+                if (firstSend) {
+                    System.out.println("流程刚启动，需要单独发送取板信号!");
+                    this.signalService.sendTakeBoardSignal(order.getId());
+                    firstSend = false;
+                }
                 this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
                 CuttingSignal signal = this.signalService.getLatestCuttingSignal();
                 log.info("下料信号: {}", signal);
-                // 待整合:
-                this.processOrder(param, signal, orders);
-                // test:
-                this.actionService.completedAllMachineActions();
+                Integer nextOrderId = this.processOrder(param, signal, orders);
+                this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
+                this.signalService.sendTakeBoardSignal(nextOrderId);
                 this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);
                 this.actionService.processAction();
             } else {
@@ -87,7 +87,7 @@ public abstract class AbstractModuleService implements ModuleService {
      * @param cuttingSignal 下料信号
      * @param orderList     工单列表
      */
-    protected abstract void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList);
+    protected abstract Integer processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList);
 
     /**
      * 获取处理当前工单需要的工单对象数组

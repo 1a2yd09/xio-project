@@ -1,10 +1,14 @@
 package com.cat.utils;
 
+import com.cat.enums.BoardCategory;
+import com.cat.pojo.NormalBoard;
 import com.cat.pojo.WorkOrder;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -78,5 +82,28 @@ public class OrderUtil {
                 .filter(order -> order.getMaterial().equals(firstOrder.getMaterial()))
                 .filter(order -> BoardUtil.specStrToDecList(order.getProductSpecification()).get(0).compareTo(firstHeight) == 0)
                 .collect(Collectors.toList());
+    }
+
+    public static Map<Integer, Integer> calOrderProduct(List<NormalBoard> boardList) {
+        Map<Integer, Integer> countMap = new HashMap<>();
+        for (NormalBoard normalBoard : boardList) {
+            if (normalBoard.getCategory() == BoardCategory.PRODUCT) {
+                countMap.put(normalBoard.getOrderId(), countMap.getOrDefault(normalBoard.getOrderId(), 0) + normalBoard.getCutTimes());
+            }
+        }
+        return countMap;
+    }
+
+    public static Integer getNextOrderId(Map<Integer, Integer> countMap, List<WorkOrder> orderList) {
+        for (WorkOrder order : orderList) {
+            if (countMap.containsKey(order.getId())) {
+                if (order.getIncompleteQuantity() > countMap.get(order.getId())) {
+                    return order.getId();
+                }
+            } else {
+                return order.getId();
+            }
+        }
+        return null;
     }
 }

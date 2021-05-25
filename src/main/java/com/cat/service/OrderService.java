@@ -252,12 +252,12 @@ public class OrderService {
         // 1、如果couldProduct < requireNum，意味着剩余的原料板还得生产当前工单的成品板
         // 反之，当前工单的成品板数量以满足要求，剩余板材用来生产后续工单的成品板
         // 2、剩余板材宽度不足以生产当前工单的成品板
-        if (incompleteQuantity > 0 && destBoard.getWidth().compareTo(remainWidth) < 0) {
+        if (incompleteQuantity > 0 && destBoard.getWidth().compareTo(remainWidth) <= 0) {
             if (destBoard.getWidth().compareTo(BoardUtil.CLAMP_DEPTH) >= 0) {
                 BigDecimal widthCut = remainWidth.subtract(destBoard.getWidth());
                 // 余料板
                 NormalBoard remainBoard = new NormalBoard(srcBoard.getHeight(), widthCut, destBoard.getLength(), srcBoard.getMaterial(), BoardUtil.calBoardCategory(widthCut, destBoard.getLength(), wasteThreshold), order.getId());
-                remainBoard.setCutTimes(1);
+                remainBoard.setCutTimes(widthCut.compareTo(BigDecimal.ZERO) == 0 ? 0 : 1);
                 normalBoards.add(remainBoard);
                 remainWidth = remainWidth.subtract(widthCut);
 

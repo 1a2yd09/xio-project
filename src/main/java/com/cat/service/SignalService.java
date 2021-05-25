@@ -131,6 +131,12 @@ public class SignalService {
         this.signalMapper.insertTakeBoardSignal(order.getId());
     }
 
+    public void sendTakeBoardSignal(Integer orderId) {
+        if (orderId != null) {
+            this.signalMapper.insertTakeBoardSignal(orderId);
+        }
+    }
+
     /**
      * 获取最新未被处理的下料信号，不存在未被处理的下料信号时将返回 null。
      *

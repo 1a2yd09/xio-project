@@ -24,8 +24,6 @@ public class MainService {
     public void start() {
         SynUtil.WORK_THREAD_RUNNING.set(true);
         try {
-            // test:
-            this.signalService.insertProcessControlSignal(ControlSignalCategory.START);
             this.signalService.checkStartSignal();
             this.moduleServiceFactory.getModuleService(OrderModule.STRAIGHT_WEIGHT.name()).process();
         } catch (Exception e) {

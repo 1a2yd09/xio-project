@@ -54,7 +54,7 @@ public class BottomModuleServiceImpl extends AbstractModuleService {
     }
 
     @Override
-    protected void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList) {
+    protected Integer processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList) {
         throw new UnsupportedOperationException();
     }
 

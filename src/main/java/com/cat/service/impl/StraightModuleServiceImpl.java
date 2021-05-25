@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author CAT
@@ -80,7 +77,7 @@ public class StraightModuleServiceImpl extends AbstractModuleService {
     }
 
     @Override
-    protected void processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList) {
+    protected Integer processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList) {
         orderList.forEach(System.out::println);
         System.out.println("==========");
         List<WorkOrder> orders = OrderUtil.filterOrderList(orderList);
@@ -88,8 +85,11 @@ public class StraightModuleServiceImpl extends AbstractModuleService {
         WorkOrder firstOrder = orders.get(0);
         List<NormalBoard> boardList = this.getOrderService().getBoardList(BoardUtil.changeCuttingSize(cuttingSignal), orders, parameter.getWasteThreshold());
         boardList.forEach(System.out::println);
+        Map<Integer, Integer> countMap = OrderUtil.calOrderProduct(boardList);
+        Integer nextOrderId = OrderUtil.getNextOrderId(countMap, orderList);
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), firstOrder.getMaterial(), cuttingSignal.getForwardEdge(), firstOrder.getId());
         this.getProcessBoardService().frontToBackCutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
+        return nextOrderId;
     }
 
     @Override

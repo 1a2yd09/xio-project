@@ -1,14 +1,17 @@
 package com.cat.service.impl;
 
+import com.cat.enums.ForwardEdge;
 import com.cat.enums.OrderSortPattern;
 import com.cat.enums.SignalCategory;
 import com.cat.pojo.CuttingSignal;
 import com.cat.pojo.OperatingParameter;
 import com.cat.pojo.WorkOrder;
 import com.cat.service.*;
+import com.cat.utils.OrderUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Deque;
 import java.util.List;
@@ -42,16 +45,25 @@ public abstract class AbstractModuleService implements ModuleService {
             log.info("工单数量: {}", orders.size());
             if (!orders.isEmpty()) {
                 WorkOrder order = orders.get(0);
-                log.info("当前工单: {}", order);
+                log.info("头部工单: {}", order);
                 if (firstSend) {
                     System.out.println("流程刚启动，需要单独发送取板信号!");
                     this.signalService.sendTakeBoardSignal(order.getId());
                     firstSend = false;
                 }
+                // test:
+                this.signalService.insertCuttingSignal("4.0×1485×3530", ForwardEdge.SHORT, new BigDecimal("15"), order.getId());
                 this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
                 CuttingSignal signal = this.signalService.getLatestCuttingSignal();
                 log.info("下料信号: {}", signal);
+                orders.forEach(System.out::println);
+                orders = OrderUtil.filterOrderList(signal.getOrderId(), orders);
+                order = orders.get(0);
+                log.info("当前头部工单: {}", order);
+                // 尝试报警，直接结束流程(交给前台去做):
                 Integer nextOrderId = this.processOrder(param, signal, orders);
+                // test:
+                this.actionService.completedAllMachineActions();
                 this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
                 this.signalService.sendTakeBoardSignal(nextOrderId);
                 this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);

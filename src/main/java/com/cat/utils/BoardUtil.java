@@ -301,6 +301,14 @@ public class BoardUtil {
         return stock;
     }
 
+    public static NormalBoard getMatchStock(List<StockSpecification> specs, CutBoard cutBoard) {
+        StockSpecification ss = specs.stream()
+                .filter(spec -> spec.getHeight().compareTo(cutBoard.getHeight()) == 0)
+                .findFirst()
+                .orElse(ParamUtil.getDefaultStockSpec());
+        return new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), cutBoard.getMaterial(), BoardCategory.STOCK, cutBoard.getOrderId());
+    }
+
     /**
      * 获取额外板材。
      *

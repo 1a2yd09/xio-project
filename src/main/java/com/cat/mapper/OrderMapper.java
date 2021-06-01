@@ -142,4 +142,8 @@ public interface OrderMapper {
      * 异常重启。
      */
     void exceptionRestore();
+
+    void truncateRealTimeOrder();
+
+    void insertRealTimeOrderFromLocal(Integer id);
 }

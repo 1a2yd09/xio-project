@@ -78,17 +78,18 @@ public class StraightModuleServiceImpl extends AbstractModuleService {
 
     @Override
     protected Integer processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList) {
-        orderList.forEach(System.out::println);
         System.out.println("==========");
-        List<WorkOrder> orders = OrderUtil.filterOrderList(orderList);
-        orders.forEach(System.out::println);
-        WorkOrder firstOrder = orders.get(0);
-        List<NormalBoard> boardList = this.getOrderService().getBoardList(BoardUtil.changeCuttingSize(cuttingSignal), orders, parameter.getWasteThreshold());
+        orderList.forEach(System.out::println);
+        WorkOrder firstOrder = orderList.get(0);
+        List<NormalBoard> boardList = this.getOrderService().getBoardList(BoardUtil.changeCuttingSize(cuttingSignal), orderList, parameter.getWasteThreshold());
+        System.out.println(boardList.size());
         boardList.forEach(System.out::println);
         Map<Integer, Integer> countMap = OrderUtil.calOrderProduct(boardList);
         Integer nextOrderId = OrderUtil.getNextOrderId(countMap, orderList);
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), firstOrder.getMaterial(), cuttingSignal.getForwardEdge(), firstOrder.getId());
         this.getProcessBoardService().frontToBackCutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
+        // 等动作生成后才能知道此时正在进行的工单:
+        this.getOrderService().insertRealTimeOrder(orderList);
         return nextOrderId;
     }
 

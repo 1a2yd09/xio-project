@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  */
 public class ParamUtil {
     private static final OperatingParameter DEFAULT_PARAM = new OperatingParameter(-1L, LocalDate.now(), BigDecimal.ZERO, BigDecimal.ZERO, OrderSortPattern.SEQ.getName(), OrderModule.BOTTOM_PLATFORM.getName(), LocalDateTime.now());
-    private static final StockSpecification DEFAULT_STOCK_SPEC = new StockSpecification(-1L, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, LocalDateTime.now());
+    private static final StockSpecification DEFAULT_STOCK_SPEC = new StockSpecification(-1L, new BigDecimal(5000), new BigDecimal(5000), new BigDecimal(5000), LocalDateTime.now());
 
     private ParamUtil() {
     }

@@ -2,6 +2,9 @@ package com.cat.service;
 
 import com.cat.mapper.StockSpecMapper;
 import com.cat.pojo.StockSpecification;
+import com.cat.pojo.WorkOrder;
+import com.cat.utils.BoardUtil;
+import com.cat.utils.ParamUtil;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +28,28 @@ public class StockSpecService {
      */
     public List<StockSpecification> getGroupStockSpecs() {
         return this.stockSpecMapper.getGroupStockSpecs();
+    }
+
+    public WorkOrder getStockWorkOrder(WorkOrder productWorkOrder) {
+        List<BigDecimal> list = BoardUtil.specStrToDecList(productWorkOrder.getProductSpecification());
+        BigDecimal productHeight = list.get(0);
+        StockSpecification ss = this.getGroupStockSpecs().stream()
+                .filter(spec -> spec.getHeight().compareTo(productHeight) == 0)
+                .findFirst()
+                .orElse(ParamUtil.getDefaultStockSpec());
+        WorkOrder stockOrder = new WorkOrder();
+        stockOrder.setOperationState(productWorkOrder.getOperationState());
+        stockOrder.setProductSpecification(BoardUtil.getStandardSpecStr(ss.getHeight(), ss.getWidth(), ss.getLength()));
+        stockOrder.setMaterial(productWorkOrder.getMaterial());
+        stockOrder.setProductQuantity("99");
+        stockOrder.setCompletionDate(productWorkOrder.getCompletionDate());
+        stockOrder.setId(-1);
+        stockOrder.setBatchNumber(productWorkOrder.getBatchNumber());
+        stockOrder.setSequenceNumber(productWorkOrder.getSequenceNumber());
+        stockOrder.setCuttingSize(productWorkOrder.getCuttingSize());
+        stockOrder.setSiteModule(productWorkOrder.getSiteModule());
+        stockOrder.setCompletedQuantity(null);
+        return stockOrder;
     }
 
     /**

@@ -241,7 +241,7 @@ public class BoardUtil {
     }
 
     public static NormalBoard getStandardProduct(String specification, String material, Integer orderIncompleteQuantity, Integer orderId) {
-        NormalBoard product = new NormalBoard(specification, material, BoardCategory.PRODUCT, orderId);
+        NormalBoard product = new NormalBoard(specification, material, orderId > 0 ? BoardCategory.PRODUCT : BoardCategory.STOCK, orderId);
         if (product.getWidth().compareTo(product.getLength()) > 0) {
             // 如果成品板宽度大于下料板宽度，则需要交换成品板的宽度和长度，不然会导致后续裁剪逻辑出错:
             BigDecimal tmp = product.getWidth();

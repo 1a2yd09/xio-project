@@ -52,14 +52,11 @@ public abstract class AbstractModuleService implements ModuleService {
                     firstSend = false;
                 }
                 // test:
-                this.signalService.insertCuttingSignal("4.0×1485×3530", ForwardEdge.SHORT, new BigDecimal("15"), order.getId());
+                this.signalService.insertCuttingSignal("4.0×1500×3600", ForwardEdge.SHORT, BigDecimal.TEN, order.getId());
                 this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
                 CuttingSignal signal = this.signalService.getLatestCuttingSignal();
                 log.info("下料信号: {}", signal);
                 orders.forEach(System.out::println);
-                orders = OrderUtil.filterOrderList(signal.getOrderId(), orders);
-                order = orders.get(0);
-                log.info("当前头部工单: {}", order);
                 // 尝试报警，直接结束流程(交给前台去做):
                 Integer nextOrderId = this.processOrder(param, signal, orders);
                 // test:

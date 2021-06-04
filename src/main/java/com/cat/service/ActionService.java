@@ -3,8 +3,10 @@ package com.cat.service;
 import com.cat.enums.ActionState;
 import com.cat.enums.BoardCategory;
 import com.cat.mapper.ActionMapper;
+import com.cat.pojo.Inventory;
 import com.cat.pojo.MachineAction;
 import com.cat.pojo.WorkOrder;
+import com.cat.utils.BoardUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +24,12 @@ import java.util.Map;
 public class ActionService {
     private final ActionMapper actionMapper;
     private final OrderService orderService;
+    private final InventoryService inventoryService;
 
-    public ActionService(ActionMapper actionMapper, OrderService orderService) {
+    public ActionService(ActionMapper actionMapper, OrderService orderService, InventoryService inventoryService) {
         this.actionMapper = actionMapper;
         this.orderService = orderService;
+        this.inventoryService = inventoryService;
     }
 
     /**
@@ -52,15 +56,29 @@ public class ActionService {
 
     public void processAction() {
         Map<Integer, Integer> map = new HashMap<>(16);
+        Inventory inventory = null;
+        int inventoryCount = 0;
 
         for (MachineAction action : this.getAllMachineActions()) {
-            if (ActionState.COMPLETED.value.equals(action.getState()) && BoardCategory.PRODUCT.value.equals(action.getBoardCategory())) {
-                map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+            if (ActionState.COMPLETED.value.equals(action.getState())) {
+                String category = action.getBoardCategory();
+                if (BoardCategory.PRODUCT.value.equals(category)) {
+                    map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+                } else if (BoardCategory.STOCK.value.equals(category)) {
+                    if (inventory == null) {
+                        inventory = new Inventory(BoardUtil.getStandardSpecStr(action.getBoardSpecification()), action.getBoardMaterial(), category);
+                    }
+                    inventoryCount++;
+                }
             }
         }
 
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
             this.orderService.addOrderCompletedQuantity(entry.getKey(), entry.getValue());
+        }
+        if (inventory != null) {
+            inventory.setQuantity(inventoryCount);
+            this.inventoryService.updateInventoryQuantity(inventory);
         }
 
         this.transferAllActions();

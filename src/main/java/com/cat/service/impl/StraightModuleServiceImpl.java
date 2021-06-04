@@ -79,22 +79,23 @@ public class StraightModuleServiceImpl extends AbstractModuleService {
     @Override
     protected Integer processOrder(OperatingParameter parameter, CuttingSignal cuttingSignal, List<WorkOrder> orderList) {
         System.out.println("==========");
-        List<WorkOrder> orders = OrderUtil.filterOrderList(cuttingSignal.getOrderId(), orderList);
-        log.info("当前头部工单: {}", orders.get(0));
-        orders.add(this.stockSpecService.getStockWorkOrder(orders.get(orders.size() - 1)));
-        orders.forEach(System.out::println);
-        WorkOrder firstOrder = orders.get(0);
+        List<WorkOrder> filterOrderList = OrderUtil.filterOrderList(cuttingSignal.getOrderId(), orderList);
+        System.out.println("当前头部工单: " + filterOrderList.get(0));
+        filterOrderList.add(this.stockSpecService.getStockWorkOrder(filterOrderList.get(filterOrderList.size() - 1)));
+        filterOrderList.forEach(System.out::println);
+        WorkOrder firstOrder = filterOrderList.get(0);
         // 函数内部会将列表中的工单移除，导致取板信号出错，但不会修改工单信息:
-        List<NormalBoard> boardList = this.getOrderService().getBoardList(BoardUtil.changeCuttingSize(cuttingSignal), new ArrayList<>(orders), parameter.getWasteThreshold());
-        System.out.println(boardList.size());
+        List<NormalBoard> boardList = this.getOrderService().getBoardList(BoardUtil.changeCuttingSize(cuttingSignal), new ArrayList<>(filterOrderList), parameter.getWasteThreshold());
+//        System.out.println(boardList.size());
+        System.out.println("==========");
         boardList.forEach(System.out::println);
         Map<Integer, Integer> countMap = OrderUtil.calOrderProduct(boardList);
-        orders.remove(orders.size() - 1);
+        filterOrderList.remove(filterOrderList.size() - 1);
         Integer nextOrderId = OrderUtil.getNextOrderId(countMap, orderList);
         CutBoard cutBoard = BoardUtil.getCutBoard(cuttingSignal.getCuttingSize(), firstOrder.getMaterial(), cuttingSignal.getForwardEdge(), firstOrder.getId());
         this.getProcessBoardService().frontToBackCutting(cutBoard, boardList, parameter.getWasteThreshold(), cuttingSignal);
         // 等动作生成后才能知道此时正在进行的工单:
-        this.getOrderService().insertRealTimeOrder(orders);
+        this.getOrderService().insertRealTimeOrder(filterOrderList);
         return nextOrderId;
     }
 

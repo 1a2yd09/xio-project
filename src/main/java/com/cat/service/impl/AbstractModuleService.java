@@ -40,7 +40,9 @@ public abstract class AbstractModuleService implements ModuleService {
     public void process() {
         boolean firstSend = true;
         while (true) {
+            // 从tb_operating_parameter中查出参数，因为针对不同的工单可能会有不同的参数
             OperatingParameter param = this.parameterService.getLatestOperatingParameter();
+            // 从tb_new_local_work_order中根据当前日期查出GDMK（工单模块）是"直梁工地模块"和"对重架工地模块"的记录，并按照参数中的sortPattern进行排序
             List<WorkOrder> orders = this.orderService.getStraightOrders(OrderSortPattern.get(param.getSortPattern()), param.getOrderDate());
             log.info("工单数量: {}", orders.size());
             if (!orders.isEmpty()) {
@@ -51,9 +53,12 @@ public abstract class AbstractModuleService implements ModuleService {
                     this.signalService.sendTakeBoardSignal(order.getId());
                     firstSend = false;
                 }
-                // test:
+                // test: 假设硬件设备已获取到原料板，斯科奇将原料版数据写入tb_cutting_signal数据表
                 this.signalService.insertCuttingSignal("4.0×1500×3600", ForwardEdge.SHORT, BigDecimal.TEN, order.getId());
+
+                // 我们从tb_cutting_signal数据库中获取记录，如果没有则阻塞等待
                 this.signalService.waitingForSignal(SignalCategory.CUTTING, this.signalService::isReceivedNewCuttingSignal);
+                // 成功获取到信号
                 CuttingSignal signal = this.signalService.getLatestCuttingSignal();
                 log.info("下料信号: {}", signal);
                 orders.forEach(System.out::println);
@@ -61,9 +66,14 @@ public abstract class AbstractModuleService implements ModuleService {
                 Integer nextOrderId = this.processOrder(param, signal, orders);
                 // test:
                 this.actionService.completedAllMachineActions();
+
+                // 当所有旋转信号被处理了之后，吸盘就可以空闲出来去做取板任务
                 this.signalService.waitingForSignal(SignalCategory.ROTATE, this.actionService::isAllRotateActionsCompleted);
+                // 向数据表tb_take_board_signal中写入取板信号，让机械吸盘去取板
                 this.signalService.sendTakeBoardSignal(nextOrderId);
+                // 等待所有动作完成
                 this.signalService.waitingForSignal(SignalCategory.ACTION, this.actionService::isAllMachineActionsProcessed);
+                // 根据动作表中已完成的动作统计产出的板的种类、数量
                 this.actionService.processAction();
             } else {
                 break;

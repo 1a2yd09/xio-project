@@ -27,14 +27,20 @@ public class TaskService {
         this.executor = executor;
     }
 
+    /**
+     *  该任务主要是向数据库获取开始信号
+     */
     @Scheduled(initialDelay = 1_000, fixedDelay = 1_000)
     public void checkStartControl() {
         try {
+            // 从数据表tb_process_control_signal获取最新的process=0 And category = 1的记录
             ProcessControlSignal signal = this.signalMapper.getUnProcessedStartSignal();
             if (signal != null) {
                 log.info("检测到新的流程控制信号到达...");
+                // 成功获取到之后修改process=1
                 signal.setProcessed(Boolean.TRUE);
                 this.signalMapper.updateControlSignal(signal);
+                // 开始信号队列START_SIGNAL_QUEUE放入开始信号，业务线程service-executor-1开始处理
                 SynUtil.START_SIGNAL_QUEUE.put(1);
             }
         } catch (SQLTimeoutException | InterruptedException e) {

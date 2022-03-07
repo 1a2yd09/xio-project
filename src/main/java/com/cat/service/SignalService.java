@@ -43,6 +43,7 @@ public class SignalService {
     public void waitingForSignal(SignalCategory sc, BooleanSupplier supplier) {
         log.info("等待{}信号到达...", sc.getName());
         CountDownLatch cdl = new CountDownLatch(1);
+        // 每隔1s getAsBoolean()方法执行一次，该方法内部就是本类中的getLatestUnProcessedCuttingSignal()方法
         ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
             if (supplier.getAsBoolean()) {
                 cdl.countDown();

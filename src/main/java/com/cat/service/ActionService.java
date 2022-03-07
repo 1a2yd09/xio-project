@@ -59,6 +59,7 @@ public class ActionService {
         Inventory inventory = null;
         int inventoryCount = 0;
 
+        // 根据已完成的动作可以得知产出的成品板和库存板的数量
         for (MachineAction action : this.getAllMachineActions()) {
             if (ActionState.COMPLETED.value.equals(action.getState())) {
                 String category = action.getBoardCategory();

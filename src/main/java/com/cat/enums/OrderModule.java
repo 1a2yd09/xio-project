@@ -8,6 +8,7 @@ import java.util.Map;
 
 /**
  * @author CAT
+ * 工单模块是指：当前原料板用来制作成那种符合哪种规格的工单模块
  */
 @AllArgsConstructor
 @Getter

@@ -21,12 +21,17 @@ public class MainService {
         this.moduleServiceFactory = moduleServiceFactory;
     }
 
+    /**
+     *
+     */
     public void start() {
         SynUtil.WORK_THREAD_RUNNING.set(true);
         try {
-            // test:
+            // 测试用，假定斯科奇已放入数据到数据库
             this.signalService.insertProcessControlSignal(ControlSignalCategory.START);
+            // 获取START_SIGNAL_QUEUE的信号，没有则阻塞
             this.signalService.checkStartSignal();
+            // 开始处理
             this.moduleServiceFactory.getModuleService(OrderModule.STRAIGHT_WEIGHT.name()).process();
         } catch (Exception e) {
             log.error(e.getMessage(), e);

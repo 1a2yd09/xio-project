@@ -75,7 +75,7 @@
                CompleteQTY
         FROM tb_new_local_work_order
         WHERE GDMK IN (#{module1}, #{module2})
-          AND Status = N'未开工'
+          AND Status != N'已暂停'
           AND CompleteDate = #{date}
     </select>
 
@@ -93,7 +93,6 @@
                CompleteQTY
         FROM tb_new_local_work_order
         WHERE GDMK IN (#{module1})
-          AND Status = N'未开工'
           AND CompleteDate = #{date}
     </select>
 
@@ -230,4 +229,50 @@
                 #{siteModule},
                 #{completedQuantity})
     </insert>
+
+    <update id="exceptionRestore">
+        TRUNCATE TABLE tb_cutting_signal;
+        TRUNCATE TABLE tb_machine_action;
+        TRUNCATE TABLE tb_process_control_signal;
+        TRUNCATE TABLE tb_take_board_signal;
+    </update>
+
+    <update id="truncateRealTimeOrder">
+        TRUNCATE TABLE tb_new_realtime_work_order;
+    </update>
+
+    <update id="insertRealTimeOrderFromLocal">
+        INSERT INTO tb_new_realtime_work_order (PKID, Status, OwnerID, OwnerName, BookerID, BookerName, AddDate,
+                                                UpdateDate, HTH, PartNo, PartName, Size, Texture, QTY, CompleteTime,
+                                                Remark, CompleteDate, WoNo, UpSize, PC, SXH, OriSize, CXH, DBCXH, GDMK,
+                                                CompleteQTY)
+        SELECT PKID,
+               Status,
+               OwnerID,
+               OwnerName,
+               BookerID,
+               BookerName,
+               AddDate,
+               UpdateDate,
+               HTH,
+               PartNo,
+               PartName,
+               Size,
+               Texture,
+               QTY,
+               CompleteTime,
+               Remark,
+               CompleteDate,
+               WoNo,
+               UpSize,
+               PC,
+               SXH,
+               OriSize,
+               CXH,
+               DBCXH,
+               GDMK,
+               CompleteQTY
+        FROM tb_new_local_work_order
+        WHERE WoNo = #{id}
+    </update>
 </mapper>

@@ -9,6 +9,7 @@ import java.util.Objects;
 
 /**
  * @author CAT
+ * 对于数据表tb_operating_parameter的查询，不同的工单设置的参数可能不一样，例如waste_threshold（废料阈值）、order_module（工单模块）
  */
 @Service
 public class ParameterService {

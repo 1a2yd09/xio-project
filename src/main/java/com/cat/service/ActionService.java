@@ -10,6 +10,7 @@ import com.cat.utils.BoardUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLTimeoutException;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -38,36 +39,50 @@ public class ActionService {
      * @param orders     动作列表中涉及的工单
      */
     public void processAction(Deque<WorkOrder> orderDeque, WorkOrder... orders) {
-        Map<Integer, Integer> map = new HashMap<>(4);
-        for (WorkOrder order : orders) {
-            map.put(order.getId(), 0);
+        Map<Integer, Integer> map = new HashMap<>(16);
+
+        for (MachineAction action : this.getAllMachineActions()) {
+            if (ActionState.COMPLETED.value.equals(action.getState()) && BoardCategory.PRODUCT.value.equals(action.getBoardCategory())) {
+                map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+            }
         }
+
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            this.orderService.addOrderCompletedQuantity(entry.getKey(), entry.getValue());
+        }
+
+        this.transferAllActions();
+    }
+
+    public void processAction() {
+        Map<Integer, Integer> map = new HashMap<>(16);
         Inventory inventory = null;
         int inventoryCount = 0;
 
+        // 根据已完成的动作可以得知产出的成品板和库存板的数量
         for (MachineAction action : this.getAllMachineActions()) {
-            String bc = action.getBoardCategory();
-            if (BoardCategory.PRODUCT.value.equals(bc)) {
-                map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
-            } else if (BoardCategory.STOCK.value.equals(bc) || BoardCategory.SEMI_PRODUCT.value.equals(bc)) {
-                if (inventory == null) {
-                    inventory = new Inventory(BoardUtil.getStandardSpecStr(action.getBoardSpecification()), action.getBoardMaterial(), bc);
+            if (ActionState.COMPLETED.value.equals(action.getState())) {
+                String category = action.getBoardCategory();
+                if (BoardCategory.PRODUCT.value.equals(category)) {
+                    map.put(action.getOrderId(), map.getOrDefault(action.getOrderId(), 0) + 1);
+                } else if (BoardCategory.STOCK.value.equals(category)) {
+                    if (inventory == null) {
+                        inventory = new Inventory(BoardUtil.getStandardSpecStr(action.getBoardSpecification()), action.getBoardMaterial(), category);
+                    }
+                    inventoryCount++;
                 }
-                inventoryCount++;
             }
         }
 
-        for (int i = orders.length - 1; i >= 0; i--) {
-            WorkOrder order = orders[i];
-            this.orderService.addOrderCompletedQuantity(order, map.get(order.getId()));
-            if (order.getIncompleteQuantity() != 0) {
-                orderDeque.offerFirst(order);
-            }
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            this.orderService.addOrderCompletedQuantity(entry.getKey(), entry.getValue());
         }
         if (inventory != null) {
             inventory.setQuantity(inventoryCount);
             this.inventoryService.updateInventoryQuantity(inventory);
         }
+
+        this.transferAllActions();
     }
 
     /**
@@ -76,7 +91,11 @@ public class ActionService {
      * @return true 表示都被完成，否则表示未都被完成
      */
     public boolean isAllMachineActionsProcessed() {
-        return ActionState.COMPLETED.value.equals(this.actionMapper.getFinalMachineActionState());
+        try {
+            return ActionState.COMPLETED.value.equals(this.actionMapper.getFinalMachineActionState());
+        } catch (SQLTimeoutException e) {
+            return false;
+        }
     }
 
     /**

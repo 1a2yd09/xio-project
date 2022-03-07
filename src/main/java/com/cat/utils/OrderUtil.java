@@ -1,7 +1,16 @@
 package com.cat.utils;
 
+import com.cat.enums.BoardCategory;
+import com.cat.pojo.NormalBoard;
 import com.cat.pojo.WorkOrder;
 import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author CAT
@@ -64,5 +73,60 @@ public class OrderUtil {
      */
     private static boolean validateStr(String s) {
         return StringUtils.hasText(s);
+    }
+
+    public static List<WorkOrder> filterOrderList(List<WorkOrder> orderList) {
+        WorkOrder firstOrder = orderList.get(0);
+        BigDecimal firstHeight = BoardUtil.specStrToDecList(firstOrder.getProductSpecification()).get(0);
+        return orderList.stream()
+                .filter(order -> order.getBatchNumber().equals(firstOrder.getBatchNumber()))
+                .filter(order -> order.getMaterial().equals(firstOrder.getMaterial()))
+                .filter(order -> BoardUtil.specStrToDecList(order.getProductSpecification()).get(0).compareTo(firstHeight) == 0)
+                .filter(order -> BoardUtil.compareTwoSpecStr(order.getCuttingSize(), firstOrder.getCuttingSize()) == 0)
+                .collect(Collectors.toList());
+    }
+
+    public static List<WorkOrder> filterOrderList(Integer orderId, List<WorkOrder> orderList) {
+        Iterator<WorkOrder> iterator = orderList.iterator();
+        // 遍历工单，对比下料信号中的工单ID，排除ID不一致的工单，直到遇到ID一致的工单:
+        while (iterator.hasNext()) {
+            if (!iterator.next().getId().equals(orderId)) {
+                iterator.remove();
+            } else {
+                break;
+            }
+        }
+
+        WorkOrder firstOrder = orderList.get(0);
+        BigDecimal firstHeight = BoardUtil.specStrToDecList(firstOrder.getProductSpecification()).get(0);
+        return orderList.stream()
+                .filter(order -> order.getBatchNumber().equals(firstOrder.getBatchNumber()))
+                .filter(order -> order.getMaterial().equals(firstOrder.getMaterial()))
+                .filter(order -> BoardUtil.specStrToDecList(order.getProductSpecification()).get(0).compareTo(firstHeight) == 0)
+                .filter(order -> BoardUtil.compareTwoSpecStr(order.getCuttingSize(), firstOrder.getCuttingSize()) == 0)
+                .collect(Collectors.toList());
+    }
+
+    public static Map<Integer, Integer> calOrderProduct(List<NormalBoard> boardList) {
+        Map<Integer, Integer> countMap = new HashMap<>();
+        for (NormalBoard normalBoard : boardList) {
+            if (normalBoard.getCategory() == BoardCategory.PRODUCT) {
+                countMap.put(normalBoard.getOrderId(), countMap.getOrDefault(normalBoard.getOrderId(), 0) + normalBoard.getCutTimes());
+            }
+        }
+        return countMap;
+    }
+
+    public static Integer getNextOrderId(Map<Integer, Integer> countMap, List<WorkOrder> orderList) {
+        for (WorkOrder order : orderList) {
+            if (countMap.containsKey(order.getId())) {
+                if (order.getIncompleteQuantity() > countMap.get(order.getId())) {
+                    return order.getId();
+                }
+            } else {
+                return order.getId();
+            }
+        }
+        return null;
     }
 }

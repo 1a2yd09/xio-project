@@ -12,7 +12,7 @@ import java.util.Properties;
 /**
  * @author CAT
  */
-@Configuration
+//@Configuration
 public class MailConfiguration {
     @Bean
     JavaMailSender createJavaMailSender(MailMapper mailMapper) {

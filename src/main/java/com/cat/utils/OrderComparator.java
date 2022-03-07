@@ -57,8 +57,8 @@ public enum OrderComparator {
             if (!bn1.equals(bn2)) {
                 return bn1 - bn2;
             }
-            int retVal = BoardUtil.compareTwoSpecStr(o1.getProductSpecification(), o2.getProductSpecification());
-            return retVal != 0 ? -retVal : o1.getId() - o2.getId();
+            int retVal = BoardUtil.compareSpec(o1.getProductSpecification(), o2.getProductSpecification());
+            return retVal != 0 ? retVal : o1.getId() - o2.getId();
         }
     };
 

@@ -16,6 +16,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.SQLTimeoutException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.BooleanSupplier;
@@ -42,6 +43,7 @@ public class SignalService {
     public void waitingForSignal(SignalCategory sc, BooleanSupplier supplier) {
         log.info("等待{}信号到达...", sc.getName());
         CountDownLatch cdl = new CountDownLatch(1);
+        // 每隔1s getAsBoolean()方法执行一次，该方法内部就是本类中的getLatestUnProcessedCuttingSignal()方法
         ScheduledFuture<?> sf = this.scheduler.scheduleWithFixedDelay(() -> {
             if (supplier.getAsBoolean()) {
                 cdl.countDown();
@@ -49,7 +51,7 @@ public class SignalService {
         }, 1000);
         try {
             cdl.await();
-            sf.cancel(false);
+            sf.cancel(true);
             log.info("{}信号到达...", sc.getName());
         } catch (InterruptedException e) {
             log.warn("等待信号过程中出现异常: ", e);
@@ -64,10 +66,10 @@ public class SignalService {
         log.info("等待流程启动信号...");
         while (true) {
             try {
-                SynUtil.getStartControlMessageQueue().take();
+                SynUtil.START_SIGNAL_QUEUE.take();
                 break;
-            } catch (Exception e) {
-                log.warn("等待流程启动信号过程中出现异常: ", e);
+            } catch (InterruptedException e) {
+                log.warn("等待流程启动信号过程被中断...");
                 Thread.currentThread().interrupt();
             }
         }
@@ -81,7 +83,7 @@ public class SignalService {
      */
     public boolean checkStopSignal() {
         log.info("检查流程停止信号...");
-        Integer flag = SynUtil.getStopControlMessageQueue().poll();
+        Integer flag = SynUtil.STOP_SIGNAL_QUEUE.poll();
         return flag != null;
     }
 
@@ -127,8 +129,12 @@ public class SignalService {
      * @param order 工单对象
      */
     public void sendTakeBoardSignal(WorkOrder order) {
-        if (order != null) {
-            this.signalMapper.insertTakeBoardSignal(order.getId());
+        this.signalMapper.insertTakeBoardSignal(order.getId());
+    }
+
+    public void sendTakeBoardSignal(Integer orderId) {
+        if (orderId != null) {
+            this.signalMapper.insertTakeBoardSignal(orderId);
         }
     }
 
@@ -138,13 +144,17 @@ public class SignalService {
      * @return 下料信号
      */
     public CuttingSignal getLatestUnProcessedCuttingSignal() {
-        CuttingSignal cuttingSignal = this.signalMapper.getLatestUnProcessedCuttingSignal();
-        if (cuttingSignal != null) {
-            cuttingSignal.setProcessed(true);
-            this.signalMapper.updateCuttingSignal(cuttingSignal);
-            return cuttingSignal;
+        try {
+            CuttingSignal cuttingSignal = this.signalMapper.getLatestUnProcessedCuttingSignal();
+            if (cuttingSignal != null) {
+                cuttingSignal.setProcessed(true);
+                this.signalMapper.updateCuttingSignal(cuttingSignal);
+                return cuttingSignal;
+            }
+            return null;
+        } catch (SQLTimeoutException e) {
+            return null;
         }
-        return null;
     }
 
     /**
@@ -153,12 +163,16 @@ public class SignalService {
      * @return true 表示收到有效的下料新信号，否则表示未接收到有效的下料新信号
      */
     public boolean isReceivedNewCuttingSignal() {
-        CuttingSignal signal = this.signalMapper.getLatestUnProcessedCuttingSignal();
-        if (signal != null) {
-            signal.setProcessed(true);
-            this.signalMapper.updateCuttingSignal(signal);
-            return BoardUtil.isValidSpec(signal.getCuttingSize());
-        } else {
+        try {
+            CuttingSignal signal = this.signalMapper.getLatestUnProcessedCuttingSignal();
+            if (signal != null) {
+                signal.setProcessed(true);
+                this.signalMapper.updateCuttingSignal(signal);
+                return BoardUtil.isValidSpec(signal.getCuttingSize());
+            } else {
+                return false;
+            }
+        } catch (SQLTimeoutException e) {
             return false;
         }
     }

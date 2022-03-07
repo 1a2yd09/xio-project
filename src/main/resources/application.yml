@@ -3,13 +3,20 @@ spring:
     url: jdbc:sqlserver://${DB_HOST:localhost}:1433;databaseName=xio
     username: ${DB_USER:sa}
     password: ${DB_PASS:admin}
+    hikari:
+      maximum-pool-size: 16
   main:
     banner-mode: off
   thymeleaf:
     cache: false
+  profiles:
+    active: test
 mybatis:
   mapper-locations: mybatis/mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
 server:
   port: ${PORT:8090}
+logging:
+  level:
+    com.cat: debug

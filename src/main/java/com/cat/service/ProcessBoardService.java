@@ -9,6 +9,8 @@ import com.cat.utils.DecimalUtil;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author CAT
@@ -87,6 +89,25 @@ public class ProcessBoardService {
         if (cutBoard.getWidth().compareTo(BigDecimal.ZERO) > 0) {
             NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, BigDecimal.ZERO, wasteThreshold);
             this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
+        }
+    }
+
+    public void frontToBackCutting(CutBoard cutBoard, List<NormalBoard> boardList, BigDecimal wasteThreshold, CuttingSignal signal) {
+        // 对裁剪次数为0的板材进行过滤
+        List<NormalBoard> canCutBoard = boardList.stream().filter(normalBoard -> normalBoard.getCutTimes() > 0).collect(Collectors.toList());
+        for (int i = 0; i < canCutBoard.size(); i++) {
+            NormalBoard board = canCutBoard.get(i);
+            // 确定剪裁方向
+            NormalBoard extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.SHORT, board.getLength(), wasteThreshold);
+            // 生成剪板动作（插入数据库）
+            this.cuttingBoard(cutBoard, ForwardEdge.SHORT, extraBoard);
+            if (i == 0) {
+                extraBoard = BoardUtil.getExtraBoard(cutBoard, ForwardEdge.LONG, cutBoard.getWidth().subtract(signal.getLongEdgeTrim()), wasteThreshold);
+                this.cuttingBoard(cutBoard, ForwardEdge.LONG, extraBoard);
+            }
+            for (int j = 0; j < board.getCutTimes(); j++) {
+                this.cuttingBoard(cutBoard, ForwardEdge.LONG, board);
+            }
         }
     }
 

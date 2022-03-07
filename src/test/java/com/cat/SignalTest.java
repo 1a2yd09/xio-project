@@ -52,10 +52,10 @@ class SignalTest extends BaseTest {
      */
     @Test
     void testStartSignal() throws InterruptedException {
-        Integer state = SynUtil.getStartControlMessageQueue().poll();
+        Integer state = SynUtil.START_SIGNAL_QUEUE.poll();
         assertNull(state);
         signalService.insertProcessControlSignal(ControlSignalCategory.START);
-        state = SynUtil.getStartControlMessageQueue().take();
+        state = SynUtil.START_SIGNAL_QUEUE.take();
         assertNotNull(state);
         ProcessControlSignal signal = signalService.getLatestControlSignal();
         assertEquals(Boolean.TRUE, signal.getProcessed());
@@ -67,10 +67,10 @@ class SignalTest extends BaseTest {
      */
     @Test
     void testStopSignal() throws InterruptedException {
-        Integer state = SynUtil.getStopControlMessageQueue().poll();
+        Integer state = SynUtil.STOP_SIGNAL_QUEUE.poll();
         assertNull(state);
         signalService.insertProcessControlSignal(ControlSignalCategory.STOP);
-        state = SynUtil.getStopControlMessageQueue().take();
+        state = SynUtil.STOP_SIGNAL_QUEUE.take();
         assertNotNull(state);
         ProcessControlSignal signal = signalService.getLatestControlSignal();
         assertEquals(Boolean.TRUE, signal.getProcessed());

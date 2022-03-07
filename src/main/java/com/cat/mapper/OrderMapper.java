@@ -137,4 +137,13 @@ public interface OrderMapper {
      * @param order 工单对象
      */
     void insertOrder(WorkOrder order);
+
+    /**
+     * 异常重启。
+     */
+    void exceptionRestore();
+
+    void truncateRealTimeOrder();
+
+    void insertRealTimeOrderFromLocal(Integer id);
 }

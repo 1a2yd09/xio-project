@@ -101,6 +101,20 @@ public class BoardUtil {
         return 0;
     }
 
+    public static int compareSpec(String sp1, String sp2) {
+        List<BigDecimal> decList1 = specStrToDecList(sp1);
+        List<BigDecimal> decList2 = specStrToDecList(sp2);
+        if (decList1.get(0).compareTo(decList2.get(0)) != 0) {
+            return decList2.get(0).compareTo(decList1.get(0));
+        } else if (decList1.get(2).compareTo(decList2.get(2)) != 0) {
+            return decList2.get(2).compareTo(decList1.get(2));
+        } else if (decList1.get(1).compareTo(decList2.get(1)) != 0) {
+            return decList1.get(1).compareTo(decList2.get(1));
+        } else {
+            return 0;
+        }
+    }
+
     /**
      * 比较第一个字符串所表示的规格是否大于等于第二个字符串所表示的规格。
      *
@@ -226,6 +240,19 @@ public class BoardUtil {
         return product;
     }
 
+    public static NormalBoard getStandardProduct(String specification, String material, Integer orderIncompleteQuantity, Integer orderId) {
+        NormalBoard product = new NormalBoard(specification, material, orderId > 0 ? BoardCategory.PRODUCT : BoardCategory.STOCK, orderId);
+        if (product.getWidth().compareTo(product.getLength()) > 0) {
+            // 如果成品板宽度大于下料板宽度，则需要交换成品板的宽度和长度，不然会导致后续裁剪逻辑出错:
+            BigDecimal tmp = product.getWidth();
+            product.setWidth(product.getLength());
+            product.setLength(tmp);
+        }
+        // 成品板的裁剪次数取决于最大裁剪次数以及工单未完成数目中的最小值:
+        product.setCutTimes(orderIncompleteQuantity);
+        return product;
+    }
+
     /**
      * 获取半成品。
      *
@@ -274,6 +301,14 @@ public class BoardUtil {
         return stock;
     }
 
+    public static NormalBoard getMatchStock(List<StockSpecification> specs, CutBoard cutBoard) {
+        StockSpecification ss = specs.stream()
+                .filter(spec -> spec.getHeight().compareTo(cutBoard.getHeight()) == 0)
+                .findFirst()
+                .orElse(ParamUtil.getDefaultStockSpec());
+        return new NormalBoard(ss.getHeight(), ss.getWidth(), ss.getLength(), cutBoard.getMaterial(), BoardCategory.STOCK, cutBoard.getOrderId());
+    }
+
     /**
      * 获取额外板材。
      *
@@ -310,9 +345,9 @@ public class BoardUtil {
      * @param product   当前工单成品板
      * @return 后续成品
      */
-    public static NormalBoard getNextProduct(WorkOrder nextOrder, CutBoard cutBoard, NormalBoard product) {
+    public static NormalBoard getNextProduct(WorkOrder currOrder, WorkOrder nextOrder, CutBoard cutBoard, NormalBoard product) {
         NormalBoard nextProduct = new NormalBoard(nextOrder.getProductSpecification(), nextOrder.getMaterial(), BoardCategory.PRODUCT, nextOrder.getId());
-        if (product.getMaterial().equals(nextProduct.getMaterial())) {
+        if (product.getMaterial().equals(nextProduct.getMaterial()) && currOrder.getBatchNumber().equals(nextOrder.getBatchNumber())) {
             BigDecimal remainingWidth = DecimalUtil.sub(cutBoard.getWidth(), product.getAllWidth());
             if (isAllowCutting(remainingWidth, product.getLength(), nextProduct.getLength())) {
                 nextProduct.setCutTimes(Math.min(DecimalUtil.div(getAvailableWidth(remainingWidth, nextProduct.getWidth()), nextProduct.getWidth()), nextOrder.getIncompleteQuantity()));
@@ -326,9 +361,14 @@ public class BoardUtil {
      *
      * @param signal 下料信号对象
      */
-    public static void changeCuttingSize(CuttingSignal signal) {
+    public static CuttingSignal changeCuttingSize(CuttingSignal signal) {
         List<BigDecimal> decList = specStrToDecList(signal.getCuttingSize());
         decList.set(1, decList.get(1).subtract(signal.getLongEdgeTrim()));
-        signal.setCuttingSize(getStandardSpecStr(decList.toArray(new BigDecimal[]{})));
+        CuttingSignal cuttingSignal = new CuttingSignal();
+        cuttingSignal.setCuttingSize(getStandardSpecStr(decList.toArray(new BigDecimal[]{})));
+        cuttingSignal.setForwardEdge(signal.getForwardEdge());
+        cuttingSignal.setLongEdgeTrim(signal.getLongEdgeTrim());
+        cuttingSignal.setOrderId(signal.getOrderId());
+        return cuttingSignal;
     }
 }

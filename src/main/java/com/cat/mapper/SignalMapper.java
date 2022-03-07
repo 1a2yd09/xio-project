@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
+import java.sql.SQLTimeoutException;
 
 /**
  * @author CAT
@@ -18,7 +19,15 @@ public interface SignalMapper {
      *
      * @return 信号对象
      */
-    ProcessControlSignal getLatestUnProcessedControlSignal();
+    ProcessControlSignal getLatestUnProcessedControlSignal() throws SQLTimeoutException;
+
+    /**
+     * 获取最新未处理的开工信号。
+     *
+     * @return 控制信号对象
+     * @throws SQLTimeoutException 超时异常
+     */
+    ProcessControlSignal getUnProcessedStartSignal() throws SQLTimeoutException;
 
     /**
      * 获取最新的流程控制信号。
@@ -59,8 +68,9 @@ public interface SignalMapper {
      * 获取最新未被处理的下料信号记录，不存在将返回 null。
      *
      * @return 下料信号对象
+     * @throws SQLTimeoutException 查询超时
      */
-    CuttingSignal getLatestUnProcessedCuttingSignal();
+    CuttingSignal getLatestUnProcessedCuttingSignal() throws SQLTimeoutException;
 
     /**
      * 获取最新的下料信号记录，不存在下料信号记录将返回 null。
